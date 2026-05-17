@@ -44,7 +44,6 @@
   },
   "physics": {
     "lambda_logistic": 0.1,
-    "lambda_smooth": 0.05,
     "mu_norm": 0.4,
     "K_norm": 1.0
   },

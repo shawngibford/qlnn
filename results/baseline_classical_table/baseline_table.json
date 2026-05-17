@@ -22,32 +22,32 @@
     },
     {
       "model": "Liquid-ODE (Euler)",
-      "val_mae": "0.0688 \u00b1 0.0178",
-      "val_rmse": "0.0879 \u00b1 0.0212",
-      "val_r2": "0.9118 \u00b1 0.0395",
-      "test_mae": "0.0770 \u00b1 0.0125",
-      "test_rmse": "0.0927 \u00b1 0.0164",
-      "test_r2": "0.9342 \u00b1 0.0220",
+      "val_mae": "0.0688 \u00b1 0.0199",
+      "val_rmse": "0.0879 \u00b1 0.0237",
+      "val_r2": "0.9118 \u00b1 0.0442",
+      "test_mae": "0.0770 \u00b1 0.0139",
+      "test_rmse": "0.0927 \u00b1 0.0184",
+      "test_r2": "0.9342 \u00b1 0.0246",
       "n_seeds": "5"
     },
     {
       "model": "Liquid-ODE (dopri5)",
-      "val_mae": "0.0688 \u00b1 0.0177",
-      "val_rmse": "0.0878 \u00b1 0.0211",
-      "val_r2": "0.9121 \u00b1 0.0393",
-      "test_mae": "0.0771 \u00b1 0.0123",
-      "test_rmse": "0.0929 \u00b1 0.0163",
-      "test_r2": "0.9339 \u00b1 0.0219",
+      "val_mae": "0.0688 \u00b1 0.0198",
+      "val_rmse": "0.0878 \u00b1 0.0236",
+      "val_r2": "0.9121 \u00b1 0.0439",
+      "test_mae": "0.0771 \u00b1 0.0137",
+      "test_rmse": "0.0929 \u00b1 0.0182",
+      "test_r2": "0.9339 \u00b1 0.0245",
       "n_seeds": "5"
     },
     {
-      "model": "Liquid-ODE +physics",
-      "val_mae": "0.0559 \u00b1 0.0092",
-      "val_rmse": "0.0728 \u00b1 0.0123",
-      "val_r2": "0.9413 \u00b1 0.0195",
-      "test_mae": "0.0615 \u00b1 0.0035",
-      "test_rmse": "0.0738 \u00b1 0.0041",
-      "test_r2": "0.9594 \u00b1 0.0046",
+      "model": "Liquid-ODE +physics(logistic-only)",
+      "val_mae": "0.0557 \u00b1 0.0101",
+      "val_rmse": "0.0724 \u00b1 0.0133",
+      "val_r2": "0.9419 \u00b1 0.0210",
+      "test_mae": "0.0613 \u00b1 0.0041",
+      "test_rmse": "0.0734 \u00b1 0.0048",
+      "test_r2": "0.9598 \u00b1 0.0054",
       "n_seeds": "5"
     }
   ],
@@ -59,6 +59,6 @@
   "labels": [
     "Liquid-ODE (Euler)",
     "Liquid-ODE (dopri5)",
-    "Liquid-ODE +physics"
+    "Liquid-ODE +physics(logistic-only)"
   ]
 }
