@@ -1,0 +1,54 @@
+# Hybrid QLNN — head-to-head with the classical Liquid-ODE baseline.
+#
+# Shares the data/window/split/eval-protocol numbers with configs/baseline.yaml
+# so the rows produced by this run can be appended to the classical paper
+# table by scripts/summarize_baselines.py without any reshaping.
+#
+# The headline difference from the baseline is the vector field: the classical
+# LiquidCell is replaced by LiquidQuantumCell, which routes the input through a
+# data-reuploading parameterized quantum circuit before driving dh/dt.
+
+data:
+  csv_path: data/raw/qZETA_data_copy.csv
+  feature_cols: [OD, PRE, TEMP_EXT, TEMP_CULTURE, PAR_LIGHT, PH, DO]
+  target_col: OD
+  od_min: 0.0
+  od_max: 3.8
+
+windows:
+  window_size: 24
+  stride: 1
+  horizon_hours: 1.0
+  horizon_tol_hours: 0.001
+
+split:
+  train_ratio: 0.70
+  val_ratio: 0.15
+
+model:
+  num_qubits: 4
+  num_layers: 3
+  delta_scale: 0.1
+  tau_min: 0.1
+  tau_init: 1.0
+  init_head_std: 0.1
+  # Diffrax solver
+  solver: tsit5          # tsit5 (Bogacki-Shampine pair) or dopri5
+  rtol: 0.001
+  atol: 0.0001
+  dt0: 0.05
+  max_steps: 4096
+
+training:
+  epochs: 60             # quantum training is slow; early stopping handles most runs
+  batch_size: 32
+  lr: 0.002
+  weight_decay: 0.0
+  eval_every: 5
+  patience: 6
+  grad_clip_norm: 1.0
+
+# Fewer seeds than the classical baseline because each seed takes substantially
+# longer (Diffrax + PennyLane circuit per step). Three seeds still give a
+# mean ± std for the paper table; can be scaled up after the first end-to-end.
+seeds: [0, 1, 2]
