@@ -76,8 +76,17 @@ Phase 1 (classical Liquid-ODE baseline) is implemented and produces canonical re
 - `configs/baseline_euler_fast.yaml` — fast Euler variant for smoke tests / MPS.
 - `configs/baseline_physics.yaml` — physics-informed ablation.
 
+### Quantum subpackage: `src/qlnn_/` (step 2+)
+
+JAX + Equinox + PennyLane. Lives alongside the PyTorch package, shares data via numpy arrays at the module boundary.
+
+- **circuits/reuploading.py** — `DataReuploadingCircuit` (Pérez-Salinas 2020 universal pattern): interleaves angle-encoding, parameterized Rot, and ring-entangling layers. Returns a `(num_qubits,)` PauliZ-expectation vector. JAX-interfaced QNode, JIT- and grad-compatible.
+- **encoders/quantum_feature_encoder.py** — `QuantumFeatureEncoder` Equinox module: `x ∈ ℝ^F → π·tanh(Wx+b) → PQC → ⟨Z⟩ ∈ [-1,1]^Q`. Trainable parameters are PyTree leaves; the PennyLane QNode is a static field. Use `jax.vmap` (or `encoder_apply_batched`) for batching. ~68 params at default (input_dim=7, num_qubits=4, num_layers=3).
+
+End-to-end smoke test: `scripts/qlnn_smoke_encoder.py` consumes real qZETA windows through the PyTorch data pipeline and feeds them through the JAX encoder.
+
 ### Key dependencies
-torch, torchdiffeq (ODE solvers), pennylane (quantum circuits), pandas, scikit-learn
+torch, torchdiffeq (ODE solvers), jax + jaxlib (quantum side), equinox, diffrax, optax, pennylane (quantum circuits), pandas, scikit-learn
 
 ### Data
 Raw data lives in `data/` (gitignored). Dataset: `data/raw/qZETA_data_copy.csv` — 778 rows, features include PRE, TEMP_EXT, TEMP_CULTURE, PAR_LIGHT, PH, DO, OD, DRY, CELL.

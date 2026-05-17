@@ -97,22 +97,35 @@ Build a paper-ready comparison table:
 ## Package layout
 
 ```
-src/quantum_liquid_neuralode/
-    models/
-        liquid_cell.py            # Continuous-time RNN cell — returns dh/dt
-        forecaster.py             # LiquidODForecaster, swappable ODE solver
-    training/
-        losses.py                 # Physics losses (logistic, smoothness)
-        trainer.py                # Reusable training loop with physics knobs
-    data_processing/
-        qzeta.py                  # Canonical qZETA loader
-        windowing.py              # Splits, MinMax, sliding-window builder
-        preprocessor.py           # General-purpose preprocessor (legacy entry)
-    evaluation/
-        metrics.py                # MAE / RMSE / R² / MSE_norm
-        baselines.py              # Persistence + linear extrapolation
-    utils/
-        mps.py                    # Device selection
+src/
+    quantum_liquid_neuralode/        # PyTorch — classical baseline (step 1)
+        models/
+            liquid_cell.py            # Continuous-time RNN cell — returns dh/dt
+            forecaster.py             # LiquidODForecaster, swappable ODE solver
+        training/
+            losses.py                 # Physics losses (logistic, smoothness)
+            trainer.py                # Reusable training loop with physics knobs
+        data_processing/
+            qzeta.py                  # Canonical qZETA loader
+            windowing.py              # Splits, MinMax, sliding-window builder
+            preprocessor.py           # General-purpose preprocessor (legacy)
+        evaluation/
+            metrics.py                # MAE / RMSE / R² / MSE_norm
+            baselines.py              # Persistence + linear extrapolation
+        utils/
+            mps.py                    # Device selection
+
+    qlnn_/                            # JAX + Equinox + PennyLane — quantum (step 2+)
+        circuits/
+            reuploading.py            # Data-reuploading PQC (PennyLane QNode)
+        encoders/
+            quantum_feature_encoder.py  # Linear→angles→PQC→⟨Z⟩ latent
+```
+
+Run the quantum encoder smoke-test (consumes real qZETA windows):
+
+```bash
+.venv/bin/python scripts/qlnn_smoke_encoder.py
 ```
 
 ## Spec
