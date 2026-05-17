@@ -1,0 +1,23 @@
+{
+  "n_rows": 778,
+  "train_end": 544,
+  "val_end": 661,
+  "n_train_windows": 500,
+  "n_val_windows": 88,
+  "n_test_windows": 86,
+  "horizon_hours": 1.0,
+  "window_size": 24,
+  "stride": 1,
+  "od_min": 0.0,
+  "od_max": 3.8,
+  "feature_cols": [
+    "OD",
+    "PRE",
+    "TEMP_EXT",
+    "TEMP_CULTURE",
+    "PAR_LIGHT",
+    "PH",
+    "DO"
+  ],
+  "target_col": "OD"
+}

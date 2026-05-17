@@ -1,0 +1,64 @@
+{
+  "rows": [
+    {
+      "model": "Persistence (OD(t+h)=OD(t))",
+      "val_mae": "0.0824",
+      "val_rmse": "0.1044",
+      "val_r2": "0.8824",
+      "test_mae": "0.0934",
+      "test_rmse": "0.1129",
+      "test_r2": "0.9052",
+      "n_seeds": "n/a"
+    },
+    {
+      "model": "Linear extrapolation",
+      "val_mae": "0.1210",
+      "val_rmse": "0.1572",
+      "val_r2": "0.7335",
+      "test_mae": "0.1545",
+      "test_rmse": "0.1930",
+      "test_r2": "0.7231",
+      "n_seeds": "n/a"
+    },
+    {
+      "model": "Liquid-ODE (Euler)",
+      "val_mae": "0.0688 \u00b1 0.0178",
+      "val_rmse": "0.0879 \u00b1 0.0212",
+      "val_r2": "0.9118 \u00b1 0.0395",
+      "test_mae": "0.0770 \u00b1 0.0125",
+      "test_rmse": "0.0927 \u00b1 0.0164",
+      "test_r2": "0.9342 \u00b1 0.0220",
+      "n_seeds": "5"
+    },
+    {
+      "model": "Liquid-ODE (dopri5)",
+      "val_mae": "0.0688 \u00b1 0.0177",
+      "val_rmse": "0.0878 \u00b1 0.0211",
+      "val_r2": "0.9121 \u00b1 0.0393",
+      "test_mae": "0.0771 \u00b1 0.0123",
+      "test_rmse": "0.0929 \u00b1 0.0163",
+      "test_r2": "0.9339 \u00b1 0.0219",
+      "n_seeds": "5"
+    },
+    {
+      "model": "Liquid-ODE +physics",
+      "val_mae": "0.0559 \u00b1 0.0092",
+      "val_rmse": "0.0728 \u00b1 0.0123",
+      "val_r2": "0.9413 \u00b1 0.0195",
+      "test_mae": "0.0615 \u00b1 0.0035",
+      "test_rmse": "0.0738 \u00b1 0.0041",
+      "test_r2": "0.9594 \u00b1 0.0046",
+      "n_seeds": "5"
+    }
+  ],
+  "runs": [
+    "results/baseline_classical_euler",
+    "results/baseline_classical_dopri5",
+    "results/baseline_classical_physics"
+  ],
+  "labels": [
+    "Liquid-ODE (Euler)",
+    "Liquid-ODE (dopri5)",
+    "Liquid-ODE +physics"
+  ]
+}
