@@ -140,7 +140,10 @@ def make_horizon_windows(
     target_idx_list: list[int] = []
 
     n = features.shape[0]
-    for start in range(0, n - window_size, stride):
+    # Note: `+ 1` so the final valid window (start_idx = n - window_size) is
+    # included. The target-index guard (`target_idx >= n`) still drops any
+    # window whose horizon target falls past the array.
+    for start in range(0, n - window_size + 1, stride):
         end = start + window_size
         end_idx = end - 1
 

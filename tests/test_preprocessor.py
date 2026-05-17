@@ -27,14 +27,41 @@ def test_preprocessor_normalize_and_create_sequences_shapes():
 
     sequences, targets = pre.create_sequences(window_size=4, stride=2)
 
-    assert sequences.shape == (3, 4, 6)
-    assert targets.shape == (3, 4)
+    # n=10, window_size=4, stride=2 -> valid start indices [0, 2, 4, 6] = 4 windows.
+    # (Was 3 under the off-by-one bug fixed in commit XXX.)
+    assert sequences.shape == (4, 4, 6)
+    assert targets.shape == (4, 4)
 
     assert sequences.min() >= -1e-6
     assert sequences.max() <= 1.0 + 1e-6
 
     assert targets.min() >= -1e-6
     assert targets.max() <= 1.0 + 1e-6
+
+
+def test_create_sequences_includes_final_window():
+    """Regression test for R1-B1 off-by-one in `create_sequences`.
+
+    Boundary case: n_rows = window_size + 1. With stride=1 there are exactly
+    2 valid windows (start=0 and start=1). The buggy code produced only 1.
+    """
+    window_size = 4
+    n_rows = window_size + 1  # 5
+    df = pd.DataFrame(
+        {
+            "A": np.arange(n_rows, dtype=np.float32),
+            "OD": np.linspace(0.1, 0.9, n_rows, dtype=np.float32),
+        }
+    )
+
+    pre = BioreactorDataPreprocessor(df=df, feature_cols=["A"], target_col="OD")
+    sequences, targets = pre.create_sequences(window_size=window_size, stride=1)
+
+    # Expected start indices: range(0, n_rows - window_size + 1, 1) = [0, 1] -> 2 windows.
+    assert sequences.shape == (2, window_size, 1)
+    assert targets.shape == (2, window_size)
+    # The final window must start at index 1 (the off-by-one bug dropped this).
+    np.testing.assert_allclose(sequences[-1, :, 0], np.arange(1, 1 + window_size, dtype=np.float32))
 
 
 def test_preprocessor_raises_if_window_too_large():

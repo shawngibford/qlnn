@@ -32,6 +32,33 @@ def test_encoder_batched_via_vmap():
     assert jnp.allclose(Y - Y[0:1], 0.0, atol=1e-6)
 
 
+def test_encoder_vmap_with_heterogeneous_inputs():
+    """Different inputs must produce different outputs under vmap.
+
+    Catches the vmap-collapse failure mode where all rows accidentally
+    return the same value regardless of input (e.g. if the batch axis was
+    dropped or the circuit was inadvertently broadcast).
+    """
+    enc = _enc()
+    # 3 deliberately different feature vectors.
+    X = jnp.stack([
+        jnp.arange(7.0),
+        jnp.linspace(-1.0, 1.0, 7),
+        jnp.array([0.5, -0.5, 0.7, -0.7, 0.3, -0.3, 0.1]),
+    ])
+    Y = encoder_apply_batched(enc, X)
+    assert Y.shape == (3, 4)
+
+    # Every pair of rows must differ in at least one component by > 1e-6.
+    for i in range(3):
+        for j in range(i + 1, 3):
+            row_diff = float(jnp.max(jnp.abs(Y[i] - Y[j])))
+            assert row_diff > 1e-6, (
+                f"rows {i} and {j} are identical to 1e-6: "
+                f"Y[{i}]={Y[i]} Y[{j}]={Y[j]} (vmap collapse?)"
+            )
+
+
 def test_encoder_gradients_flow_through_all_leaves():
     enc = _enc()
     x = jnp.arange(7.0)

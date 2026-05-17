@@ -80,7 +80,9 @@ class BioreactorDataPreprocessor:
         sequences: list[np.ndarray] = []
         targets: list[np.ndarray] = []
 
-        for i in range(0, n_rows - window_size, stride):
+        # `+ 1` so the final valid window (start = n_rows - window_size) is
+        # included. Off-by-one bug fix.
+        for i in range(0, n_rows - window_size + 1, stride):
             seq = features[i : i + window_size]
             tgt = target[i : i + window_size]
             sequences.append(seq)

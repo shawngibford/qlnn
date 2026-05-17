@@ -76,9 +76,15 @@ def aggregate_seed_metrics(metrics_list: list[ForecastMetrics]) -> dict[str, dic
     out: dict[str, dict[str, float]] = {}
     for f in fields:
         vals = np.asarray([getattr(m, f) for m in metrics_list], dtype=np.float64)
+        # ddof=1: unbiased sample std (Bessel's correction). This is the
+        # standard convention for reporting mean +/- std over finite seed
+        # populations in ML/scientific journals. numpy's default ddof=0 is the
+        # population std and underestimates by a factor sqrt(n/(n-1)) for
+        # small n (e.g. ~12% too small at n=5).
+        std_val = float(vals.std(ddof=1)) if vals.size > 1 else float("nan")
         out[f] = {
             "mean": float(vals.mean()),
-            "std": float(vals.std(ddof=0)),
+            "std": std_val,
             "min": float(vals.min()),
             "max": float(vals.max()),
             "n_seeds": int(vals.size),

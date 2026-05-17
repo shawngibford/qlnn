@@ -78,3 +78,45 @@ def test_aggregate_seed_metrics_mean_std():
     assert agg["mae_raw"]["min"] == pytest.approx(0.1)
     assert agg["mae_raw"]["max"] == pytest.approx(0.2)
     assert agg["mae_raw"]["n_seeds"] == 2
+
+
+def test_aggregate_seed_metrics_uses_unbiased_std():
+    """Regression test for R1-B3: aggregate_seed_metrics must use unbiased
+    sample std (ddof=1, Bessel's correction), not population std (ddof=0).
+
+    Scientific convention is to report mean +/- sample std for finite seed
+    populations. Hand-computed: for vals=[0.9, 1.0, 1.1] the mean is 1.0, and
+    sample variance = (0.01 + 0 + 0.01) / (3 - 1) = 0.01 -> sample std = 0.1.
+    Population std (ddof=0) would be sqrt(0.02/3) ~= 0.08165, which is wrong.
+    """
+    from quantum_liquid_neuralode.evaluation.metrics import ForecastMetrics
+
+    ms = [
+        ForecastMetrics(mse_norm=0.9, mae_raw=0.9, rmse_raw=0.9, r2_raw=0.9),
+        ForecastMetrics(mse_norm=1.0, mae_raw=1.0, rmse_raw=1.0, r2_raw=1.0),
+        ForecastMetrics(mse_norm=1.1, mae_raw=1.1, rmse_raw=1.1, r2_raw=1.1),
+    ]
+    agg = aggregate_seed_metrics(ms)
+
+    expected_sample_std = 0.1  # hand-computed (ddof=1)
+    population_std = float(np.sqrt(0.02 / 3.0))  # ~0.08165 (ddof=0) — bug value
+
+    for field in ("mse_norm", "mae_raw", "rmse_raw", "r2_raw"):
+        assert agg[field]["mean"] == pytest.approx(1.0, abs=1e-12)
+        assert agg[field]["std"] == pytest.approx(expected_sample_std, abs=1e-9)
+        # And make sure we are NOT computing the population std.
+        assert abs(agg[field]["std"] - population_std) > 1e-3
+
+
+def test_aggregate_seed_metrics_std_nan_for_single_seed():
+    """With a single seed the unbiased std is undefined (division by zero).
+    We surface NaN rather than silently emitting 0.0 (which ddof=0 would do).
+    """
+    from quantum_liquid_neuralode.evaluation.metrics import ForecastMetrics
+
+    ms = [ForecastMetrics(mse_norm=0.5, mae_raw=0.5, rmse_raw=0.5, r2_raw=0.5)]
+    agg = aggregate_seed_metrics(ms)
+    for field in ("mse_norm", "mae_raw", "rmse_raw", "r2_raw"):
+        assert agg[field]["mean"] == pytest.approx(0.5)
+        assert np.isnan(agg[field]["std"])
+        assert agg[field]["n_seeds"] == 1

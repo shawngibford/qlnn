@@ -17,7 +17,9 @@ linear baselines are deterministic and identical across all runs (same data).
 from __future__ import annotations
 
 import argparse
+import csv
 import json
+import re
 from pathlib import Path
 
 
@@ -28,6 +30,99 @@ def _read_json(p: Path) -> dict:
 
 def _fmt(mean: float, std: float, *, sig: int = 4) -> str:
     return f"{mean:.{sig}f} ± {std:.{sig}f}"
+
+
+_SEED_DIR_RE = re.compile(r"^seed_(-?\d+)$")
+
+
+def _seed_dirs(run_dir: Path) -> list[tuple[int, Path]]:
+    """Return [(seed_int, seed_dir), ...] sorted by seed_int.
+
+    Numeric sort so seed_10 doesn't precede seed_2 lexicographically.
+    """
+    out: list[tuple[int, Path]] = []
+    if not run_dir.exists():
+        return out
+    for child in run_dir.iterdir():
+        if not child.is_dir():
+            continue
+        m = _SEED_DIR_RE.match(child.name)
+        if not m:
+            continue
+        if not (child / "metrics.json").exists():
+            continue
+        out.append((int(m.group(1)), child))
+    out.sort(key=lambda pair: pair[0])
+    return out
+
+
+# Long-form per-seed table columns, in emission order.
+_PER_SEED_COLUMNS: tuple[str, ...] = (
+    "model",
+    "seed",
+    "best_epoch",
+    "val_mse_norm",
+    "val_mae_raw",
+    "val_rmse_raw",
+    "val_r2_raw",
+    "test_mse_norm",
+    "test_mae_raw",
+    "test_rmse_raw",
+    "test_r2_raw",
+)
+
+
+def _collect_per_seed_rows(run_dir: Path, label: str) -> list[dict]:
+    rows: list[dict] = []
+    for seed, seed_dir in _seed_dirs(run_dir):
+        m = _read_json(seed_dir / "metrics.json")
+        val = m.get("val", {})
+        test = m.get("test", {})
+        rows.append({
+            "model": label,
+            "seed": seed,
+            "best_epoch": m.get("best_epoch", ""),
+            "val_mse_norm": val.get("mse_norm", ""),
+            "val_mae_raw": val.get("mae_raw", ""),
+            "val_rmse_raw": val.get("rmse_raw", ""),
+            "val_r2_raw": val.get("r2_raw", ""),
+            "test_mse_norm": test.get("mse_norm", ""),
+            "test_mae_raw": test.get("mae_raw", ""),
+            "test_rmse_raw": test.get("rmse_raw", ""),
+            "test_r2_raw": test.get("r2_raw", ""),
+        })
+    return rows
+
+
+def _format_cell(value) -> str:
+    if isinstance(value, float):
+        return f"{value:.6f}"
+    return str(value)
+
+
+def _write_per_seed_tables(output_dir: Path, per_seed_rows: list[dict]) -> None:
+    csv_path = output_dir / "per_seed_table.csv"
+    with csv_path.open("w", newline="") as f:
+        writer = csv.DictWriter(f, fieldnames=list(_PER_SEED_COLUMNS))
+        writer.writeheader()
+        for row in per_seed_rows:
+            writer.writerow({col: row.get(col, "") for col in _PER_SEED_COLUMNS})
+
+    md_lines: list[str] = []
+    md_lines.append("# Per-seed results (supplementary)")
+    md_lines.append("")
+    md_lines.append(
+        "Full per-seed metrics for every run aggregated by `baseline_table.md`. "
+        "Use this for reviewer-side CIs and paired analyses."
+    )
+    md_lines.append("")
+    md_lines.append("| " + " | ".join(_PER_SEED_COLUMNS) + " |")
+    md_lines.append("|" + "|".join(["---"] * len(_PER_SEED_COLUMNS)) + "|")
+    for row in per_seed_rows:
+        md_lines.append(
+            "| " + " | ".join(_format_cell(row.get(col, "")) for col in _PER_SEED_COLUMNS) + " |"
+        )
+    (output_dir / "per_seed_table.md").write_text("\n".join(md_lines) + "\n")
 
 
 def main() -> None:
@@ -69,8 +164,10 @@ def main() -> None:
         "n_seeds": "n/a",
     })
 
+    per_seed_rows: list[dict] = []
     for run_dir, label in zip(args.runs, args.labels):
         s = _read_json(run_dir / "seeds_summary.json")
+        per_seed_rows.extend(_collect_per_seed_rows(run_dir, label))
         rows.append({
             "model": label,
             "val_mae": _fmt(s["val"]["mae_raw"]["mean"], s["val"]["mae_raw"]["std"]),
@@ -109,8 +206,12 @@ def main() -> None:
     }
     (args.output / "baseline_table.json").write_text(json.dumps(blob, indent=2) + "\n")
 
+    _write_per_seed_tables(args.output, per_seed_rows)
+
     print("\n".join(md_lines))
     print(f"\nwrote {md_path}")
+    print(f"wrote {args.output / 'per_seed_table.csv'} ({len(per_seed_rows)} rows)")
+    print(f"wrote {args.output / 'per_seed_table.md'}")
 
 
 if __name__ == "__main__":

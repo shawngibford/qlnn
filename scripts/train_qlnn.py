@@ -1,27 +1,16 @@
-"""Train the classical Liquid-ODE baseline across multiple seeds.
+"""Multi-seed trainer for the hybrid QLNN forecaster.
 
-Reads a YAML config, runs N seeds with the same hyperparameters, aggregates
-metrics (mean ± std), and writes a single canonical artifact directory:
-
-    <output_dir>/
-        config.json                 # frozen copy of the config that ran
-        protocol.json               # locked data/split/window protocol
-        baselines.json              # persistence + linear baseline metrics (no training)
-        seed_<k>/
-            metrics.json
-            history.csv
-            best_state.pt
-        seeds_summary.json          # mean/std/min/max across seeds (the paper-table row)
-
-This is the artifact the paper cites for "classical Liquid-ODE baseline."
+Writes results in the SAME shape as scripts/train_baseline.py so
+scripts/summarize_baselines.py can place QLNN rows alongside the classical
+ones in the paper table without any reshaping.
 
 Usage:
-    python scripts/train_baseline.py --config configs/baseline.yaml \\
-        --output-dir results/baseline_classical
+    python scripts/train_qlnn.py --config configs/qlnn_hybrid.yaml \\
+        --output-dir results/qlnn_hybrid
 
-    # Smoke test on 1 seed, 5 epochs:
-    python scripts/train_baseline.py --config configs/baseline.yaml \\
-        --output-dir results/_smoke --seeds 0 --epochs 5 --eval-every 1
+    # Smoke test (1 seed, few epochs):
+    python scripts/train_qlnn.py --config configs/qlnn_hybrid.yaml \\
+        --output-dir results/_qlnn_smoke --seeds 0 --epochs 3 --eval-every 1
 """
 from __future__ import annotations
 
@@ -30,15 +19,23 @@ import json
 from pathlib import Path
 from typing import Any
 
+import equinox as eqx
+import jax
 import numpy as np
 import pandas as pd
-import torch
 import yaml
 
+from qlnn_ import (
+    QLNNForecaster,
+    QLNNForecasterConfig,
+    QLNNTrainerConfig,
+    history_to_dicts,
+    train_one_qlnn,
+)
 from quantum_liquid_neuralode.data_processing import (
-    HorizonWindows,
     apply_minmax,
     fit_minmax,
+    HorizonWindows,
     load_qzeta,
     make_horizon_windows,
     split_indices,
@@ -50,14 +47,7 @@ from quantum_liquid_neuralode.evaluation import (
     persistence_forecast,
 )
 from quantum_liquid_neuralode.evaluation.metrics import aggregate_seed_metrics
-from quantum_liquid_neuralode.models import LiquidODForecaster
-from quantum_liquid_neuralode.training import (
-    PhysicsLossConfig,
-    TrainerConfig,
-    history_to_dicts,
-    train_one,
-)
-from quantum_liquid_neuralode.utils import select_device, write_provenance
+from quantum_liquid_neuralode.utils import write_provenance
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -104,29 +94,12 @@ def _resolve_csv_path(csv_path_str: str) -> Path:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Multi-seed classical Liquid-ODE baseline.")
-    parser.add_argument("--config", type=Path, required=True, help="Path to YAML config.")
-    parser.add_argument("--output-dir", type=Path, required=True, help="Where to write artifacts.")
-    parser.add_argument(
-        "--seeds",
-        nargs="+",
-        type=int,
-        default=None,
-        help="Override the seeds in the config (space-separated integers).",
-    )
-    parser.add_argument(
-        "--epochs",
-        type=int,
-        default=None,
-        help="Override training.epochs (useful for smoke tests).",
-    )
-    parser.add_argument(
-        "--eval-every",
-        type=int,
-        default=None,
-        help="Override training.eval_every.",
-    )
-    parser.add_argument("--device", type=str, default=None, choices=["mps", "cuda", "cpu"])
+    parser = argparse.ArgumentParser(description="Multi-seed hybrid QLNN forecaster trainer.")
+    parser.add_argument("--config", type=Path, required=True)
+    parser.add_argument("--output-dir", type=Path, required=True)
+    parser.add_argument("--seeds", nargs="+", type=int, default=None)
+    parser.add_argument("--epochs", type=int, default=None)
+    parser.add_argument("--eval-every", type=int, default=None)
     parser.add_argument("--quiet", action="store_true")
     args = parser.parse_args()
 
@@ -195,10 +168,11 @@ def main() -> None:
         "od_max": float(cfg["data"]["od_max"]),
         "feature_cols": feature_cols,
         "target_col": target_col,
+        "stack": "jax+pennylane",
     }
     (output_dir / "protocol.json").write_text(json.dumps(protocol, indent=2) + "\n")
 
-    # ---- Baselines (deterministic, no training) ----
+    # ---- Baselines ----
     od_scaler = scalers[target_col]
     persist_val_pred = persistence_forecast(w_val.od_last)
     persist_test_pred = persistence_forecast(w_test.od_last)
@@ -208,7 +182,6 @@ def main() -> None:
     linear_test_pred = linear_extrapolation_forecast(
         od_last=w_test.od_last, od_prev=w_test.od_prev, dt_last_hours=w_test.dt_last, horizon_hours=horizon_hours
     )
-
     baselines_record = {
         "persistence": {
             "val": compute_metrics(y_true_norm=w_val.y, y_pred_norm=persist_val_pred, od_scaler=od_scaler).to_dict(),
@@ -221,36 +194,23 @@ def main() -> None:
     }
     (output_dir / "baselines.json").write_text(json.dumps(baselines_record, indent=2) + "\n")
 
-    # ---- Device ----
-    if args.device is not None:
-        device = torch.device(args.device)
-    else:
-        device = select_device(prefer_mps=True)
-
-    log = (lambda s: None) if args.quiet else (lambda s: print(s))
-    log(f"device: {device}")
+    log = (lambda s: None) if args.quiet else (lambda s: print(s, flush=True))
+    log(f"jax default backend: {jax.default_backend()}")
     log(
         f"rows: {n} | train_end={split.train_end} val_end={split.val_end} | "
         f"windows: train={len(w_train)} val={len(w_val)} test={len(w_test)}"
     )
     log(
-        f"baselines | persist val MSE_norm={baselines_record['persistence']['val']['mse_norm']:.6f}, "
-        f"R2_raw={baselines_record['persistence']['val']['r2_raw']:.4f}"
+        f"baselines | persist val MAE={baselines_record['persistence']['val']['mae_raw']:.4f}, "
+        f"R2={baselines_record['persistence']['val']['r2_raw']:.4f}"
     )
 
     # ---- Per-seed training ----
     seeds: list[int] = list(cfg["seeds"])
     od_index = feature_cols.index(target_col)
 
-    # NOTE: `lambda_smooth` was removed from PhysicsLossConfig (R1 BLOCKER B2;
-    # see trainer.py). Any `lambda_smooth` key still present in legacy YAML
-    # configs is intentionally ignored here.
-    physics_cfg = PhysicsLossConfig(
-        lambda_logistic=float(cfg.get("physics", {}).get("lambda_logistic", 0.0)),
-        mu_norm=float(cfg.get("physics", {}).get("mu_norm", 0.4)),
-        K_norm=float(cfg.get("physics", {}).get("K_norm", 1.0)),
-    )
-    trainer_cfg = TrainerConfig(
+    model_cfg = cfg["model"]
+    trainer_cfg = QLNNTrainerConfig(
         epochs=int(cfg["training"]["epochs"]),
         batch_size=int(cfg["training"]["batch_size"]),
         lr=float(cfg["training"]["lr"]),
@@ -258,42 +218,40 @@ def main() -> None:
         eval_every=int(cfg["training"]["eval_every"]),
         patience=int(cfg["training"]["patience"]),
         grad_clip_norm=float(cfg["training"]["grad_clip_norm"]),
-        physics=physics_cfg,
     )
-
-    model_cfg = cfg["model"]
 
     val_metrics_all = []
     test_metrics_all = []
 
     for seed in seeds:
         log(f"\n=== seed {seed} ===")
-        torch.manual_seed(seed)
-        np.random.seed(seed)
 
-        model = LiquidODForecaster(
-            input_size=len(feature_cols),
-            hidden_size=int(model_cfg["hidden_size"]),
+        forecaster_cfg = QLNNForecasterConfig(
+            input_dim=len(feature_cols),
+            num_qubits=int(model_cfg["num_qubits"]),
+            num_layers=int(model_cfg["num_layers"]),
             horizon_hours=horizon_hours,
-            forecast_steps=int(model_cfg["forecast_steps"]),
             od_index=od_index,
             delta_scale=float(model_cfg["delta_scale"]),
             tau_min=float(model_cfg["tau_min"]),
-            ode_method=str(model_cfg.get("ode_method", "euler")),
-            rtol=float(model_cfg.get("rtol", 1e-3)),
-            atol=float(model_cfg.get("atol", 1e-4)),
+            tau_init=float(model_cfg["tau_init"]),
+            solver=str(model_cfg["solver"]),
+            rtol=float(model_cfg["rtol"]),
+            atol=float(model_cfg["atol"]),
+            dt0=float(model_cfg["dt0"]),
+            max_steps=int(model_cfg["max_steps"]),
+            init_head_std=float(model_cfg["init_head_std"]),
         )
 
-        result = train_one(
+        model = QLNNForecaster(forecaster_cfg, key=jax.random.PRNGKey(seed))
+
+        result = train_one_qlnn(
             model=model,
-            x_train=w_train.x, t_train=w_train.t, y_train=w_train.y, od_last_train=w_train.od_last,
+            x_train=w_train.x, t_train=w_train.t, y_train=w_train.y,
             x_val=w_val.x, t_val=w_val.t, y_val=w_val.y,
             x_test=w_test.x, t_test=w_test.t, y_test=w_test.y,
             od_scaler=od_scaler,
-            device=device,
             cfg=trainer_cfg,
-            horizon_hours=horizon_hours,
-            od_index=od_index,
             seed=seed,
             log_fn=log,
         )
@@ -312,14 +270,14 @@ def main() -> None:
             + "\n"
         )
         pd.DataFrame(history_to_dicts(result.history)).to_csv(seed_dir / "history.csv", index=False)
-        torch.save(result.model_state, seed_dir / "best_state.pt")
+        eqx.tree_serialise_leaves(seed_dir / "best_model.eqx", result.model)
 
         val_metrics_all.append(result.val_metrics)
         test_metrics_all.append(result.test_metrics)
 
         log(
-            f"seed {seed} | val MAE_raw={result.val_metrics.mae_raw:.4f} R2={result.val_metrics.r2_raw:.4f} | "
-            f"test MAE_raw={result.test_metrics.mae_raw:.4f} R2={result.test_metrics.r2_raw:.4f}"
+            f"seed {seed} | val MAE={result.val_metrics.mae_raw:.4f} R2={result.val_metrics.r2_raw:.4f} | "
+            f"test MAE={result.test_metrics.mae_raw:.4f} R2={result.test_metrics.r2_raw:.4f}"
         )
 
     # ---- Aggregate ----

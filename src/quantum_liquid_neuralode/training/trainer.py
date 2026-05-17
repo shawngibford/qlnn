@@ -16,9 +16,18 @@ from .losses import logistic_growth_residual_loss, smoothness_loss
 
 @dataclass(frozen=True)
 class PhysicsLossConfig:
-    """Weights for physics-informed regularizers. All default 0 (off)."""
+    """Weights for physics-informed regularizers. All default 0 (off).
+
+    Note: a `lambda_smooth` field used to live here. It applied a penalty of the
+    form ``lambda * ((yp - od_last) - (yb - od_last))^2`` which reduces
+    algebraically to ``lambda * (yp - yb)^2`` — i.e. a re-weighted copy of the
+    data MSE, not a smoothness regularizer. Reviewer R1 flagged this as a
+    BLOCKER; the field has been removed so the `+physics` ablation row in the
+    paper cannot be misattributed to a smoothness prior. Real smoothness
+    regularization requires multi-step output and is planned for the
+    trajectory-forecast variant.
+    """
     lambda_logistic: float = 0.0
-    lambda_smooth: float = 0.0
     # Logistic-growth params (only used if lambda_logistic > 0).
     # These are in NORMALIZED OD space because the model emits normalized OD.
     mu_norm: float = 0.4       # growth rate (1/h)
@@ -102,18 +111,26 @@ def _physics_loss_terms(
 ) -> Tensor:
     """Apply physics regularizers to the model's 1-step-ahead prediction.
 
-    The regularizers are computed on the (od_last, yp) pair viewed as a 2-point
-    "trajectory" over `horizon_hours`. This is a soft prior, not a hard constraint.
+    Active regularizers (logistic-only, post-R1 review):
 
-    - Logistic-growth residual penalizes deviations from the autonomous logistic
-      ODE dOD/dt = mu * OD * (1 - OD/K).
-    - Smoothness penalty regularizes against jumps that are large relative to
-      both true and predicted deltas (here approximated as |delta_pred|^2; the
-      smoothness loss API expects >=3 points so we use a simple delta penalty
-      proxy when we only have a 1-step horizon).
+    - Logistic-growth residual (`lambda_logistic`): penalizes deviations from
+      the autonomous logistic ODE ``dOD/dt = mu * OD * (1 - OD/K)`` evaluated
+      on the 2-point "trajectory" (od_last, yp) over `horizon_hours`. This is
+      a soft prior, not a hard constraint.
+
+    Removed regularizers:
+
+    - `lambda_smooth` was removed (reviewer R1, BLOCKER B2). The previous
+      formulation computed ``((yp - od_last) - (yb - od_last))^2 == (yp - yb)^2``,
+      which is just a rescaled copy of the data MSE — not a smoothness term.
+      `yb` is therefore not referenced by any current regularizer; it is kept
+      in the signature so re-introducing a true multi-step smoothness penalty
+      later (planned for the trajectory-forecast variant) does not require a
+      breaking change to call sites.
 
     Returns scalar tensor.
     """
+    del yb  # not used by any currently-active regularizer; see docstring.
     total = yp.new_zeros(())
 
     if cfg.lambda_logistic > 0.0:
@@ -133,15 +150,6 @@ def _physics_loss_terms(
             reduction="mean",
         )
         total = total + cfg.lambda_logistic * l_log
-
-    if cfg.lambda_smooth > 0.0:
-        # With only a 1-step horizon we can't compute second differences;
-        # use a delta-magnitude proxy that penalizes predicted jumps not
-        # supported by the true delta.
-        delta_pred = yp - od_last
-        delta_true = yb - od_last
-        excess = delta_pred - delta_true
-        total = total + cfg.lambda_smooth * excess.pow(2).mean()
 
     return total
 
@@ -217,7 +225,7 @@ def train_one(
             mse = se.mean()
             loss = mse
 
-            if cfg.physics.lambda_logistic > 0.0 or cfg.physics.lambda_smooth > 0.0:
+            if cfg.physics.lambda_logistic > 0.0:
                 od_last_b = xb[:, -1, od_index]
                 loss = loss + _physics_loss_terms(
                     yp=yp,

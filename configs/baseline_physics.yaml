@@ -1,7 +1,14 @@
-# Physics-informed ablation — same as baseline.yaml but with logistic-growth
-# and smoothness regularizers turned on. Used in the paper's ablation table to
-# show whether the physics priors help, hurt, or are neutral relative to the
-# pure data-driven baseline.
+# Physics-informed ablation — same as baseline.yaml but with the logistic-growth
+# regularizer turned on. Used in the paper's ablation table to show whether the
+# logistic-growth prior helps, hurts, or is neutral relative to the pure
+# data-driven baseline.
+#
+# Reviewer R1 (BLOCKER B2) showed that the previous `lambda_smooth` term
+# reduced algebraically to a re-weighted MSE (because
+# ``((yp - od_last) - (yb - od_last))^2 == (yp - yb)^2``) rather than a real
+# smoothness penalty. It has been removed from PhysicsLossConfig and from this
+# config. Real smoothness regularization requires multi-step output, which is
+# planned for the trajectory-forecast variant.
 
 data:
   csv_path: data/raw/qZETA_data_copy.csv
@@ -40,7 +47,6 @@ training:
 
 physics:
   lambda_logistic: 0.1
-  lambda_smooth: 0.05
   mu_norm: 0.4
   K_norm: 1.0
 
