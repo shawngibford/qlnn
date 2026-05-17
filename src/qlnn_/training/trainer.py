@@ -10,7 +10,7 @@ Model-agnostic: accepts any callable `eqx.Module` with the per-sample signature
 
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Callable, Optional
 
 import equinox as eqx
@@ -22,6 +22,8 @@ from sklearn.preprocessing import MinMaxScaler
 
 from quantum_liquid_neuralode.evaluation.metrics import ForecastMetrics, compute_metrics
 
+from .losses import QLNNPhysicsLossConfig, logistic_growth_residual_loss
+
 
 @dataclass(frozen=True)
 class QLNNTrainerConfig:
@@ -32,6 +34,8 @@ class QLNNTrainerConfig:
     eval_every: int = 5
     patience: int = 5
     grad_clip_norm: float = 1.0  # 0 disables
+    # Physics regularizers. Default off; the +physics ablation overrides this.
+    physics: QLNNPhysicsLossConfig = field(default_factory=QLNNPhysicsLossConfig)
 
     def __post_init__(self) -> None:
         if self.epochs <= 0:
@@ -86,9 +90,49 @@ def _build_optimizer(cfg: QLNNTrainerConfig) -> optax.GradientTransformation:
 
 
 def _loss_fn(model: eqx.Module, x_batch: jnp.ndarray, t_batch: jnp.ndarray, y_batch: jnp.ndarray) -> jnp.ndarray:
-    """Mean squared error in normalized OD space."""
+    """Mean squared error in normalized OD space (no physics term)."""
     y_pred = jax.vmap(model)(x_batch, t_batch)  # (B,)
     return jnp.mean((y_pred - y_batch) ** 2)
+
+
+def _make_loss_fn_with_physics(
+    physics: QLNNPhysicsLossConfig,
+    *,
+    od_index: int,
+    horizon_hours: float,
+) -> Callable[[eqx.Module, jnp.ndarray, jnp.ndarray, jnp.ndarray], jnp.ndarray]:
+    """Build a closed-over loss_fn that adds the logistic-growth physics term.
+
+    `od_index` is a Python int (static) and `horizon_hours` is a Python float
+    (closed over as a constant) so the result is JIT-safe — neither is traced
+    as a JAX array.
+
+    Mirrors the PyTorch `_physics_loss_terms` 2-point trajectory:
+    `(od_last, y_pred)` at times `(0, h)` → `logistic_growth_residual_loss`.
+    """
+    lam = float(physics.lambda_logistic)
+    mu = float(physics.mu_norm)
+    K = float(physics.K_norm)
+    h = float(horizon_hours)
+    idx = int(od_index)
+
+    def loss_fn(
+        model: eqx.Module,
+        x_batch: jnp.ndarray,
+        t_batch: jnp.ndarray,
+        y_batch: jnp.ndarray,
+    ) -> jnp.ndarray:
+        y_pred = jax.vmap(model)(x_batch, t_batch)  # (B,)
+        mse = jnp.mean((y_pred - y_batch) ** 2)
+
+        # 2-point trajectory per sample: (od_last, y_pred) at times (0, h).
+        od_last = x_batch[:, -1, idx]
+        traj = jnp.stack([od_last, y_pred], axis=-1)  # (B, 2)
+        t_pts = jnp.asarray([0.0, h], dtype=traj.dtype)
+        l_log = logistic_growth_residual_loss(traj, t_pts, mu=mu, K=K)
+        return mse + lam * l_log
+
+    return loss_fn
 
 
 def _predict_all(
@@ -125,10 +169,20 @@ def train_one_qlnn(
     cfg: QLNNTrainerConfig,
     seed: int,
     log_fn: Optional[Callable[[str], None]] = None,
+    od_index: int = 0,
+    horizon_hours: float = 1.0,
 ) -> QLNNTrainResult:
     """Train any Equinox model on (x, t) -> scalar via Optax Adam(W).
 
-    See module docstring for the contract.
+    Args:
+        od_index: column index of OD inside the per-step feature vector. Only
+            consulted when ``cfg.physics.lambda_logistic > 0`` — for pure-MSE
+            training the default (0) is irrelevant.
+        horizon_hours: forecast horizon (h). Used to define the 2-point
+            (od_last → y_pred) trajectory passed to the logistic-growth
+            residual. Only consulted when physics is on.
+
+    See module docstring for the rest of the contract.
     """
     # --- Data as JAX arrays (kept on default device; trainer is device-agnostic).
     x_train_j = jnp.asarray(x_train)
@@ -139,6 +193,16 @@ def train_one_qlnn(
     opt = _build_optimizer(cfg)
     opt_state = opt.init(eqx.filter(model, eqx.is_array))
 
+    # --- Per-batch loss (data MSE optionally + logistic-growth physics term).
+    # Both od_index and horizon_hours are closed over as Python constants so the
+    # resulting function is JIT-safe.
+    if cfg.physics.lambda_logistic > 0.0:
+        loss_fn = _make_loss_fn_with_physics(
+            cfg.physics, od_index=int(od_index), horizon_hours=float(horizon_hours),
+        )
+    else:
+        loss_fn = _loss_fn
+
     # --- JIT'd train step
     @eqx.filter_jit
     def train_step(
@@ -148,7 +212,7 @@ def train_one_qlnn(
         t_b: jnp.ndarray,
         y_b: jnp.ndarray,
     ) -> tuple[eqx.Module, optax.OptState, jnp.ndarray]:
-        loss, grads = eqx.filter_value_and_grad(_loss_fn)(model, x_b, t_b, y_b)
+        loss, grads = eqx.filter_value_and_grad(loss_fn)(model, x_b, t_b, y_b)
         updates, opt_state = opt.update(grads, opt_state, eqx.filter(model, eqx.is_array))
         model = eqx.apply_updates(model, updates)
         return model, opt_state, loss

@@ -32,6 +32,21 @@ def _fmt(mean: float, std: float, *, sig: int = 4) -> str:
     return f"{mean:.{sig}f} ± {std:.{sig}f}"
 
 
+def _fmt_ci(field: dict, *, sig: int = 4) -> str:
+    """Format ``mean ± ci95_half_width`` (preferred), falling back to ``mean ± std``.
+
+    seeds_summary.json gained ``ci95_half_width`` once aggregate_seed_metrics
+    started emitting the t-distribution CI alongside std (R3 Tier 2.2). Older
+    JSONs lack that field — fall back to std so this script keeps reading
+    legacy runs.
+    """
+    mean = field["mean"]
+    hw = field.get("ci95_half_width")
+    if hw is None or (isinstance(hw, float) and (hw != hw)):  # None or NaN
+        return f"{mean:.{sig}f} ± {field['std']:.{sig}f}"
+    return f"{mean:.{sig}f} ± {hw:.{sig}f}"
+
+
 _SEED_DIR_RE = re.compile(r"^seed_(-?\d+)$")
 
 
@@ -170,12 +185,15 @@ def main() -> None:
         per_seed_rows.extend(_collect_per_seed_rows(run_dir, label))
         rows.append({
             "model": label,
-            "val_mae": _fmt(s["val"]["mae_raw"]["mean"], s["val"]["mae_raw"]["std"]),
-            "val_rmse": _fmt(s["val"]["rmse_raw"]["mean"], s["val"]["rmse_raw"]["std"]),
-            "val_r2": _fmt(s["val"]["r2_raw"]["mean"], s["val"]["r2_raw"]["std"]),
-            "test_mae": _fmt(s["test"]["mae_raw"]["mean"], s["test"]["mae_raw"]["std"]),
-            "test_rmse": _fmt(s["test"]["rmse_raw"]["mean"], s["test"]["rmse_raw"]["std"]),
-            "test_r2": _fmt(s["test"]["r2_raw"]["mean"], s["test"]["r2_raw"]["std"]),
+            # Prefer 95% t-CI half-width (R3 Tier 2.2). Falls back to bare std
+            # silently for legacy seeds_summary.json files that pre-date the
+            # CI-emitting aggregator.
+            "val_mae": _fmt_ci(s["val"]["mae_raw"]),
+            "val_rmse": _fmt_ci(s["val"]["rmse_raw"]),
+            "val_r2": _fmt_ci(s["val"]["r2_raw"]),
+            "test_mae": _fmt_ci(s["test"]["mae_raw"]),
+            "test_rmse": _fmt_ci(s["test"]["rmse_raw"]),
+            "test_r2": _fmt_ci(s["test"]["r2_raw"]),
             "n_seeds": str(s["n_seeds"]),
         })
 
@@ -185,7 +203,12 @@ def main() -> None:
     md_lines.append("")
     md_lines.append("Dataset: qZETA bioreactor (778 rows). Splits: train=70%, val=15%, test=15% (chronological).")
     md_lines.append("Window: 24 steps, horizon: 1 h. OD scaling: fixed MinMax [0.0, 3.8].")
-    md_lines.append("Metrics in raw OD units (MAE/RMSE) or unitless (R²). Mean ± std across seeds.")
+    md_lines.append(
+        "Metrics in raw OD units (MAE/RMSE) or unitless (R²). "
+        "Mean ± 95% t-CI half-width across seeds (legacy runs without CI metadata "
+        "fall back to mean ± std). For head-to-head significance, see the "
+        "paired-bootstrap reports under `results/paired_comparison_*`."
+    )
     md_lines.append("")
     md_lines.append("| Model | val MAE | val RMSE | val R² | test MAE | test RMSE | test R² | seeds |")
     md_lines.append("|---|---|---|---|---|---|---|---|")

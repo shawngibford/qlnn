@@ -29,6 +29,7 @@ import yaml
 from qlnn_ import (
     QLNNForecaster,
     QLNNForecasterConfig,
+    QLNNPhysicsLossConfig,
     QLNNTrainerConfig,
     history_to_dicts,
     train_one_qlnn,
@@ -283,6 +284,12 @@ def main() -> None:
     od_index = feature_cols.index(target_col)
 
     model_cfg = cfg["model"]
+    physics_cfg_raw = cfg.get("physics", {}) or {}
+    physics_cfg = QLNNPhysicsLossConfig(
+        lambda_logistic=float(physics_cfg_raw.get("lambda_logistic", 0.0)),
+        mu_norm=float(physics_cfg_raw.get("mu_norm", 0.4)),
+        K_norm=float(physics_cfg_raw.get("K_norm", 1.0)),
+    )
     trainer_cfg = QLNNTrainerConfig(
         epochs=int(cfg["training"]["epochs"]),
         batch_size=int(cfg["training"]["batch_size"]),
@@ -291,7 +298,13 @@ def main() -> None:
         eval_every=int(cfg["training"]["eval_every"]),
         patience=int(cfg["training"]["patience"]),
         grad_clip_norm=float(cfg["training"]["grad_clip_norm"]),
+        physics=physics_cfg,
     )
+    if physics_cfg.lambda_logistic > 0:
+        log(
+            f"physics ON | lambda_logistic={physics_cfg.lambda_logistic} "
+            f"mu={physics_cfg.mu_norm} K={physics_cfg.K_norm}"
+        )
 
     val_metrics_all = []
     test_metrics_all = []
@@ -327,6 +340,8 @@ def main() -> None:
             cfg=trainer_cfg,
             seed=seed,
             log_fn=log,
+            od_index=od_index,
+            horizon_hours=horizon_hours,
         )
 
         # Re-evaluate the best model with raw-space clipping of predictions
@@ -368,6 +383,20 @@ def main() -> None:
         )
         pd.DataFrame(history_to_dicts(result.history)).to_csv(seed_dir / "history.csv", index=False)
         eqx.tree_serialise_leaves(seed_dir / "best_model.eqx", result.model)
+
+        # Per-window predictions (val + test) for downstream paired-bootstrap
+        # analyses (Phase-C statistical-rigor work). Same schema as
+        # train_baseline.py so scripts/run_paired_comparison.py can pair
+        # QLNN vs classical without special-casing the stack.
+        np.savez(
+            seed_dir / "predictions.npz",
+            val_y_true_norm=w_val.y.astype(np.float32),
+            val_y_pred_norm=val_pred_clipped.astype(np.float32),
+            val_od_last_norm=w_val.od_last.astype(np.float32),
+            test_y_true_norm=w_test.y.astype(np.float32),
+            test_y_pred_norm=test_pred_clipped.astype(np.float32),
+            test_od_last_norm=w_test.od_last.astype(np.float32),
+        )
 
         val_metrics_all.append(result.val_metrics)
         test_metrics_all.append(result.test_metrics)

@@ -10,6 +10,7 @@ from quantum_liquid_neuralode.evaluation import (
     compute_metrics,
     linear_extrapolation_forecast,
     persistence_forecast,
+    t_confidence_interval,
 )
 from quantum_liquid_neuralode.evaluation.metrics import (
     ForecastMetrics,
@@ -286,6 +287,64 @@ def test_clip_predictions_norm_handles_train_only_scaler():
     y2 = np.array([-1.0, -0.1, 0.0], dtype=np.float32)
     out2 = clip_predictions_norm(y2, sc, clip_raw_max=3.8, clip_raw_min=0.0)
     np.testing.assert_allclose(out2, np.array([0.0, 0.0, 0.0], dtype=np.float32))
+
+
+# ---------------------------------------------------------------------------
+# t_confidence_interval — R3 Tier 2.2.
+# ---------------------------------------------------------------------------
+def test_t_ci_basic():
+    """For [1,2,3,4,5]: mean=3, sample std=sqrt(2.5), n=5, df=4.
+    Critical t(0.025, df=4) ~= 2.776 -> half_width ~= 2.776 * sqrt(2.5)/sqrt(5)
+    ~= 2.776 * 0.7071 ~= 1.9633."""
+    mean, hw, df = t_confidence_interval([1, 2, 3, 4, 5], alpha=0.05)
+    assert mean == pytest.approx(3.0)
+    assert df == 4
+    assert hw == pytest.approx(1.9633, abs=1e-3)
+
+
+def test_t_ci_n1_returns_nan():
+    mean, hw, df = t_confidence_interval([0.42])
+    assert mean == pytest.approx(0.42)
+    assert np.isnan(hw)
+    assert df == 0
+
+
+def test_t_ci_empty_returns_nan():
+    mean, hw, df = t_confidence_interval([])
+    assert np.isnan(mean)
+    assert np.isnan(hw)
+    assert df == 0
+
+
+def test_aggregate_seed_metrics_emits_ci95():
+    """The aggregator must surface CI fields alongside std (back-compat).
+
+    For [0.9, 1.0, 1.1] across 3 seeds: sample std = 0.1, n=3, df=2,
+    t(0.025, df=2) ~= 4.303 -> half_width ~= 4.303 * 0.1/sqrt(3) ~= 0.2484.
+    """
+    ms = [
+        ForecastMetrics(mse_norm=0.9, mae_raw=0.9, rmse_raw=0.9, r2_raw=0.9),
+        ForecastMetrics(mse_norm=1.0, mae_raw=1.0, rmse_raw=1.0, r2_raw=1.0),
+        ForecastMetrics(mse_norm=1.1, mae_raw=1.1, rmse_raw=1.1, r2_raw=1.1),
+    ]
+    agg = aggregate_seed_metrics(ms)
+    for field in ("mse_norm", "mae_raw", "rmse_raw", "r2_raw"):
+        # Original fields preserved.
+        assert agg[field]["mean"] == pytest.approx(1.0)
+        assert agg[field]["std"] == pytest.approx(0.1, abs=1e-9)
+        # New CI fields populated.
+        assert agg[field]["ci95_half_width"] == pytest.approx(0.2484, abs=1e-3)
+        assert agg[field]["ci95_low"] == pytest.approx(1.0 - 0.2484, abs=1e-3)
+        assert agg[field]["ci95_high"] == pytest.approx(1.0 + 0.2484, abs=1e-3)
+
+
+def test_aggregate_seed_metrics_ci_nan_for_single_seed():
+    ms = [ForecastMetrics(mse_norm=0.5, mae_raw=0.5, rmse_raw=0.5, r2_raw=0.5)]
+    agg = aggregate_seed_metrics(ms)
+    for field in ("mse_norm", "mae_raw", "rmse_raw", "r2_raw"):
+        assert np.isnan(agg[field]["ci95_half_width"])
+        assert np.isnan(agg[field]["ci95_low"])
+        assert np.isnan(agg[field]["ci95_high"])
 
 
 def test_clip_predictions_norm_metric_impact_via_compute_metrics():

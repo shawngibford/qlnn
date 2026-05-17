@@ -53,4 +53,12 @@ training:
   patience: 6
   grad_clip_norm: 1.0
 
-seeds: [0, 1, 2]
+# Physics off in the headline h=3 config — see qlnn_hybrid_h3_physics.yaml for
+# the symmetric +physics ablation at this horizon.
+physics:
+  lambda_logistic: 0.0
+  mu_norm: 0.4
+  K_norm: 1.0
+
+# n=5 seeds (R3 finding 2.2).
+seeds: [0, 1, 2, 3, 4]

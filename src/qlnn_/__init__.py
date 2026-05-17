@@ -20,6 +20,7 @@ from .encoders.quantum_feature_encoder import (
 )
 from .cells.liquid_quantum_cell import LiquidQuantumCell, LiquidQuantumCellConfig
 from .models.qlnn_forecaster import QLNNForecaster, QLNNForecasterConfig
+from .training.losses import QLNNPhysicsLossConfig
 from .training.trainer import (
     QLNNTrainerConfig,
     HistoryRow,
@@ -43,6 +44,7 @@ __all__ = [
     "QLNNForecasterConfig",
     # training
     "QLNNTrainerConfig",
+    "QLNNPhysicsLossConfig",
     "HistoryRow",
     "QLNNTrainResult",
     "train_one_qlnn",

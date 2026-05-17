@@ -458,6 +458,20 @@ def main() -> None:
         pd.DataFrame(history_to_dicts(result.history)).to_csv(seed_dir / "history.csv", index=False)
         torch.save(result.model_state, seed_dir / "best_state.pt")
 
+        # Per-window predictions (val + test) for downstream paired-bootstrap
+        # analyses (Phase-C statistical-rigor work). `od_last_norm` lets the
+        # bootstrap script reconstruct the persistence baseline without
+        # rerunning anything. (R3 Tier 2.2.)
+        np.savez(
+            seed_dir / "predictions.npz",
+            val_y_true_norm=w_val.y.astype(np.float32),
+            val_y_pred_norm=val_pred_clipped.astype(np.float32),
+            val_od_last_norm=w_val.od_last.astype(np.float32),
+            test_y_true_norm=w_test.y.astype(np.float32),
+            test_y_pred_norm=test_pred_clipped.astype(np.float32),
+            test_od_last_norm=w_test.od_last.astype(np.float32),
+        )
+
         val_metrics_all.append(result.val_metrics)
         test_metrics_all.append(result.test_metrics)
 

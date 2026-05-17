@@ -16,6 +16,7 @@ from sklearn.preprocessing import MinMaxScaler
 
 from qlnn_.training import (
     HistoryRow,
+    QLNNPhysicsLossConfig,
     QLNNTrainerConfig,
     QLNNTrainResult,
     history_to_dicts,
@@ -363,6 +364,45 @@ def test_grad_clipping_runs():
     first_val = res.history[0].val_mse_norm
     last_val = res.history[-1].val_mse_norm
     assert last_val < first_val, f"val MSE did not improve with clipping: {first_val} -> {last_val}"
+
+
+def test_train_with_physics_does_not_crash():
+    """Physics-on training path (lambda_logistic>0) produces finite metrics.
+
+    Verifies the JAX physics term is wired through end-to-end: the JIT'd train
+    step compiles with the closed-over od_index/horizon_hours, gradients flow
+    through the 2-point logistic-growth residual, and the run completes with
+    finite val/test ForecastMetrics. This is the smoke-test for R3 finding 2.5.
+    """
+    N, T, F = 24, 5, 3
+    x, t, y = _make_dataset(N, T, F, seed=11, target="noisy_persistence")
+    splits = _split(x, t, y, n_train=14, n_val=5)
+
+    model = TinyForecastModel(F=F, key=jax.random.PRNGKey(11))
+    cfg = QLNNTrainerConfig(
+        epochs=2,
+        batch_size=4,
+        eval_every=1,
+        patience=5,
+        physics=QLNNPhysicsLossConfig(lambda_logistic=0.1, mu_norm=0.4, K_norm=1.0),
+    )
+    res = train_one_qlnn(
+        model=model,
+        x_train=splits[0], t_train=splits[1], y_train=splits[2],
+        x_val=splits[3], t_val=splits[4], y_val=splits[5],
+        x_test=splits[6], t_test=splits[7], y_test=splits[8],
+        od_scaler=_make_od_scaler(),
+        cfg=cfg,
+        seed=11,
+        od_index=0,        # OD lives at column 0 in our synthetic features.
+        horizon_hours=1.0,
+    )
+    assert len(res.history) >= 1
+    for m in (res.val_metrics, res.test_metrics):
+        assert np.isfinite(m.mse_norm)
+        assert np.isfinite(m.mae_raw)
+        assert np.isfinite(m.rmse_raw)
+        assert np.isfinite(m.r2_raw)
 
 
 def test_eval_every_and_patience_early_stops():

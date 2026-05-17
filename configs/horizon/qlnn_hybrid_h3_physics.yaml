@@ -1,0 +1,54 @@
+# Horizon ablation — h=3h, QLNN hybrid + physics. Symmetric to
+# configs/horizon/qlnn_hybrid_h3.yaml with the logistic-growth residual
+# regularizer turned on (lambda=0.1), matching the classical +physics weight.
+#
+# This is the +physics counterpart at the discriminating regime per Phase B
+# (R3 finding 2.5 + R3 finding 0.2: at h=3 persistence's R² drops enough for
+# the comparison to have real headroom).
+
+data:
+  csv_path: data/raw/qZETA_data_copy.csv
+  feature_cols: [OD, PRE, TEMP_EXT, TEMP_CULTURE, PAR_LIGHT, PH, DO]
+  target_col: OD
+  od_min: 0.0
+  od_max: null
+  od_phys_max: 3.8
+
+windows:
+  window_size: 24
+  stride: 1
+  horizon_hours: 3.0
+  horizon_tol_hours: 0.0835
+
+split:
+  train_ratio: 0.70
+  val_ratio: 0.15
+
+model:
+  num_qubits: 4
+  num_layers: 3
+  delta_scale: 0.1
+  tau_min: 0.1
+  tau_init: 1.0
+  init_head_std: 0.1
+  solver: tsit5
+  rtol: 0.001
+  atol: 0.0001
+  dt0: 0.05
+  max_steps: 12288
+
+training:
+  epochs: 60
+  batch_size: 32
+  lr: 0.002
+  weight_decay: 0.0
+  eval_every: 5
+  patience: 6
+  grad_clip_norm: 1.0
+
+physics:
+  lambda_logistic: 0.1
+  mu_norm: 0.4
+  K_norm: 1.0
+
+seeds: [0, 1, 2, 3, 4]

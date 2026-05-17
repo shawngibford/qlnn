@@ -1,12 +1,61 @@
 from __future__ import annotations
 
+import math
 import warnings
 from dataclasses import dataclass, fields
 from typing import Any, Optional
 
 import numpy as np
+from scipy import stats as _scipy_stats
 from sklearn.metrics import r2_score
 from sklearn.preprocessing import MinMaxScaler
+
+
+def t_confidence_interval(
+    values, *, alpha: float = 0.05
+) -> tuple[float, float, int]:
+    """Compute (mean, half_width, df) for a t-distribution CI on a 1D sample.
+
+    Reports a two-sided 100*(1-alpha)% confidence interval for the mean of a
+    finite sample assuming approximate normality (or applicability of the
+    Student-t distribution for small n). This is the standard convention for
+    reporting "mean ± CI" in scientific papers when the population variance
+    is unknown and n is small (per e.g. NIST/SEMATECH e-Handbook §1.3.6.7.2,
+    Efron & Tibshirani 1993 §12.5).
+
+    Formula::
+
+        half_width = t_crit(alpha/2, df=n-1) * std(ddof=1) / sqrt(n)
+
+    Args:
+        values: 1D array-like sample (need not be a numpy array).
+        alpha: significance level. Default 0.05 -> 95% CI.
+
+    Returns:
+        Tuple ``(mean, half_width, df)``:
+          - ``mean``: the sample mean (NaN if n=0).
+          - ``half_width``: t_crit * sample_std / sqrt(n). Undefined for n<2;
+            we return NaN in that case.
+          - ``df``: n - 1 (degrees of freedom). 0 when n<=1.
+
+    Notes:
+      - Uses ``scipy.stats.t.ppf(1 - alpha/2, df=n-1)`` for the critical value.
+      - Sample std uses Bessel's correction (ddof=1), matching the rest of
+        this module (R1-B3 fix).
+    """
+    arr = np.asarray(values, dtype=np.float64).reshape(-1)
+    n = arr.size
+    if n == 0:
+        return (float("nan"), float("nan"), 0)
+    mean = float(arr.mean())
+    if n < 2:
+        # CI undefined for n=1: no degrees of freedom for the variance estimate.
+        return (mean, float("nan"), 0)
+    df = n - 1
+    sample_std = float(arr.std(ddof=1))
+    t_crit = float(_scipy_stats.t.ppf(1.0 - alpha / 2.0, df=df))
+    half_width = t_crit * sample_std / math.sqrt(n)
+    return (mean, half_width, df)
 
 
 @dataclass(frozen=True)
@@ -186,12 +235,26 @@ def aggregate_seed_metrics(metrics_list: list[ForecastMetrics]) -> dict[str, dic
         # population std and underestimates by a factor sqrt(n/(n-1)) for
         # small n (e.g. ~12% too small at n=5).
         std_val = float(vals.std(ddof=1)) if vals.size > 1 else float("nan")
+        # 95% t-CI half-width on the mean. Reported alongside std so the paper
+        # table can switch from bare-std error bars to proper CIs without
+        # breaking back-compat for callers that only consume mean/std/min/max.
+        # (R3 Tier 2.2 — reviewer asked for CI-based reporting instead of std.)
+        mean_val, ci95_hw, _df = t_confidence_interval(vals, alpha=0.05)
+        if math.isnan(ci95_hw):
+            ci95_low = float("nan")
+            ci95_high = float("nan")
+        else:
+            ci95_low = mean_val - ci95_hw
+            ci95_high = mean_val + ci95_hw
         out[f] = {
             "mean": float(vals.mean()),
             "std": std_val,
             "min": float(vals.min()),
             "max": float(vals.max()),
             "n_seeds": int(vals.size),
+            "ci95_half_width": ci95_hw,
+            "ci95_low": ci95_low,
+            "ci95_high": ci95_high,
         }
     return out
 

@@ -50,7 +50,15 @@ training:
   patience: 6
   grad_clip_norm: 1.0
 
-# Fewer seeds than the classical baseline because each seed takes substantially
-# longer (Diffrax + PennyLane circuit per step). Three seeds still give a
-# mean ± std for the paper table; can be scaled up after the first end-to-end.
-seeds: [0, 1, 2]
+# Physics regularizer — off in the headline config. The qlnn_hybrid_physics.yaml
+# sibling sets lambda_logistic > 0 for the symmetric +physics ablation row
+# (R3 finding 2.5).
+physics:
+  lambda_logistic: 0.0
+  mu_norm: 0.4
+  K_norm: 1.0
+
+# n=5 seeds to match the classical baseline (R3 finding 2.2: CI half-width
+# wider than effect size at n=3). Quantum training is slower per seed, so this
+# config will take ~5/3x the previous wall time; budget accordingly.
+seeds: [0, 1, 2, 3, 4]
