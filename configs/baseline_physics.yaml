@@ -14,8 +14,10 @@ data:
   csv_path: data/raw/qZETA_data_copy.csv
   feature_cols: [OD, PRE, TEMP_EXT, TEMP_CULTURE, PAR_LIGHT, PH, DO]
   target_col: OD
+  # Train-only OD scaler (R3 finding 6). Set `od_max` to a number to revert.
   od_min: 0.0
-  od_max: 3.8
+  od_max: null
+  od_phys_max: 3.8
 
 windows:
   window_size: 24

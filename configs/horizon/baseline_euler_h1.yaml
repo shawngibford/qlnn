@@ -1,14 +1,24 @@
-# Fast variant — same protocol, swaps dopri5 for Euler (matches the original
-# script). Useful for sanity-checking pipelines / smoke tests on MPS without
-# torchdiffeq overhead. Headline numbers in the paper come from baseline.yaml.
+# Horizon ablation — h=1h (Liquid-ODE, Euler).
+#
+# Identical to configs/baseline_euler_fast.yaml; included in the horizon/ set
+# so the run_horizon_sweep.sh driver is symmetric across horizons.
+#
+# Window inventory (computed at sweep build time, stride=1, window_size=24):
+#   train=500  val=88  test=86
+#
+# dt note: the qZETA grid is regular (776/777 dt values = 0.1667 h). One ~1.17 h
+# gap is the only irregularity. For h=1 the tight horizon_tol_hours=0.001 used
+# in the headline baseline is fine — no windows are dropped relative to a
+# loose tolerance.
 
 data:
   csv_path: data/raw/qZETA_data_copy.csv
   feature_cols: [OD, PRE, TEMP_EXT, TEMP_CULTURE, PAR_LIGHT, PH, DO]
   target_col: OD
-  # Train-only OD scaler (R3 finding 6). Set `od_max` to a number to revert.
   od_min: 0.0
-  od_max: null
+  od_max: null  # train-only OD (R3 leak fix)
+
+
   od_phys_max: 3.8
 
 windows:

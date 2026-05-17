@@ -63,6 +63,81 @@ from quantum_liquid_neuralode.utils import select_device, write_provenance
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
+# ---------------------------------------------------------------------------
+# Prediction clipping (R3 finding 6 follow-up).
+#
+# The OD scaler is now fit on the training slice only — closing the
+# soft-leakage of the test-set max (~3.8) into the scaler. With train-only
+# fitting the model can technically emit normalized OD > 1 when test OD
+# exceeds the training-segment max. Predictions are still allowed in the
+# whole real line and inverse-transform faithfully, but for evaluation we
+# clip to the strain's physical OD range [0, od_phys_max] (a legitimate
+# domain prior, separate from the scaler-fit data). Clipping is applied
+# in *raw* space and mapped back to normalized space so it composes
+# cleanly with the existing normalized-space metric (mse_norm) and the
+# raw-space metrics (mae_raw, rmse_raw, r2_raw).
+#
+# Inlined here rather than living in a shared utility because two
+# concurrent training scripts (train_baseline.py, train_qlnn.py) each
+# own their own copy until a common helper module is introduced. TODO:
+# factor into quantum_liquid_neuralode.evaluation once the metrics-module
+# coordination settles.
+# ---------------------------------------------------------------------------
+def clip_predictions_norm(
+    y_pred_norm: np.ndarray,
+    od_scaler,
+    *,
+    clip_raw_max: float | None,
+    clip_raw_min: float = 0.0,
+) -> np.ndarray:
+    """Clip normalized predictions to a physically reasonable raw-OD range.
+
+    Args:
+        y_pred_norm: array of normalized predictions (the model's raw output).
+        od_scaler: the (already-fit) MinMaxScaler used for OD.
+        clip_raw_max: upper bound in raw OD units (e.g. 3.8 from strain spec).
+            If None, no clipping is applied (returns y_pred_norm unchanged).
+        clip_raw_min: lower bound in raw OD units (default 0.0 — OD is
+            non-negative).
+
+    Returns:
+        Array same shape as y_pred_norm, clipped to the normalized image of
+        [clip_raw_min, clip_raw_max].
+    """
+    if clip_raw_max is None:
+        return y_pred_norm
+    bounds_raw = np.array([[float(clip_raw_min)], [float(clip_raw_max)]], dtype=np.float64)
+    bounds_norm = od_scaler.transform(bounds_raw).reshape(-1)
+    lo, hi = float(bounds_norm[0]), float(bounds_norm[1])
+    return np.clip(y_pred_norm, lo, hi)
+
+
+def _predict_norm_with_clip(
+    model: torch.nn.Module,
+    x: np.ndarray,
+    t: np.ndarray,
+    *,
+    device: torch.device,
+    batch_size: int,
+    od_scaler,
+    clip_raw_max: float | None,
+) -> np.ndarray:
+    """Run the model in eval mode and return clipped normalized predictions."""
+    model.eval()
+    preds: list[np.ndarray] = []
+    n = x.shape[0]
+    with torch.no_grad():
+        for i in range(0, n, batch_size):
+            xb = torch.from_numpy(x[i : i + batch_size]).to(device)
+            tb = torch.from_numpy(t[i : i + batch_size].astype(np.float32)).to(device)
+            yp = model(xb, tb).detach().cpu().numpy()
+            preds.append(yp)
+    y_pred_norm = np.concatenate(preds, axis=0)
+    return clip_predictions_norm(
+        y_pred_norm, od_scaler, clip_raw_max=clip_raw_max
+    )
+
+
 def _load_config(path: Path) -> dict[str, Any]:
     with path.open("r") as f:
         return yaml.safe_load(f)
@@ -159,10 +234,23 @@ def main() -> None:
     cols_to_scale = list(dict.fromkeys(feature_cols + [target_col]))
     fixed_bounds: dict[str, tuple[float, float]] = {}
     if cfg["data"].get("od_max") is not None:
-        fixed_bounds[target_col] = (float(cfg["data"]["od_min"]), float(cfg["data"]["od_max"]))
+        # Legacy fixed-bounds mode (sensitivity comparator). With od_max=null
+        # in the YAML, this branch is skipped and fit_minmax falls back to
+        # train-only fitting for OD (R3 finding 6: close test-set leakage).
+        od_min_cfg = cfg["data"].get("od_min", 0.0)
+        fixed_bounds[target_col] = (float(od_min_cfg), float(cfg["data"]["od_max"]))
 
     scalers = fit_minmax(df, cols_to_scale, fit_end=split.train_end, fixed_bounds=fixed_bounds)
     df_n = apply_minmax(df, cols_to_scale, scalers)
+    od_scaler = scalers[target_col]
+    # Record the actual fitted scaler bounds (post-fit), independent of the
+    # YAML — this is what's in effect for the run.
+    od_data_min = float(od_scaler.data_min_[0])
+    od_data_max = float(od_scaler.data_max_[0])
+    od_scaler_mode = "fixed" if cfg["data"].get("od_max") is not None else "train_only"
+    clip_raw_max = cfg["data"].get("od_phys_max", None)
+    if clip_raw_max is not None:
+        clip_raw_max = float(clip_raw_max)
 
     win = cfg["windows"]
     common_kwargs = dict(
@@ -191,15 +279,27 @@ def main() -> None:
         "horizon_hours": horizon_hours,
         "window_size": int(win["window_size"]),
         "stride": int(win["stride"]),
-        "od_min": float(cfg["data"]["od_min"]),
-        "od_max": float(cfg["data"]["od_max"]),
+        # OD scaler bookkeeping. `od_scaler_mode`:
+        #   - "train_only": OD MinMax fit on the training slice (R3 fix);
+        #     `od_data_min`/`od_data_max` are the actual fitted bounds.
+        #   - "fixed": OD MinMax pinned to the YAML's [od_min, od_max] (legacy
+        #     domain-prior comparator); `od_data_min`/`od_data_max` echo those.
+        "od_scaler_mode": od_scaler_mode,
+        "od_data_min": od_data_min,
+        "od_data_max": od_data_max,
+        # Domain prior used to clip predictions in raw OD space at eval time.
+        # Independent of the scaler fit — captures the strain's physical OD
+        # max. None disables clipping.
+        "od_phys_max": clip_raw_max,
+        # Legacy fields (kept for back-compat with downstream summaries).
+        "od_min": od_data_min,
+        "od_max": od_data_max,
         "feature_cols": feature_cols,
         "target_col": target_col,
     }
     (output_dir / "protocol.json").write_text(json.dumps(protocol, indent=2) + "\n")
 
     # ---- Baselines (deterministic, no training) ----
-    od_scaler = scalers[target_col]
     persist_val_pred = persistence_forecast(w_val.od_last)
     persist_test_pred = persistence_forecast(w_test.od_last)
     linear_val_pred = linear_extrapolation_forecast(
@@ -209,14 +309,21 @@ def main() -> None:
         od_last=w_test.od_last, od_prev=w_test.od_prev, dt_last_hours=w_test.dt_last, horizon_hours=horizon_hours
     )
 
+    # Clip baseline predictions with the same domain-prior the trained
+    # models will be clipped against — apples-to-apples comparison.
+    persist_val_pred_c = clip_predictions_norm(persist_val_pred, od_scaler, clip_raw_max=clip_raw_max)
+    persist_test_pred_c = clip_predictions_norm(persist_test_pred, od_scaler, clip_raw_max=clip_raw_max)
+    linear_val_pred_c = clip_predictions_norm(linear_val_pred, od_scaler, clip_raw_max=clip_raw_max)
+    linear_test_pred_c = clip_predictions_norm(linear_test_pred, od_scaler, clip_raw_max=clip_raw_max)
+
     baselines_record = {
         "persistence": {
-            "val": compute_metrics(y_true_norm=w_val.y, y_pred_norm=persist_val_pred, od_scaler=od_scaler).to_dict(),
-            "test": compute_metrics(y_true_norm=w_test.y, y_pred_norm=persist_test_pred, od_scaler=od_scaler).to_dict(),
+            "val": compute_metrics(y_true_norm=w_val.y, y_pred_norm=persist_val_pred_c, od_scaler=od_scaler, od_last_norm=w_val.od_last).to_dict(),
+            "test": compute_metrics(y_true_norm=w_test.y, y_pred_norm=persist_test_pred_c, od_scaler=od_scaler, od_last_norm=w_test.od_last).to_dict(),
         },
         "linear": {
-            "val": compute_metrics(y_true_norm=w_val.y, y_pred_norm=linear_val_pred, od_scaler=od_scaler).to_dict(),
-            "test": compute_metrics(y_true_norm=w_test.y, y_pred_norm=linear_test_pred, od_scaler=od_scaler).to_dict(),
+            "val": compute_metrics(y_true_norm=w_val.y, y_pred_norm=linear_val_pred_c, od_scaler=od_scaler, od_last_norm=w_val.od_last).to_dict(),
+            "test": compute_metrics(y_true_norm=w_test.y, y_pred_norm=linear_test_pred_c, od_scaler=od_scaler, od_last_norm=w_test.od_last).to_dict(),
         },
     }
     (output_dir / "baselines.json").write_text(json.dumps(baselines_record, indent=2) + "\n")
@@ -298,12 +405,49 @@ def main() -> None:
             log_fn=log,
         )
 
+        # Re-evaluate the best model with raw-space clipping of predictions to
+        # the strain's physical OD range (R3 finding 6 follow-up). Done here in
+        # the script — rather than inside train_one — so that the trainer's
+        # selection-time metrics (which drive early stopping) are unchanged
+        # and only the reported / aggregated numbers reflect the clip.
+        model.load_state_dict(result.model_state)
+        model.to(device)
+        val_pred_clipped = _predict_norm_with_clip(
+            model, w_val.x, w_val.t,
+            device=device, batch_size=trainer_cfg.batch_size,
+            od_scaler=od_scaler, clip_raw_max=clip_raw_max,
+        )
+        test_pred_clipped = _predict_norm_with_clip(
+            model, w_test.x, w_test.t,
+            device=device, batch_size=trainer_cfg.batch_size,
+            od_scaler=od_scaler, clip_raw_max=clip_raw_max,
+        )
+        # Pass od_last_norm so compute_metrics also reports delta_* fields
+        # (R3 ΔOD-reporting fix). Persistence has delta_r2_raw < 0 by
+        # construction; trained models should show delta_r2_raw > 0 if they
+        # actually capture OD-change signal.
+        result.val_metrics = compute_metrics(
+            y_true_norm=w_val.y, y_pred_norm=val_pred_clipped, od_scaler=od_scaler,
+            od_last_norm=w_val.od_last,
+        )
+        result.test_metrics = compute_metrics(
+            y_true_norm=w_test.y, y_pred_norm=test_pred_clipped, od_scaler=od_scaler,
+            od_last_norm=w_test.od_last,
+        )
+
+        # `delta_scale` is now a learnable scalar (softplus + floor). Log the
+        # value the best checkpoint converged to so the paper / sweeps can see
+        # whether the model grew or shrank the delta-headroom relative to its
+        # init (Phase-B finding: the old fixed delta_scale=0.1 was a cap).
+        delta_scale_learned = float(model.delta_scale().detach().cpu().item())
+
         seed_dir = output_dir / f"seed_{seed}"
         seed_dir.mkdir(parents=True, exist_ok=True)
         (seed_dir / "metrics.json").write_text(
             json.dumps(
                 {
                     "best_epoch": int(result.best_epoch),
+                    "delta_scale_learned": delta_scale_learned,
                     "val": result.val_metrics.to_dict(),
                     "test": result.test_metrics.to_dict(),
                 },

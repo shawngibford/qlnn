@@ -1,0 +1,55 @@
+# Horizon ablation — h=6h (QLNN hybrid).
+#
+# At 6 h persistence drops well below the 1h R² ≈ 0.91 floor; this is the
+# row where a structural QLNN advantage (if it exists) should appear.
+#
+# Wall-clock note: each QLNN seed integrates the quantum vector field over
+# 6 h per forecast — roughly 6x the per-window cost of h=1. With 3 seeds
+# this run is the longest single config in the sweep.
+#
+# Window inventory (stride=1, window_size=24, horizon_tol_hours=0.0835):
+#   train=436  val=58  test=53
+
+data:
+  csv_path: data/raw/qZETA_data_copy.csv
+  feature_cols: [OD, PRE, TEMP_EXT, TEMP_CULTURE, PAR_LIGHT, PH, DO]
+  target_col: OD
+  od_min: 0.0
+  od_max: null  # train-only OD (R3 leak fix)
+
+
+  od_phys_max: 3.8
+
+windows:
+  window_size: 24
+  stride: 1
+  horizon_hours: 6.0
+  horizon_tol_hours: 0.0835
+
+split:
+  train_ratio: 0.70
+  val_ratio: 0.15
+
+model:
+  num_qubits: 4
+  num_layers: 3
+  delta_scale: 0.1
+  tau_min: 0.1
+  tau_init: 1.0
+  init_head_std: 0.1
+  solver: tsit5
+  rtol: 0.001
+  atol: 0.0001
+  dt0: 0.05
+  max_steps: 24576
+
+training:
+  epochs: 60
+  batch_size: 32
+  lr: 0.002
+  weight_decay: 0.0
+  eval_every: 5
+  patience: 6
+  grad_clip_norm: 1.0
+
+seeds: [0, 1, 2]

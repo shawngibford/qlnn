@@ -1,0 +1,52 @@
+# Sensitivity-analysis variant — same as baseline_euler_fast.yaml but with the
+# OD scaler locked to the legacy fixed bounds [0, 3.8] (the "domain prior"
+# comparator). Used together with the train-only-scaler variant by
+# scripts/compare_scaling.py to quantify the impact of closing R3 finding 6
+# (test-set leakage through the fixed OD max).
+#
+# Numbers from this run are NOT paper-table headline numbers; they exist only
+# to demonstrate that the train-only fix did not materially change results
+# (or, if it did, to report the corrected numbers and document the shift).
+
+data:
+  csv_path: data/raw/qZETA_data_copy.csv
+  feature_cols: [OD, PRE, TEMP_EXT, TEMP_CULTURE, PAR_LIGHT, PH, DO]
+  target_col: OD
+  # Legacy fixed-bounds mode (sensitivity analysis): the OD scaler is pinned
+  # to [0, 3.8] for all splits. This is the configuration that R3 flagged as
+  # soft leakage (the stationary-phase peak ~3.8 lives entirely in test).
+  od_min: 0.0
+  od_max: 3.8
+  od_phys_max: 3.8
+
+windows:
+  window_size: 24
+  stride: 1
+  horizon_hours: 1.0
+  horizon_tol_hours: 0.001
+
+split:
+  train_ratio: 0.70
+  val_ratio: 0.15
+
+model:
+  hidden_size: 32
+  tau_min: 0.1
+  forecast_steps: 4
+  delta_scale: 0.1
+  ode_method: euler
+
+training:
+  epochs: 300
+  batch_size: 64
+  lr: 0.0022379431100255152
+  weight_decay: 0.0000024028981322551868
+  eval_every: 10
+  patience: 10
+  grad_clip_norm: 1.0
+
+physics:
+  lambda_logistic: 0.0
+  lambda_smooth: 0.0
+
+seeds: [0, 1, 2, 3, 4]

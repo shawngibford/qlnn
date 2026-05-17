@@ -1,0 +1,58 @@
+# Horizon ablation — h=12h (QLNN hybrid). SUPPLEMENTARY ONLY.
+#
+# DO NOT run as part of the default sweep. At 12 h:
+#   * Per-window quantum integration is ~12x the h=1 cost (impractical for
+#     headline numbers without a JAX/PennyLane speed-up).
+#   * Test segment shrinks to 17 windows (val=22) — too few for stable
+#     mean ± std with n=3 seeds. Same caveat as baseline_euler_h12.yaml.
+#
+# Kept here for completeness and for the supplementary table if reviewers
+# specifically ask. The run_horizon_sweep.sh driver excludes this file by
+# default for both the classical and QLNN sweeps' QLNN portion.
+#
+# Window inventory (stride=1, window_size=24, horizon_tol_hours=0.0835):
+#   train=385  val=22  test=17       <-- supplementary only
+
+data:
+  csv_path: data/raw/qZETA_data_copy.csv
+  feature_cols: [OD, PRE, TEMP_EXT, TEMP_CULTURE, PAR_LIGHT, PH, DO]
+  target_col: OD
+  od_min: 0.0
+  od_max: null  # train-only OD (R3 leak fix)
+
+
+  od_phys_max: 3.8
+
+windows:
+  window_size: 24
+  stride: 1
+  horizon_hours: 12.0
+  horizon_tol_hours: 0.0835
+
+split:
+  train_ratio: 0.70
+  val_ratio: 0.15
+
+model:
+  num_qubits: 4
+  num_layers: 3
+  delta_scale: 0.1
+  tau_min: 0.1
+  tau_init: 1.0
+  init_head_std: 0.1
+  solver: tsit5
+  rtol: 0.001
+  atol: 0.0001
+  dt0: 0.05
+  max_steps: 49152
+
+training:
+  epochs: 60
+  batch_size: 32
+  lr: 0.002
+  weight_decay: 0.0
+  eval_every: 5
+  patience: 6
+  grad_clip_norm: 1.0
+
+seeds: [0, 1, 2]

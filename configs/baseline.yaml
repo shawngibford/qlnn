@@ -13,8 +13,17 @@ data:
   csv_path: data/raw/qZETA_data_copy.csv
   feature_cols: [OD, PRE, TEMP_EXT, TEMP_CULTURE, PAR_LIGHT, PH, DO]
   target_col: OD
+  # Train-only OD scaler (R3 finding 6: fixed [0, 3.8] leaked test-set max).
+  # Leave `od_max: null` (default) to fit the OD MinMax scaler on the training
+  # slice only. Set to a number (e.g. 3.8) to override with a fixed prior;
+  # see configs/baseline_euler_fixed_od.yaml for the sensitivity-analysis
+  # comparator. `od_min` is currently only used when `od_max` is non-null.
   od_min: 0.0
-  od_max: 3.8
+  od_max: null
+  # Domain prior on the strain's physical OD maximum (used to clip predictions
+  # at evaluation time only — independent of the scaler fit). Predictions are
+  # clipped to [0, od_phys_max] in raw OD space before metric computation.
+  od_phys_max: 3.8
 
 windows:
   window_size: 24

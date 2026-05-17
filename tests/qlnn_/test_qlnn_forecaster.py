@@ -72,11 +72,39 @@ def test_output_is_scalar():
 def test_residual_anchors_to_od_last_at_init():
     # With delta_scale = 1e-3 and untrained params, prediction must be
     # within delta_scale + a small slack of the persistence baseline.
-    m = _model(delta_scale=0.001)
+    # ``delta_scale_min`` must be < delta_scale_init for the softplus pre-image.
+    m = _model(delta_scale=0.001, delta_scale_min=1e-5)
     x, t = _sample()
     y = m(x, t)
     persistence = x[-1, OD_INDEX]
     assert float(jnp.abs(y - persistence)) < 0.0015
+
+
+def test_residual_init_round_trip_matches_request():
+    """At init, softplus(delta_scale_unconstrained) + min must equal the
+    requested delta_scale_init (within float32 rounding).
+    """
+    requested = 0.5
+    # Pass delta_scale=None to disable the legacy-alias override that the
+    # _cfg helper bakes in via its default `delta_scale=0.1`.
+    m = _model(delta_scale=None, delta_scale_init=requested)
+    val = float(m.delta_scale())
+    assert val == pytest.approx(requested, rel=1e-5, abs=1e-6)
+
+
+def test_delta_scale_is_learnable_leaf():
+    """The unconstrained delta-scale must be an array leaf and receive a
+    non-zero gradient during a backward pass."""
+    m = _model()
+    x, t = _sample()
+
+    def loss_fn(model, x, t):
+        return (model(x, t)) ** 2
+
+    grads = eqx.filter_grad(loss_fn)(m, x, t)
+    g = grads.delta_scale_unconstrained
+    assert g is not None
+    assert jnp.isfinite(g)
 
 
 # ----------------------------------------------------------------------

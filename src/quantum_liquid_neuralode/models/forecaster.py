@@ -1,10 +1,12 @@
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 from typing import Literal
 
 import torch
 from torch import Tensor, nn
+from torch.nn import functional as F
 
 from .liquid_cell import LiquidCell
 
@@ -19,12 +21,31 @@ class LiquidODForecasterConfig:
     horizon_hours: float
     forecast_steps: int  # used for fixed-step solvers (euler/rk4); ignored for dopri5
     od_index: int
-    delta_scale: float
+    # Initial value of the learnable delta-scale (raw OD units). The forecaster
+    # exposes ``delta_scale_init`` as the user-facing knob; the trained value
+    # is read back via ``model.delta_scale().item()``. ``delta_scale_min`` is
+    # the soft floor (softplus + min) preventing the parameter from collapsing
+    # to zero.
+    delta_scale_init: float = 1.0
+    delta_scale_min: float = 0.01
     tau_min: float = 0.1
     ode_method: ODEMethod = "euler"
     # torchdiffeq adaptive tolerances (only used when ode_method == "dopri5")
     rtol: float = 1e-3
     atol: float = 1e-4
+
+
+def _inv_softplus(y: float) -> float:
+    """Inverse of softplus: x such that log(1 + exp(x)) = y, for y > 0.
+
+    Used to initialize the unconstrained parameter so that
+    ``softplus(x) + min == delta_scale_init`` (when feasible).
+    """
+    if y <= 0:
+        raise ValueError(f"inverse softplus requires y > 0, got {y}")
+    # Numerically: log(expm1(y)) — stable for moderate y. For very large y the
+    # result is approximately y itself; for very small y it's log(y).
+    return float(math.log(math.expm1(y)))
 
 
 class _ConstantInputVectorField(nn.Module):
@@ -58,7 +79,15 @@ class LiquidODForecaster(nn.Module):
       preserves the asynchronous-sampling property of a true neural ODE).
     - Evolve h over the *forecast horizon* with the last observed input held
       constant.
-    - Predict a residual delta around persistence: OD(t+h) = OD(t) + tanh(.)*scale.
+    - Predict a residual delta around persistence:
+          OD(t+h) = OD(t) + tanh(delta_head(h)) * delta_scale
+      where ``delta_scale = softplus(delta_scale_unconstrained) + delta_scale_min``
+      is a LEARNABLE positive scalar. This removes the hard cap that previously
+      bottle-necked the model near persistence: with the old fixed
+      ``delta_scale=0.1`` the model could not represent 1-h deltas larger than
+      ±0.1 OD even though the log-phase regime exhibits larger jumps. The
+      softplus + floor parameterization lets the model expand its delta
+      headroom while staying strictly positive.
 
     ODE methods:
     - "euler"  — explicit Euler with `forecast_steps` sub-steps per integration interval.
@@ -76,13 +105,29 @@ class LiquidODForecaster(nn.Module):
         horizon_hours: float,
         forecast_steps: int,
         od_index: int,
-        delta_scale: float,
+        delta_scale_init: float | None = None,
+        delta_scale_min: float = 0.01,
         tau_min: float = 0.1,
         ode_method: ODEMethod = "euler",
         rtol: float = 1e-3,
         atol: float = 1e-4,
+        # Legacy alias kept so existing scripts/YAML configs (`delta_scale: 0.1`)
+        # keep working. When supplied, treated as the init value of the now-
+        # learnable parameter.
+        delta_scale: float | None = None,
     ) -> None:
         super().__init__()
+
+        if delta_scale_init is None and delta_scale is None:
+            delta_scale_init = 1.0
+        elif delta_scale is not None:
+            if delta_scale_init is not None:
+                raise ValueError(
+                    "pass either `delta_scale_init` (new) or `delta_scale` (legacy alias), not both"
+                )
+            delta_scale_init = float(delta_scale)
+        # By here delta_scale_init is a float.
+        delta_scale_init = float(delta_scale_init)  # type: ignore[arg-type]
 
         if horizon_hours <= 0:
             raise ValueError("horizon_hours must be > 0")
@@ -90,18 +135,32 @@ class LiquidODForecaster(nn.Module):
             raise ValueError("forecast_steps must be positive")
         if not (0 <= od_index < input_size):
             raise ValueError("od_index out of range")
-        if delta_scale <= 0:
-            raise ValueError("delta_scale must be > 0")
+        if delta_scale_init <= 0:
+            raise ValueError("delta_scale_init must be > 0")
+        if delta_scale_min <= 0:
+            raise ValueError("delta_scale_min must be > 0")
+        if delta_scale_init <= delta_scale_min:
+            raise ValueError(
+                f"delta_scale_init ({delta_scale_init}) must exceed delta_scale_min "
+                f"({delta_scale_min}) so the softplus pre-image is well defined"
+            )
         if ode_method not in ("euler", "rk4", "dopri5"):
             raise ValueError(f"unknown ode_method: {ode_method}")
 
         self.horizon_hours = float(horizon_hours)
         self.forecast_steps = int(forecast_steps)
         self.od_index = int(od_index)
-        self.delta_scale = float(delta_scale)
+        self.delta_scale_min = float(delta_scale_min)
         self.ode_method = ode_method
         self.rtol = float(rtol)
         self.atol = float(atol)
+
+        # Initialize the unconstrained parameter so that at init
+        # softplus(x) + min == delta_scale_init.
+        init_unconstrained = _inv_softplus(float(delta_scale_init) - float(delta_scale_min))
+        self.delta_scale_unconstrained = nn.Parameter(
+            torch.tensor(init_unconstrained, dtype=torch.float32)
+        )
 
         self.encoder = nn.Linear(input_size, hidden_size)
         self.cell = LiquidCell(input_size=input_size, hidden_size=hidden_size, tau_min=tau_min)
@@ -120,12 +179,21 @@ class LiquidODForecaster(nn.Module):
             horizon_hours=cfg.horizon_hours,
             forecast_steps=cfg.forecast_steps,
             od_index=cfg.od_index,
-            delta_scale=cfg.delta_scale,
+            delta_scale_init=cfg.delta_scale_init,
+            delta_scale_min=cfg.delta_scale_min,
             tau_min=cfg.tau_min,
             ode_method=cfg.ode_method,
             rtol=cfg.rtol,
             atol=cfg.atol,
         )
+
+    def delta_scale(self) -> Tensor:
+        """Current value of the (learnable, strictly-positive) delta scale.
+
+        Use ``.item()`` or ``float(...)`` for a Python scalar, or call this
+        inside a forward pass to keep the gradient connection.
+        """
+        return F.softplus(self.delta_scale_unconstrained) + self.delta_scale_min
 
     def _integrate(self, *, h: Tensor, x: Tensor, dt: Tensor | float, n_substeps: int) -> Tensor:
         """Integrate dh/dt = cell(h, x) over an interval of length `dt`.
@@ -240,7 +308,7 @@ class LiquidODForecaster(nn.Module):
             n_substeps=self.forecast_steps,
         )
 
-        # Residual delta around persistence.
+        # Residual delta around persistence (delta_scale is now learnable).
         od_last = x_last[:, self.od_index]
-        delta = torch.tanh(self.delta_head(h).squeeze(-1)) * self.delta_scale
+        delta = torch.tanh(self.delta_head(h).squeeze(-1)) * self.delta_scale()
         return od_last + delta

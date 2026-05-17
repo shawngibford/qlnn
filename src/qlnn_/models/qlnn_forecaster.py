@@ -10,6 +10,12 @@ Pipeline for one sample (x : (T, F), t_hours : (T,)):
     4. delta = tanh(W_d @ h + b_d) * delta_scale            # scalar
     5. y = x[-1, od_index] + delta                           # residual around persistence
 
+`delta_scale` is a LEARNABLE positive scalar (softplus + floor): see the
+matching classical forecaster docstring. The previous fixed-cap formulation
+("delta_scale=0.1") structurally prevented the model from representing 1-h
+OD deltas larger than ±0.1 OD — which is the dominant log-phase regime.
+Making it trainable lets the data decide how much delta headroom to allocate.
+
 Semantics intentionally mirror the classical PyTorch forecaster: the only
 thing that changes when we swap classical → quantum is the vector field
 inside the cell. Everything else (initial state encoding, residual head,
@@ -28,6 +34,7 @@ Diffrax notes:
 
 from __future__ import annotations
 
+import math
 from dataclasses import dataclass
 
 import diffrax
@@ -38,6 +45,15 @@ import jax.numpy as jnp
 from ..cells.liquid_quantum_cell import LiquidQuantumCell, LiquidQuantumCellConfig
 
 
+def _inv_softplus(y: float) -> float:
+    """Inverse of softplus, used for initializing the unconstrained
+    delta-scale parameter so that softplus(x) + min == requested_init.
+    """
+    if y <= 0:
+        raise ValueError(f"inverse softplus requires y > 0, got {y}")
+    return float(math.log(math.expm1(y)))
+
+
 @dataclass(frozen=True)
 class QLNNForecasterConfig:
     input_dim: int
@@ -45,7 +61,14 @@ class QLNNForecasterConfig:
     num_layers: int = 3
     horizon_hours: float = 1.0
     od_index: int = 0
-    delta_scale: float = 0.1
+    # Initial value of the learnable delta-scale. The trained value is read
+    # back via ``model.delta_scale()``. ``delta_scale_min`` is the soft floor
+    # (softplus + min) preventing the parameter from collapsing to zero.
+    delta_scale_init: float = 1.0
+    delta_scale_min: float = 0.01
+    # Legacy alias kept so existing scripts / YAML configs that pass
+    # ``delta_scale=0.1`` keep working; when set, treated as ``delta_scale_init``.
+    delta_scale: float | None = None
     tau_min: float = 0.1
     tau_init: float = 1.0
     # Diffrax solver knobs.
@@ -66,8 +89,20 @@ class QLNNForecasterConfig:
             raise ValueError(
                 f"od_index must be in [0, input_dim={self.input_dim}), got {self.od_index}"
             )
-        if self.delta_scale <= 0:
-            raise ValueError(f"delta_scale must be > 0, got {self.delta_scale}")
+        # Legacy ``delta_scale`` kwarg overrides ``delta_scale_init`` if given.
+        if self.delta_scale is not None:
+            if self.delta_scale <= 0:
+                raise ValueError(f"delta_scale must be > 0, got {self.delta_scale}")
+            object.__setattr__(self, "delta_scale_init", float(self.delta_scale))
+        if self.delta_scale_init <= 0:
+            raise ValueError(f"delta_scale_init must be > 0, got {self.delta_scale_init}")
+        if self.delta_scale_min <= 0:
+            raise ValueError(f"delta_scale_min must be > 0, got {self.delta_scale_min}")
+        if self.delta_scale_init <= self.delta_scale_min:
+            raise ValueError(
+                f"delta_scale_init ({self.delta_scale_init}) must exceed delta_scale_min "
+                f"({self.delta_scale_min}) so the softplus pre-image is well defined"
+            )
         if self.horizon_hours <= 0:
             raise ValueError(f"horizon_hours must be > 0, got {self.horizon_hours}")
         if self.num_qubits < 1:
@@ -92,11 +127,12 @@ class QLNNForecaster(eqx.Module):
     """Hybrid QLNN forecaster — JAX/Equinox analog of LiquidODForecaster.
 
     Parameters (PyTree leaves):
-        cell            : LiquidQuantumCell (whose own params are leaves)
-        initial_h_W     : (input_dim, num_qubits)
-        initial_h_b     : (num_qubits,)
-        delta_head_W    : (num_qubits, 1)
-        delta_head_b    : (1,)
+        cell                       : LiquidQuantumCell (whose own params are leaves)
+        initial_h_W                : (input_dim, num_qubits)
+        initial_h_b                : (num_qubits,)
+        delta_head_W               : (num_qubits, 1)
+        delta_head_b               : (1,)
+        delta_scale_unconstrained  : scalar — learnable, exposed via .delta_scale()
     """
 
     cell: LiquidQuantumCell
@@ -104,6 +140,7 @@ class QLNNForecaster(eqx.Module):
     initial_h_b: jnp.ndarray
     delta_head_W: jnp.ndarray
     delta_head_b: jnp.ndarray
+    delta_scale_unconstrained: jnp.ndarray
 
     config: QLNNForecasterConfig = eqx.field(static=True)
 
@@ -129,6 +166,19 @@ class QLNNForecaster(eqx.Module):
             k_dW, (config.num_qubits, 1)
         )
         self.delta_head_b = jnp.zeros((1,))
+
+        init_unconstrained = _inv_softplus(
+            float(config.delta_scale_init) - float(config.delta_scale_min)
+        )
+        self.delta_scale_unconstrained = jnp.asarray(init_unconstrained, dtype=jnp.float32)
+
+    def delta_scale(self) -> jnp.ndarray:
+        """Current value of the (learnable, strictly-positive) delta scale.
+
+        Use ``float(...)`` for a Python scalar, or call inside a forward pass
+        to keep the gradient connection.
+        """
+        return jax.nn.softplus(self.delta_scale_unconstrained) + self.config.delta_scale_min
 
     # ------------------------------------------------------------------
     # Diffrax integration of dh/dt = cell(t, h, x_const) over [0, dt].
@@ -204,7 +254,7 @@ class QLNNForecaster(eqx.Module):
         # 3. Forecast horizon: hold the last observed input constant.
         h = self._integrate(h, x[-1], jnp.asarray(cfg.horizon_hours, dtype=h.dtype))
 
-        # 4. Residual delta around persistence.
-        delta = jnp.tanh(h @ self.delta_head_W + self.delta_head_b).squeeze(-1) * cfg.delta_scale
+        # 4. Residual delta around persistence (delta_scale is now learnable).
+        delta = jnp.tanh(h @ self.delta_head_W + self.delta_head_b).squeeze(-1) * self.delta_scale()
         od_last = x[-1, cfg.od_index]
         return od_last + delta

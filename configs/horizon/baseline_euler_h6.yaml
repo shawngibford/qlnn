@@ -1,0 +1,53 @@
+# Horizon ablation — h=6h (Liquid-ODE, Euler).
+#
+# At 6h, persistence and linear extrapolation should be substantially worse
+# than at 1h: the lag-36 autocorrelation is well below the lag-6 number that
+# made the 1h horizon non-discriminating (R3 reviewer Finding 2).
+#
+# Window inventory (stride=1, window_size=24, horizon_tol_hours=0.0835):
+#   train=436  val=58  test=53
+#
+# Tolerance: 0.0835 h ≈ median_dt / 2. Longer horizons accumulate timing
+# drift across the dataset's one ~1.17 h gap, so we use the wider tolerance.
+
+data:
+  csv_path: data/raw/qZETA_data_copy.csv
+  feature_cols: [OD, PRE, TEMP_EXT, TEMP_CULTURE, PAR_LIGHT, PH, DO]
+  target_col: OD
+  od_min: 0.0
+  od_max: null  # train-only OD (R3 leak fix)
+
+
+  od_phys_max: 3.8
+
+windows:
+  window_size: 24
+  stride: 1
+  horizon_hours: 6.0
+  horizon_tol_hours: 0.0835
+
+split:
+  train_ratio: 0.70
+  val_ratio: 0.15
+
+model:
+  hidden_size: 32
+  tau_min: 0.1
+  forecast_steps: 4
+  delta_scale: 0.1
+  ode_method: euler
+
+training:
+  epochs: 300
+  batch_size: 64
+  lr: 0.0022379431100255152
+  weight_decay: 0.0000024028981322551868
+  eval_every: 10
+  patience: 10
+  grad_clip_norm: 1.0
+
+physics:
+  lambda_logistic: 0.0
+  lambda_smooth: 0.0
+
+seeds: [0, 1, 2, 3, 4]

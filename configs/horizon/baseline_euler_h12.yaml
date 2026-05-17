@@ -1,0 +1,60 @@
+# Horizon ablation — h=12h (Liquid-ODE, Euler).
+#
+# Stretch horizon for the paper's supplementary table. At 12 h, the test
+# segment has only 17 windows (val=22), well below the n=30 rule-of-thumb
+# for stable metrics. Treat the resulting numbers as indicative, not
+# headline: report mean ± std but caveat in the discussion.
+#
+# Window inventory (stride=1, window_size=24, horizon_tol_hours=0.0835):
+#   train=385  val=22  test=17       <-- test < 30, supplementary only
+#
+# Tolerance: 0.0835 h ≈ median_dt / 2. The 12h horizon spans ~72 sampling
+# steps, so a half-step tolerance is sufficient for the regular grid; the
+# single ~1.17 h gap drops only a handful of windows.
+#
+# If h=12 needs more windows for credibility, the right move is stride > 1
+# is NOT the answer (stride is a knob that decimates training data); the
+# real answer is a longer time series. Until then, this config is the
+# best-effort h=12 row.
+
+data:
+  csv_path: data/raw/qZETA_data_copy.csv
+  feature_cols: [OD, PRE, TEMP_EXT, TEMP_CULTURE, PAR_LIGHT, PH, DO]
+  target_col: OD
+  od_min: 0.0
+  od_max: null  # train-only OD (R3 leak fix)
+
+
+  od_phys_max: 3.8
+
+windows:
+  window_size: 24
+  stride: 1
+  horizon_hours: 12.0
+  horizon_tol_hours: 0.0835
+
+split:
+  train_ratio: 0.70
+  val_ratio: 0.15
+
+model:
+  hidden_size: 32
+  tau_min: 0.1
+  forecast_steps: 4
+  delta_scale: 0.1
+  ode_method: euler
+
+training:
+  epochs: 300
+  batch_size: 64
+  lr: 0.0022379431100255152
+  weight_decay: 0.0000024028981322551868
+  eval_every: 10
+  patience: 10
+  grad_clip_norm: 1.0
+
+physics:
+  lambda_logistic: 0.0
+  lambda_smooth: 0.0
+
+seeds: [0, 1, 2, 3, 4]

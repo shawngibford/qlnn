@@ -21,6 +21,7 @@ from typing import Any
 
 import equinox as eqx
 import jax
+import jax.numpy as jnp
 import numpy as np
 import pandas as pd
 import yaml
@@ -51,6 +52,58 @@ from quantum_liquid_neuralode.utils import write_provenance
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+# ---------------------------------------------------------------------------
+# Prediction clipping (R3 finding 6 follow-up). See train_baseline.py for the
+# motivation; this is the JAX/Equinox-side mirror.
+# ---------------------------------------------------------------------------
+def clip_predictions_norm(
+    y_pred_norm: np.ndarray,
+    od_scaler,
+    *,
+    clip_raw_max: float | None,
+    clip_raw_min: float = 0.0,
+) -> np.ndarray:
+    """Clip normalized predictions to a physically-reasonable raw-OD range.
+
+    Mirrors the helper in scripts/train_baseline.py — duplicated here rather
+    than imported because that script is not on this script's import path.
+    TODO: lift into quantum_liquid_neuralode.evaluation once the metrics
+    module coordination settles.
+    """
+    if clip_raw_max is None:
+        return y_pred_norm
+    bounds_raw = np.array([[float(clip_raw_min)], [float(clip_raw_max)]], dtype=np.float64)
+    bounds_norm = od_scaler.transform(bounds_raw).reshape(-1)
+    lo, hi = float(bounds_norm[0]), float(bounds_norm[1])
+    return np.clip(y_pred_norm, lo, hi)
+
+
+def _qlnn_predict_norm_clipped(
+    model: eqx.Module,
+    x: np.ndarray,
+    t: np.ndarray,
+    *,
+    batch_size: int,
+    od_scaler,
+    clip_raw_max: float | None,
+) -> np.ndarray:
+    """Run the QLNN model in eval mode and return clipped predictions."""
+    x_j = jnp.asarray(x)
+    t_j = jnp.asarray(t.astype(np.float32))
+    n = x_j.shape[0]
+
+    @eqx.filter_jit
+    def _batch(m: eqx.Module, xb: jnp.ndarray, tb: jnp.ndarray) -> jnp.ndarray:
+        return jax.vmap(m)(xb, tb)
+
+    preds: list[np.ndarray] = []
+    for i in range(0, n, batch_size):
+        yp = _batch(model, x_j[i : i + batch_size], t_j[i : i + batch_size])
+        preds.append(np.asarray(yp))
+    y_pred_norm = np.concatenate(preds, axis=0)
+    return clip_predictions_norm(y_pred_norm, od_scaler, clip_raw_max=clip_raw_max)
 
 
 def _load_config(path: Path) -> dict[str, Any]:
@@ -132,10 +185,21 @@ def main() -> None:
     cols_to_scale = list(dict.fromkeys(feature_cols + [target_col]))
     fixed_bounds: dict[str, tuple[float, float]] = {}
     if cfg["data"].get("od_max") is not None:
-        fixed_bounds[target_col] = (float(cfg["data"]["od_min"]), float(cfg["data"]["od_max"]))
+        # Legacy fixed-bounds mode (sensitivity comparator). With od_max=null
+        # in the YAML, fit_minmax falls back to train-only fitting for OD
+        # (R3 finding 6 fix: close test-set leakage).
+        od_min_cfg = cfg["data"].get("od_min", 0.0)
+        fixed_bounds[target_col] = (float(od_min_cfg), float(cfg["data"]["od_max"]))
 
     scalers = fit_minmax(df, cols_to_scale, fit_end=split.train_end, fixed_bounds=fixed_bounds)
     df_n = apply_minmax(df, cols_to_scale, scalers)
+    od_scaler = scalers[target_col]
+    od_data_min = float(od_scaler.data_min_[0])
+    od_data_max = float(od_scaler.data_max_[0])
+    od_scaler_mode = "fixed" if cfg["data"].get("od_max") is not None else "train_only"
+    clip_raw_max = cfg["data"].get("od_phys_max", None)
+    if clip_raw_max is not None:
+        clip_raw_max = float(clip_raw_max)
 
     win = cfg["windows"]
     common_kwargs = dict(
@@ -164,8 +228,13 @@ def main() -> None:
         "horizon_hours": horizon_hours,
         "window_size": int(win["window_size"]),
         "stride": int(win["stride"]),
-        "od_min": float(cfg["data"]["od_min"]),
-        "od_max": float(cfg["data"]["od_max"]),
+        # OD scaler bookkeeping (see scripts/train_baseline.py for semantics).
+        "od_scaler_mode": od_scaler_mode,
+        "od_data_min": od_data_min,
+        "od_data_max": od_data_max,
+        "od_phys_max": clip_raw_max,
+        "od_min": od_data_min,
+        "od_max": od_data_max,
         "feature_cols": feature_cols,
         "target_col": target_col,
         "stack": "jax+pennylane",
@@ -173,7 +242,6 @@ def main() -> None:
     (output_dir / "protocol.json").write_text(json.dumps(protocol, indent=2) + "\n")
 
     # ---- Baselines ----
-    od_scaler = scalers[target_col]
     persist_val_pred = persistence_forecast(w_val.od_last)
     persist_test_pred = persistence_forecast(w_test.od_last)
     linear_val_pred = linear_extrapolation_forecast(
@@ -182,14 +250,19 @@ def main() -> None:
     linear_test_pred = linear_extrapolation_forecast(
         od_last=w_test.od_last, od_prev=w_test.od_prev, dt_last_hours=w_test.dt_last, horizon_hours=horizon_hours
     )
+    persist_val_pred_c = clip_predictions_norm(persist_val_pred, od_scaler, clip_raw_max=clip_raw_max)
+    persist_test_pred_c = clip_predictions_norm(persist_test_pred, od_scaler, clip_raw_max=clip_raw_max)
+    linear_val_pred_c = clip_predictions_norm(linear_val_pred, od_scaler, clip_raw_max=clip_raw_max)
+    linear_test_pred_c = clip_predictions_norm(linear_test_pred, od_scaler, clip_raw_max=clip_raw_max)
+
     baselines_record = {
         "persistence": {
-            "val": compute_metrics(y_true_norm=w_val.y, y_pred_norm=persist_val_pred, od_scaler=od_scaler).to_dict(),
-            "test": compute_metrics(y_true_norm=w_test.y, y_pred_norm=persist_test_pred, od_scaler=od_scaler).to_dict(),
+            "val": compute_metrics(y_true_norm=w_val.y, y_pred_norm=persist_val_pred_c, od_scaler=od_scaler, od_last_norm=w_val.od_last).to_dict(),
+            "test": compute_metrics(y_true_norm=w_test.y, y_pred_norm=persist_test_pred_c, od_scaler=od_scaler, od_last_norm=w_test.od_last).to_dict(),
         },
         "linear": {
-            "val": compute_metrics(y_true_norm=w_val.y, y_pred_norm=linear_val_pred, od_scaler=od_scaler).to_dict(),
-            "test": compute_metrics(y_true_norm=w_test.y, y_pred_norm=linear_test_pred, od_scaler=od_scaler).to_dict(),
+            "val": compute_metrics(y_true_norm=w_val.y, y_pred_norm=linear_val_pred_c, od_scaler=od_scaler, od_last_norm=w_val.od_last).to_dict(),
+            "test": compute_metrics(y_true_norm=w_test.y, y_pred_norm=linear_test_pred_c, od_scaler=od_scaler, od_last_norm=w_test.od_last).to_dict(),
         },
     }
     (output_dir / "baselines.json").write_text(json.dumps(baselines_record, indent=2) + "\n")
@@ -254,6 +327,30 @@ def main() -> None:
             cfg=trainer_cfg,
             seed=seed,
             log_fn=log,
+        )
+
+        # Re-evaluate the best model with raw-space clipping of predictions
+        # to the strain's physical OD range (R3 finding 6 follow-up). The
+        # trainer's selection-time metrics drove early stopping unchanged;
+        # only the reported / aggregated numbers reflect the clip.
+        val_pred_clipped = _qlnn_predict_norm_clipped(
+            result.model, w_val.x, w_val.t,
+            batch_size=trainer_cfg.batch_size,
+            od_scaler=od_scaler, clip_raw_max=clip_raw_max,
+        )
+        test_pred_clipped = _qlnn_predict_norm_clipped(
+            result.model, w_test.x, w_test.t,
+            batch_size=trainer_cfg.batch_size,
+            od_scaler=od_scaler, clip_raw_max=clip_raw_max,
+        )
+        # Pass od_last_norm so ΔOD metrics also populate in the report.
+        result.val_metrics = compute_metrics(
+            y_true_norm=w_val.y, y_pred_norm=val_pred_clipped, od_scaler=od_scaler,
+            od_last_norm=w_val.od_last,
+        )
+        result.test_metrics = compute_metrics(
+            y_true_norm=w_test.y, y_pred_norm=test_pred_clipped, od_scaler=od_scaler,
+            od_last_norm=w_test.od_last,
         )
 
         seed_dir = output_dir / f"seed_{seed}"
