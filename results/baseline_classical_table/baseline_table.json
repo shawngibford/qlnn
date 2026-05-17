@@ -15,50 +15,62 @@
       "val_mae": "0.1210",
       "val_rmse": "0.1572",
       "val_r2": "0.7335",
-      "test_mae": "0.1545",
-      "test_rmse": "0.1930",
-      "test_r2": "0.7231",
+      "test_mae": "0.1276",
+      "test_rmse": "0.1631",
+      "test_r2": "0.8024",
       "n_seeds": "n/a"
     },
     {
-      "model": "Liquid-ODE (Euler)",
-      "val_mae": "0.0688 \u00b1 0.0199",
-      "val_rmse": "0.0879 \u00b1 0.0237",
-      "val_r2": "0.9118 \u00b1 0.0442",
-      "test_mae": "0.0770 \u00b1 0.0139",
-      "test_rmse": "0.0927 \u00b1 0.0184",
-      "test_r2": "0.9342 \u00b1 0.0246",
+      "model": "Liquid-ODE (Euler, train-only OD)",
+      "val_mae": "0.0785 \u00b1 0.0070",
+      "val_rmse": "0.0999 \u00b1 0.0080",
+      "val_r2": "0.8918 \u00b1 0.0171",
+      "test_mae": "0.0928 \u00b1 0.0082",
+      "test_rmse": "0.1128 \u00b1 0.0097",
+      "test_r2": "0.9048 \u00b1 0.0161",
       "n_seeds": "5"
     },
     {
-      "model": "Liquid-ODE (dopri5)",
-      "val_mae": "0.0688 \u00b1 0.0198",
-      "val_rmse": "0.0878 \u00b1 0.0236",
-      "val_r2": "0.9121 \u00b1 0.0439",
-      "test_mae": "0.0771 \u00b1 0.0137",
-      "test_rmse": "0.0929 \u00b1 0.0182",
-      "test_r2": "0.9339 \u00b1 0.0245",
+      "model": "Liquid-ODE (dopri5, train-only OD)",
+      "val_mae": "0.0785 \u00b1 0.0069",
+      "val_rmse": "0.0999 \u00b1 0.0079",
+      "val_r2": "0.8919 \u00b1 0.0169",
+      "test_mae": "0.0929 \u00b1 0.0081",
+      "test_rmse": "0.1129 \u00b1 0.0097",
+      "test_r2": "0.9047 \u00b1 0.0160",
       "n_seeds": "5"
     },
     {
-      "model": "Liquid-ODE +physics(logistic-only)",
-      "val_mae": "0.0557 \u00b1 0.0101",
-      "val_rmse": "0.0724 \u00b1 0.0133",
-      "val_r2": "0.9419 \u00b1 0.0210",
-      "test_mae": "0.0613 \u00b1 0.0041",
-      "test_rmse": "0.0734 \u00b1 0.0048",
-      "test_r2": "0.9598 \u00b1 0.0054",
+      "model": "Liquid-ODE +physics (train-only OD)",
+      "val_mae": "0.0753 \u00b1 0.0061",
+      "val_rmse": "0.0965 \u00b1 0.0070",
+      "val_r2": "0.8992 \u00b1 0.0147",
+      "test_mae": "0.0899 \u00b1 0.0073",
+      "test_rmse": "0.1094 \u00b1 0.0089",
+      "test_r2": "0.9105 \u00b1 0.0144",
+      "n_seeds": "5"
+    },
+    {
+      "model": "Liquid-ODE (Euler, fixed [0,3.8] OD \u2014 leak sensitivity)",
+      "val_mae": "0.0688 \u00b1 0.0197",
+      "val_rmse": "0.0879 \u00b1 0.0234",
+      "val_r2": "0.9119 \u00b1 0.0437",
+      "test_mae": "0.0741 \u00b1 0.0150",
+      "test_rmse": "0.0892 \u00b1 0.0196",
+      "test_r2": "0.9386 \u00b1 0.0256",
       "n_seeds": "5"
     }
   ],
   "runs": [
     "results/baseline_classical_euler",
     "results/baseline_classical_dopri5",
-    "results/baseline_classical_physics"
+    "results/baseline_classical_physics",
+    "results/baseline_classical_euler_fixed_od"
   ],
   "labels": [
-    "Liquid-ODE (Euler)",
-    "Liquid-ODE (dopri5)",
-    "Liquid-ODE +physics(logistic-only)"
+    "Liquid-ODE (Euler, train-only OD)",
+    "Liquid-ODE (dopri5, train-only OD)",
+    "Liquid-ODE +physics (train-only OD)",
+    "Liquid-ODE (Euler, fixed [0,3.8] OD \u2014 leak sensitivity)"
   ]
 }

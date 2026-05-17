@@ -12,7 +12,8 @@
     ],
     "target_col": "OD",
     "od_min": 0.0,
-    "od_max": 3.8
+    "od_max": null,
+    "od_phys_max": 3.8
   },
   "windows": {
     "window_size": 24,
