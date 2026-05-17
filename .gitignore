@@ -1,0 +1,41 @@
+.DS_Store
+
+# Virtualenv
+.venv/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyd
+*.so
+*.egg-info/
+.eggs/
+
+# Packaging
+build/
+dist/
+
+# Data (local, potentially large)
+data/
+
+# Notebooks (re-executed locally; we don't version-control outputs)
+notebooks/
+checkpoints/
+
+# Testing
+.pytest_cache/
+.coverage
+
+# Notebooks
+.ipynb_checkpoints/
+
+# Editors
+.vscode/
+.idea/
+
+# Results — ignore everything by default, only commit canonical paper artifacts.
+results/*
+!results/baseline_classical_euler/
+!results/baseline_classical_dopri5/
+!results/baseline_classical_physics/
+!results/baseline_classical_table/
