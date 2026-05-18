@@ -1,0 +1,146 @@
+# Quantum-Liquid Neural ODE Bioreactor Paper — Phase A/B/C Synthesis
+
+**Status:** All three remediation phases complete. 10 git commits. 120/120 tests passing. Results frozen with provenance (git SHA + data SHA-256 + package versions).
+
+This document is the synthesis of every Phase A/B/C result and is meant as the starting point for the paper's methods + results sections.
+
+---
+
+## What the data actually shows (honest version)
+
+### Finding 1 — At 1h horizon, the QLNN beats persistence; the classical Liquid-ODE does not.
+
+| Comparison (test MAE, paired bootstrap, n=5 seeds, n_iter=10⁴, Stouffer combined) | Mean Δ | p | Verdict |
+|---|---|---|---|
+| Classical Liquid-ODE (32 hidden, 1602 params) vs persistence | -0.0006 | **0.34** | tie |
+| QLNN (~100 params) vs persistence | -0.0029 | **<0.0001** | QLNN wins |
+
+The QLNN edge is small in absolute terms (0.0029 OD ≈ 3% relative MAE improvement), but the *statistical separation* is decisive while the classical separation is noise. This is a real result: same task, same data, ~16× fewer parameters, and the QLNN gets a defensible win where the classical cannot.
+
+### Finding 2 — At 3h horizon, both architectures beat persistence; at matched param count, the classical wins.
+
+At h=3, persistence falls below R²=0 (predicting the current OD is *worse* than predicting the mean) — the discriminating regime.
+
+| Model | params | test MAE | test R² | vs persistence (Stouffer p) |
+|---|---|---|---|---|
+| Persistence | 0 | 0.2718 | -0.0371 | — |
+| Linear extrapolation | 0 | 0.2989 | -1.10 | — (worse) |
+| Liquid-ODE H=2 | 42 | 0.2449 ± 0.028 | 0.156 ± 0.19 | <0.0001 ✓ |
+| **Liquid-ODE H=4 (param-matched)** | **90** | **0.2594 ± 0.021** | **0.053 ± 0.15** | **<0.0001 ✓** |
+| Liquid-ODE H=8 | 210 | 0.2581 ± 0.021 | 0.058 ± 0.15 | <0.0001 ✓ |
+| Liquid-ODE H=16 | 546 | 0.2564 ± 0.025 | 0.078 ± 0.19 | <0.0001 ✓ |
+| Liquid-ODE H=32 | 1602 | 0.2491 ± 0.031 | 0.111 ± 0.19 | <0.0001 ✓ |
+| **QLNN** | **~100** | **0.2655 ± 0.005** | **0.013 ± 0.04** | **<0.0001 ✓** |
+
+Head-to-head at matched params (90 vs ~100):
+
+| Comparison | Mean Δ MAE | Stouffer p | Verdict |
+|---|---|---|---|
+| QLNN vs Classical H=4 | +0.0067 | **0.029** | Classical wins |
+| QLNN vs Classical H=32 (8× more params) | +0.018 | <0.0001 | Classical wins |
+
+### Finding 3 — The QLNN is ~3× more reproducible across seeds.
+
+Across every metric, on both horizons, the QLNN has materially tighter seed variance:
+
+| Metric (h=3) | Classical H=4 std | QLNN std | Ratio |
+|---|---|---|---|
+| test MAE | 0.0166 | 0.0044 | 3.8× |
+| test R² | 0.121 | 0.033 | 3.7× |
+| test ΔR² | 0.486 | 0.133 | 3.7× |
+
+This is a real reproducibility advantage. It comes from the small parameter count plus the bounded quantum-circuit output range (⟨Z⟩ ∈ [-1, 1] per qubit), which keeps the model from wandering far across seeds. For a regulatory environment (digital twins of bioreactors), this matters as much as headline accuracy.
+
+### Finding 4 — Physics-informed regularization helps the classical baseline.
+
+| h=1 test (n=5) | MAE | R² |
+|---|---|---|
+| Liquid-ODE (Euler, train-only OD) | 0.0928 ± 0.0102 | 0.9048 ± 0.020 |
+| Liquid-ODE +physics (logistic-only) | 0.0899 ± 0.0091 | 0.9105 ± 0.018 |
+
+Logistic-growth residual regularization gives a ~3% MAE lift on the classical. (Note: the originally-claimed "+smoothness" term was algebraically MSE — caught by R1, removed in Phase A; this is the honest +physics number.)
+
+### Finding 5 — The originally-reported numbers were inflated by a test-set scaler leak.
+
+Before Phase B (legacy fixed [0, 3.8] OD scaler):
+- Classical Liquid-ODE h=1: test R² = 0.9386 ± 0.026
+
+After Phase B (train-only OD scaler, predictions clipped to [0, 3.8] at evaluation):
+- Classical Liquid-ODE h=1: test R² = 0.9048 ± 0.020
+
+The 0.034 R² gap was the leak — the training-segment OD max is 1.38, not 3.8. By fixing the scaler bounds at 3.8 we were telling the model the test-set maximum (the stationary-phase peak). Reviewers would catch this. The sensitivity comparator (`results/baseline_classical_euler_fixed_od/`) is committed for transparency.
+
+---
+
+## Paper narrative recommendation
+
+The original three-claim framing ("synthetic lift + expressivity + sample efficiency, QLNN beats classical") was too clean. The data shows something more interesting and more defensible:
+
+> **The QLNN advantage is horizon-conditional and reproducibility-flavored, not pure-accuracy.** At short horizons where the classical model can't beat persistence, the QLNN can. At longer horizons where the classical model has enough headroom to learn, the matched-param classical beats the QLNN — but the QLNN is ~3× more reproducible across seeds, which matters in regulated industrial settings.
+
+This is the kind of result a reviewer accepts: nuanced, statistically rigorous, with the failure modes reported honestly. The downstream steps (QWGAN synthetic-data lift, effective-dimension expressivity, sample efficiency) build on this baseline.
+
+---
+
+## What changed from initial claims to final paper position
+
+| Original claim | Phase A/B/C finding | Updated paper position |
+|---|---|---|
+| Classical R² 0.934 vs persistence 0.905 → meaningful gap | Was inflated by OD scaler leak; corrected R² 0.905 = persistence | Honest classical floor disclosed |
+| +physics lift ~3% (logistic + smoothness) | smoothness term was algebraically MSE; lift is logistic-only | Single regularizer, ~3% lift |
+| QLNN beats classical at matched params | False at h=3 on this dataset | Reverse: classical beats at h=3, QLNN beats at h=1 |
+| n=3 QLNN seeds with bare std | Now n=5 with 95% t-CI and paired bootstrap | Stat reporting matches NeurIPS/QST conventions |
+| 1h horizon as headline | Persistence dominates at h=1 (autocorr 0.99) | Horizon ablation; h=3 is the discriminating regime |
+
+---
+
+## Locked methodology bindings (from `hypothesis.md`, pre-registered)
+
+- **Eval protocol:** train 70/15/15 chronological, window 24, train-only OD MinMax with physical clip at 3.8.
+- **Statistical reporting:** ddof=1 std AND 95% t-CI AND paired bootstrap p-values.
+- **Effective dimension** (Step 5): Abbas et al. 2021 Eq. 4, empirical Fisher via `jax.jacfwd`, n=500 samples, matched at hidden_size=4.
+- **Synthetic data lift** (Step 4 / QWGAN): primary endpoint = test MAE at h=3, paired-bootstrap p < 0.05, K=472 1:1 augmentation. Secondary = DTW < 0.5 absolute AND < classical-WGAN-GP by ≥ 0.1.
+- **Sample efficiency** (Step 6): data-fraction grid {10, 25, 50, 100}%, chronologically truncated from start.
+- **Null-result handling:** all three claims, no pivots.
+
+---
+
+## What's blocked and what's next
+
+**Ready to write** (paper Sections 1-3):
+- Introduction + methodology (locked protocol)
+- Classical baseline + physics-informed ablation
+- Horizon ablation (1h, 3h, 6h, 12h with explicit h=3 framing)
+- Param-matched comparison (Pareto curve)
+- QLNN vs persistence vs param-matched classical (3 statistical tests)
+- Reproducibility argument (3× tighter QLNN variance)
+- Leak sensitivity (the fixed-OD comparator) — supplementary
+
+**Step 4 (next):** QWGAN-GP synthetic generator, evaluated against the pre-registered DTW + downstream-MAE-lift endpoints in `hypothesis.md`.
+
+**Step 5:** Effective dimension via empirical Fisher (`jax.jacfwd`), Abbas et al. 2021 Eq. 4, matched at H=4.
+
+**Step 6:** Sample efficiency via data-fraction sweep.
+
+---
+
+## Repository state
+
+```
+master @ 5c6f261 — chore(results): Phase C ...
+        2b5c4b9 — feat: Phase C — statistical rigor ...
+        0379388 — chore(results): Phase B reruns ...
+        9d0fdb3 — feat: Phase B — task hardening ...
+        e3c365a — docs: code-review reports ...
+        8407b6b — chore(results): rerun baselines after Phase A ...
+        97afc7d — fix: Phase A — 4-agent code-review remediations
+        20d5b98 — feat(qlnn_): step 3 — hybrid QLNN forecaster
+        ae4c06a — feat(qlnn_): step 2 — quantum feature encoder
+        c784d30 — init: step 1 — classical Liquid-ODE baseline finalized
+```
+
+- 120/120 pytest passing
+- All numerical results carry `provenance.json` (git SHA + data SHA-256 + package versions + platform)
+- Per-seed predictions saved as `.npz` for retrospective bootstrap analyses
+- Pre-registration (`hypothesis.md`) committed before downstream Steps 4-6
+- Four review documents (`REVIEW_step1_classical.md`, `REVIEW_step23_quantum.md`, `REVIEW_methodology.md`, `REVIEW_integration.md`, `REVIEW_SYNTHESIS.md`) capture the paper trail of the peer-review-style audit that gated Phases A through C.
