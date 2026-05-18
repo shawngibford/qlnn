@@ -100,6 +100,32 @@ class HorizonWindows:
     def __len__(self) -> int:
         return int(self.x.shape[0])
 
+    def head(self, n: int) -> "HorizonWindows":
+        """Return a new HorizonWindows containing only the first n windows.
+
+        Used by the sample-efficiency sweep (Claim 3) to chronologically
+        truncate the training set without leaking later windows. The split is
+        already chronological inside `make_horizon_windows`, so taking the
+        first n preserves the temporal split discipline.
+
+        Raises ValueError if n is non-positive or exceeds the current length.
+        """
+        if n <= 0:
+            raise ValueError(f"head(n) requires n > 0, got {n}")
+        cur = len(self)
+        if n > cur:
+            raise ValueError(f"head(n={n}) exceeds current length {cur}")
+        return HorizonWindows(
+            x=self.x[:n],
+            t=self.t[:n],
+            y=self.y[:n],
+            od_last=self.od_last[:n],
+            od_prev=self.od_prev[:n],
+            dt_last=self.dt_last[:n],
+            end_idx=self.end_idx[:n],
+            target_idx=self.target_idx[:n],
+        )
+
 
 def make_horizon_windows(
     *,

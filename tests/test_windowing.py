@@ -161,6 +161,44 @@ def test_make_horizon_windows_off_by_one_regression():
     assert int(win.target_idx[0]) == window_size
 
 
+def test_horizon_windows_head_truncates_chronologically():
+    # Build a synthetic HorizonWindows and chronologically truncate it.
+    n = 50
+    time_hours = np.arange(n, dtype=np.float64) / 6.0
+    od = np.linspace(0.1, 0.9, n).astype(np.float32)
+    feats = od.reshape(-1, 1)
+    win = make_horizon_windows(
+        features=feats, od=od, time_hours=time_hours,
+        window_size=6, stride=1, horizon_hours=1.0, horizon_tolerance_hours=1e-3,
+    )
+    original_len = len(win)
+    assert original_len > 4
+
+    half = win.head(original_len // 2)
+    assert len(half) == original_len // 2
+    # Same arrays, just the prefix.
+    np.testing.assert_array_equal(half.x, win.x[: original_len // 2])
+    np.testing.assert_array_equal(half.y, win.y[: original_len // 2])
+    np.testing.assert_array_equal(half.end_idx, win.end_idx[: original_len // 2])
+
+
+def test_horizon_windows_head_rejects_bad_n():
+    n = 50
+    time_hours = np.arange(n, dtype=np.float64) / 6.0
+    od = np.linspace(0.1, 0.9, n).astype(np.float32)
+    feats = od.reshape(-1, 1)
+    win = make_horizon_windows(
+        features=feats, od=od, time_hours=time_hours,
+        window_size=6, stride=1, horizon_hours=1.0, horizon_tolerance_hours=1e-3,
+    )
+    with pytest.raises(ValueError):
+        win.head(0)
+    with pytest.raises(ValueError):
+        win.head(-3)
+    with pytest.raises(ValueError):
+        win.head(len(win) + 1)
+
+
 def test_fit_apply_minmax_fixed_bounds():
     import pandas as pd
 

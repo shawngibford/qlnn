@@ -266,6 +266,18 @@ def main() -> None:
     w_val = _segment_windows(df_n, start=split.train_end, end=split.val_end, **common_kwargs)
     w_test = _segment_windows(df_n, start=split.val_end, end=n, **common_kwargs)
 
+    # Sample-efficiency knob (Claim 3 / Step 6). When `windows.train_fraction`
+    # is < 1.0, chronologically truncate the training set from the START so
+    # the temporal split discipline is preserved (the model never sees later
+    # training windows). val and test are untouched — same evaluation set
+    # across all fractions, so test MAE numbers are comparable.
+    train_fraction = float(win.get("train_fraction", 1.0))
+    if not (0.0 < train_fraction <= 1.0):
+        raise ValueError(f"windows.train_fraction must be in (0, 1], got {train_fraction}")
+    if train_fraction < 1.0:
+        n_keep = max(1, int(round(len(w_train) * train_fraction)))
+        w_train = w_train.head(n_keep)
+
     horizon_hours = float(win["horizon_hours"])
 
     # ---- Protocol record ----

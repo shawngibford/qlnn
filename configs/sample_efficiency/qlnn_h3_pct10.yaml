@@ -1,0 +1,65 @@
+# Horizon ablation — h=3h (QLNN hybrid).
+#
+# Quantum integrand over 3 h is ~3x the per-window cost of the h=1 config,
+# but still tractable on the available hardware. This is the first horizon
+# at which persistence's R² should drop substantially, giving the QLNN-vs-
+# classical comparison real discriminating power (R3 reviewer Finding 2).
+#
+# Window inventory (stride=1, window_size=24, horizon_tol_hours=0.0835):
+#   train=472  val=76  test=71
+#
+# max_steps bumped to 12288 to give the adaptive solver headroom over the
+# longer interval; in practice tsit5 typically uses far fewer.
+
+data:
+  csv_path: data/raw/qZETA_data_copy.csv
+  feature_cols: [OD, PRE, TEMP_EXT, TEMP_CULTURE, PAR_LIGHT, PH, DO]
+  target_col: OD
+  od_min: 0.0
+  od_max: null  # train-only OD (R3 leak fix)
+
+
+  od_phys_max: 3.8
+
+windows:
+  window_size: 24
+  stride: 1
+  horizon_hours: 3.0
+  horizon_tol_hours: 0.0835
+  train_fraction: 0.1
+
+split:
+  train_ratio: 0.70
+  val_ratio: 0.15
+
+model:
+  num_qubits: 4
+  num_layers: 3
+  delta_scale: 0.1
+  tau_min: 0.1
+  tau_init: 1.0
+  init_head_std: 0.1
+  solver: tsit5
+  rtol: 0.001
+  atol: 0.0001
+  dt0: 0.05
+  max_steps: 12288
+
+training:
+  epochs: 60
+  batch_size: 32
+  lr: 0.002
+  weight_decay: 0.0
+  eval_every: 5
+  patience: 6
+  grad_clip_norm: 1.0
+
+# Physics off in the headline h=3 config — see qlnn_hybrid_h3_physics.yaml for
+# the symmetric +physics ablation at this horizon.
+physics:
+  lambda_logistic: 0.0
+  mu_norm: 0.4
+  K_norm: 1.0
+
+# n=5 seeds (R3 finding 2.2).
+seeds: [0, 1, 2, 3, 4]
