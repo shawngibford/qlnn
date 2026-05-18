@@ -38,4 +38,10 @@ results/*
 !results/baseline_classical_euler/
 !results/baseline_classical_dopri5/
 !results/baseline_classical_physics/
+!results/baseline_classical_euler_fixed_od/
 !results/baseline_classical_table/
+!results/horizon_sweep/
+!results/horizon_sweep_table/
+!results/param_sweep/
+!results/qlnn_hybrid_h1/
+!results/qlnn_hybrid_h3/

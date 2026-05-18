@@ -1,0 +1,23 @@
+{
+  "git_commit": "03793880ef78c66d86f6e9755e1c3823e562f1ee",
+  "git_dirty": true,
+  "git_branch": "master",
+  "data_sha256": "aba44007efafd36efefb41f4c7d5ed55bcca1cb8159ed08ad22422044e98765e",
+  "data_path": "/Users/shawngibford/dev/phd/qlnn/data/raw/qZETA_data_copy.csv",
+  "data_size_bytes": 54437,
+  "python_version": "3.11.14 (main, Oct  9 2025, 16:16:55) [Clang 17.0.0 (clang-1700.3.19.1)]",
+  "platform": "macOS-26.0.1-arm64-arm-64bit",
+  "package_versions": {
+    "torch": "2.10.0",
+    "torchdiffeq": "0.2.5",
+    "jax": "0.10.0",
+    "jaxlib": "0.10.0",
+    "equinox": "0.13.8",
+    "diffrax": "0.7.2",
+    "optax": "0.2.8",
+    "pennylane": "0.44.0",
+    "pandas": "3.0.0",
+    "scikit-learn": "1.8.0"
+  },
+  "wall_clock_start_utc": "2026-05-17T23:37:50.428900Z"
+}
