@@ -19,9 +19,10 @@ def _load(p: str | Path) -> dict:
 
 
 def _check(label: str, actual: float, expected: float, tol: float = 1e-4) -> bool:
+    """ASCII status markers so this script runs under LANG=C in CI (H-09)."""
     ok = abs(actual - expected) <= tol
-    status = "✓" if ok else "✗"
-    print(f"  {status} {label}: actual={actual:.4f}  expected={expected}  (tol={tol})")
+    status = "OK  " if ok else "FAIL"
+    print(f"  [{status}] {label}: actual={actual:.4f}  expected={expected}  (tol={tol})")
     return ok
 
 
@@ -32,7 +33,11 @@ def main() -> int:
     c = _load("results/param_sweep/euler_h3_hidden4/seeds_summary.json")
     q = _load("results/qlnn_hybrid_h3/seeds_summary.json")
     ratio = c["test"]["mae_raw"]["std"] / q["test"]["mae_raw"]["std"]
-    all_ok &= _check("ratio (paper: 3.77)", ratio, 3.77, tol=0.1)
+    # H-08 fix: tightened tol from 0.1 to 0.05. The committed numbers give
+    # ratio = 3.80; we want the check to FAIL if regressions push the ratio
+    # below ~3.75 or above ~3.85. The pre-registration's >= 2.0 is the
+    # separate scientific threshold and lives in the paper itself, not here.
+    all_ok &= _check("ratio (paper: 3.77)", ratio, 3.77, tol=0.05)
 
     print("\n=== Claim 2 (expressivity): Δd_norm ===")
     ed = _load("results/effective_dimension/effective_dimension.json")
@@ -43,10 +48,10 @@ def main() -> int:
     all_ok &= _check("Δd_norm (paper: +1.49)",
                      ed["delta_d_norm_qlnn_minus_classical"], 1.49, tol=0.01)
     if not ed["pre_registered_hypothesis_met"]:
-        print("  ✗ pre-registered hypothesis flag is False (expected True)")
+        print("  [FAIL] pre-registered hypothesis flag is False (expected True)")
         all_ok = False
     else:
-        print("  ✓ pre-registered hypothesis flag is True")
+        print("  [OK  ] pre-registered hypothesis flag is True")
 
     print("\n=== Claim 3 (sample efficiency): per-fraction means ===")
     expected_mae = {

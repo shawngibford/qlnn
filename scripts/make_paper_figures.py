@@ -133,12 +133,20 @@ def fig_horizon():
 # ---------------------------------------------------------------------------
 def fig_sample_efficiency():
     fractions = [10, 25, 50, 100]
-    n_train_classical = [47, 118, 236, 472]   # from protocol.json
+    n_train_classical: list[int] = []
     c_mae, c_ci = [], []
     q_mae, q_ci = [], []
     for pct in fractions:
         c = _load(f"results/sample_efficiency/classical_h4_h3_pct{pct}/seeds_summary.json")
         q = _load(f"results/sample_efficiency/qlnn_h3_pct{pct}/seeds_summary.json")
+        # Read n_train_windows from protocol.json (not hardcoded — H-02 fix).
+        c_proto = _load(f"results/sample_efficiency/classical_h4_h3_pct{pct}/protocol.json")
+        q_proto = _load(f"results/sample_efficiency/qlnn_h3_pct{pct}/protocol.json")
+        n_c = int(c_proto["n_train_windows"])
+        n_q = int(q_proto["n_train_windows"])
+        if n_c != n_q:
+            print(f"WARN: classical/QLNN n_train_windows differ at pct={pct}: {n_c} vs {n_q}")
+        n_train_classical.append(n_c)
         c_mae.append(c["test"]["mae_raw"]["mean"])
         c_ci.append(_ci(c["test"]["mae_raw"]))
         q_mae.append(q["test"]["mae_raw"]["mean"])

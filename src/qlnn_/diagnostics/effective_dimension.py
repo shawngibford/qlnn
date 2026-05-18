@@ -84,23 +84,28 @@ def empirical_fisher(
     Returns:
         (D, D) empirical Fisher matrix.
     """
+    # IMPORTANT (H-01): we intentionally accumulate in numpy float64, NOT
+    # in JAX. Enabling jax_enable_x64 globally breaks Diffrax dtype
+    # promotion in the QLNN forecaster (RuntimeError: buffer.at[i].set
+    # with mismatched dtypes), so the module keeps JAX in float32. Per-
+    # sample gradients are computed via jacrev in float32, then promoted
+    # to numpy float64 for the outer-product accumulation. The headline
+    # analysis driver (scripts/run_effective_dimension.py) does this
+    # same pattern.
     theta_flat = jnp.asarray(theta_flat)
     D = int(theta_flat.shape[0])
-    fisher = jnp.zeros((D, D), dtype=jnp.float64)
+    fisher_np = np.zeros((D, D), dtype=np.float64)
     n = 0
     for idx in sample_indices:
         # jacrev: reverse-mode is required for Diffrax-using models (custom_vjp).
         # For scalar outputs jacrev is also more efficient than jacfwd.
-        # output is scalar so reverse-mode would be cheaper *per sample*, but
-        # forward-mode is more amenable to small-D batching across samples and
-        # is what the hypothesis pre-registration calls for (~100 params).
-        g = jax.jacrev(forward_scalar)(theta_flat, idx)  # (D,)
-        g = g.astype(jnp.float64)
-        fisher = fisher + jnp.outer(g, g)
+        g = jax.jacrev(forward_scalar)(theta_flat, idx)  # (D,) float32
+        g_np = np.asarray(g, dtype=np.float64)
+        fisher_np = fisher_np + np.outer(g_np, g_np)
         n += 1
     if n == 0:
         raise ValueError("sample_indices must contain at least one index")
-    return fisher / float(n)
+    return jnp.asarray(fisher_np / float(n))
 
 
 def _slogdet_psd(matrix: jnp.ndarray) -> float:

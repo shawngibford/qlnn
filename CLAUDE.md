@@ -64,9 +64,10 @@ Only `pytest` is in dev dependencies. No Black, ruff, mypy, or isort.
 - Dataset: `data/raw/qZETA_data_copy.csv`, 778 rows, time-ordered.
 - Splits: train 70%, val 15%, test 15% (chronological).
 - Task: 1-hour-ahead OD forecast from a 24-step history window, stride 1.
-- OD scaling: fixed MinMax bounds [0.0, 3.8].
-- Metrics: MAE_raw, RMSE_raw, R²_raw, MSE_norm (+ DTW for trajectory-level
-  evaluation once QWGAN lands).
+  Plus h ∈ {3, 6, 12} ablation; h=3 is the discriminating regime.
+- OD scaling: train-only MinMax (R3 leak fix); predictions clipped to
+  [0, od_phys_max=3.8] in raw OD space at evaluation.
+- Metrics: MAE_raw, RMSE_raw, R²_raw, MSE_norm, ΔOD_R²_raw.
 - Baselines reported every run: persistence + linear extrapolation.
 - Seeds: {0,1,2,3,4}, report mean ± std.
 - Selection: best val MSE_norm checkpoint.
@@ -85,11 +86,27 @@ Any change to this protocol breaks comparability across milestones.
 
 Tests in `tests/` mirror these modules.
 
-### Intended pipeline (from spec.md)
-```
-Input Sequence → [Quantum Feature Encoder] → Latent → [Liquid Neural ODE] → [Decoder] → Generated Sequence
-```
-Phase 1 (classical Liquid-ODE baseline) is implemented and produces canonical results under `results/baseline_classical_*`. Phase 2 (quantum encoder via PennyLane in JAX `qlnn_/`), Phase 3 (full hybrid), Phase 4 (QWGAN-GP synthetic generator), and Phase 5 (Fisher / effective-dimension expressivity diagnostics) are planned.
+### Pipeline status — feature-complete for the v2 paper
+
+Step 1 (classical Liquid-ODE baseline), Step 2 (quantum feature encoder),
+Step 3 (full hybrid forecaster), Step 5 (effective dimension), and Step 6
+(sample efficiency) are all implemented, run, and committed. Step 4
+(QWGAN-GP synthetic data lift) was explicitly **dropped** after the Phase
+A/B/C peer-review-style audit because the single-run dataset cannot
+support that claim without a held-out second fermentation run — see
+`hypothesis.md` v2 "Deviations from v1" for the rationale.
+
+Canonical results live under:
+- `results/baseline_classical_{euler,dopri5,physics,euler_fixed_od}/`
+- `results/horizon_sweep/euler_h{1,3,6,12}/`
+- `results/param_sweep/euler_h3_hidden{2,4,8,16,32}/`
+- `results/qlnn_hybrid_{h1,h3,h3_physics}/`
+- `results/effective_dimension/`
+- `results/sample_efficiency/`
+
+`scripts/reproduce_paper.sh` regenerates everything from scratch;
+`scripts/verify_paper_integrity.py` checks the regenerated numbers against
+the values cited in `PAPER_SUMMARY.md`.
 
 ### Scripts
 - `scripts/train_baseline.py` — **canonical multi-seed trainer**. Reads YAML from `configs/`, writes `seeds_summary.json` (paper-table row).

@@ -125,7 +125,7 @@ The original three-claim framing ("synthetic lift + expressivity + sample effici
 
 > **The QLNN advantage is horizon-conditional and reproducibility-flavored, not pure-accuracy.** At short horizons where the classical model can't beat persistence, the QLNN can. At longer horizons where the classical model has enough headroom to learn, the matched-param classical beats the QLNN — but the QLNN is ~3× more reproducible across seeds, which matters in regulated industrial settings.
 
-This is the kind of result a reviewer accepts: nuanced, statistically rigorous, with the failure modes reported honestly. The downstream steps (QWGAN synthetic-data lift, effective-dimension expressivity, sample efficiency) build on this baseline.
+This is the kind of result a reviewer accepts: nuanced, statistically rigorous, with the failure modes reported honestly. (Historical note: this paragraph was originally written when the paper included a QWGAN-GP synthetic-data-lift claim as Step 4. That claim was dropped — see "Deviations from v1" in `hypothesis.md`. The current paper's three claims are reproducibility, expressivity, and sample efficiency, all empirically supported below.)
 
 ---
 
@@ -145,29 +145,44 @@ This is the kind of result a reviewer accepts: nuanced, statistically rigorous, 
 
 - **Eval protocol:** train 70/15/15 chronological, window 24, train-only OD MinMax with physical clip at 3.8.
 - **Statistical reporting:** ddof=1 std AND 95% t-CI AND paired bootstrap p-values.
-- **Effective dimension** (Step 5): Abbas et al. 2021 Eq. 4, empirical Fisher via `jax.jacfwd`, n=500 samples, matched at hidden_size=4.
-- **Synthetic data lift** (Step 4 / QWGAN): primary endpoint = test MAE at h=3, paired-bootstrap p < 0.05, K=472 1:1 augmentation. Secondary = DTW < 0.5 absolute AND < classical-WGAN-GP by ≥ 0.1.
-- **Sample efficiency** (Step 6): data-fraction grid {10, 25, 50, 100}%, chronologically truncated from start.
+- **Reproducibility** (Claim 1): σ ratio ≥ 2× on test MAE at h=3 (anchored at 3.77× from Phase C).
+- **Effective dimension** (Claim 2, Step 5): Abbas et al. 2021 Eq. 4, empirical Fisher via `jax.jacrev` (reverse-mode required for Diffrax compatibility), n=472 training samples, matched at hidden_size=4.
+- **Sample efficiency** (Claim 3, Step 6): data-fraction grid {10, 25, 50, 100}%, chronologically truncated from start.
 - **Null-result handling:** all three claims, no pivots.
+
+(The original v1 pre-registration included a QWGAN-GP synthetic-data-lift
+claim as a fourth/headline contribution. It was dropped after the Phase
+A/B/C audit; rationale in `hypothesis.md` v2 "Deviations from v1.")
 
 ---
 
-## What's blocked and what's next
+## What's left
 
-**Ready to write** (paper Sections 1-3):
-- Introduction + methodology (locked protocol)
-- Classical baseline + physics-informed ablation
-- Horizon ablation (1h, 3h, 6h, 12h with explicit h=3 framing)
-- Param-matched comparison (Pareto curve)
-- QLNN vs persistence vs param-matched classical (3 statistical tests)
-- Reproducibility argument (3× tighter QLNN variance)
-- Leak sensitivity (the fixed-OD comparator) — supplementary
+The empirical work is complete. All three pre-registered claims have
+verdicts; every headline number is verified end-to-end by
+`scripts/verify_paper_integrity.py`; three publication-quality figures
+are in `paper/figures/`. The remaining task is paper writing itself
+(introduction, methods, results, discussion). Suggested paper section
+mapping:
 
-**Step 4 (next):** QWGAN-GP synthetic generator, evaluated against the pre-registered DTW + downstream-MAE-lift endpoints in `hypothesis.md`.
-
-**Step 5:** Effective dimension via empirical Fisher (`jax.jacfwd`), Abbas et al. 2021 Eq. 4, matched at H=4.
-
-**Step 6:** Sample efficiency via data-fraction sweep.
+- §1 Introduction — motivate liquid neural networks for low-data
+  bioprocess forecasting; preview the three claims.
+- §2 Methods — locked evaluation protocol, classical Liquid-ODE
+  architecture, QLNN architecture (encoder + Liquid Quantum Cell +
+  Diffrax), statistical reporting (95% CI + paired bootstrap).
+- §3 Classical baseline — Euler/dopri5/+physics ablation, horizon
+  ablation (h ∈ {1,3,6,12}), the OD-scaler leak sensitivity comparator.
+- §4 Head-to-head: QLNN vs classical — h=1 (QLNN wins), h=3
+  (matched-params classical wins, but only by ~0.007 MAE), the
+  reproducibility result.
+- §5 Expressivity (Claim 2) — effective dimension (Abbas Eq. 4),
+  Δd_norm = +1.49 with caveats; the monotonicity correction in
+  `STEP5_MONOTONICITY_NOTE.md`.
+- §6 Sample efficiency (Claim 3) — the crossover finding, paired
+  bootstrap verdicts per fraction.
+- §7 Discussion — limitations (single fermentation run scope), why
+  QWGAN-GP was dropped (and what dataset would resurrect it), open
+  questions on the QLNN's d_norm seed variance.
 
 ---
 
