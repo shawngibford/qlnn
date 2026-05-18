@@ -1,0 +1,28 @@
+{
+  "n_rows": 778,
+  "train_end": 544,
+  "val_end": 661,
+  "n_train_windows": 118,
+  "n_val_windows": 76,
+  "n_test_windows": 71,
+  "horizon_hours": 3.0,
+  "window_size": 24,
+  "stride": 1,
+  "od_scaler_mode": "train_only",
+  "od_data_min": 0.47,
+  "od_data_max": 1.38,
+  "od_phys_max": 3.8,
+  "od_min": 0.47,
+  "od_max": 1.38,
+  "feature_cols": [
+    "OD",
+    "PRE",
+    "TEMP_EXT",
+    "TEMP_CULTURE",
+    "PAR_LIGHT",
+    "PH",
+    "DO"
+  ],
+  "target_col": "OD",
+  "stack": "jax+pennylane"
+}
