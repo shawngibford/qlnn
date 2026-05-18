@@ -45,3 +45,5 @@ results/*
 !results/param_sweep/
 !results/qlnn_hybrid_h1/
 !results/qlnn_hybrid_h3/
+!results/qlnn_hybrid_h3_physics/
+!results/effective_dimension/
