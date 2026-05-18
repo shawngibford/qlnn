@@ -4,7 +4,35 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-Research-code Python package implementing a quantum-liquid neural ODE pipeline for generating synthetic bioreactor time-series data. The dataset is small (778 samples of optical density and related features). `spec.md` is the full design/roadmap document. Stack is hybrid by design: PyTorch for the classical baseline (this repo), and a separate JAX + Equinox + Diffrax + PennyLane `qlnn_/` subpackage (forthcoming) for the quantum side. The three paper contributions are (1) synthetic data lift via QWGAN-GP, (2) expressivity via Fisher / effective dimension, (3) sample efficiency.
+Research code for a head-to-head comparison of classical Liquid Neural ODE
+and Quantum Liquid Neural Network forecasters on a 778-sample
+single-fermentation-run bioreactor OD dataset.
+
+**Status: code + experiments complete; paper writing is the remaining work.**
+
+The three pre-registered claims (`hypothesis.md` v2; original QWGAN-GP
+claim was explicitly dropped after the Phase A/B/C peer-review-style
+audit):
+
+1. **Reproducibility** — QLNN test-MAE σ is ≥ 2× tighter than classical
+   at matched params. ✅ MET (3.77× ratio, holds at every data fraction).
+2. **Expressivity** — QLNN d_norm (Abbas et al. 2021 Eq. 4) exceeds
+   classical by > 1.0 at matched params. ✅ MET (+1.49), caveated by
+   QLNN's higher d_norm seed-variance (4.7 vs 1.3) — see
+   `STEP5_MONOTONICITY_NOTE.md` for the corrected sanity-check criterion.
+3. **Sample efficiency** — paired bootstrap shows QLNN wins at 10%
+   (p=0.015) and 25% (p=0.002) of the training data, ties at 50%, loses
+   at 100% (p=0.029). Stronger than the original pre-reg threshold
+   required.
+
+**Single source of truth for paper numbers: `PAPER_SUMMARY.md`.** It is
+verified end-to-end by `scripts/verify_paper_integrity.py`.
+
+Stack is hybrid by design: PyTorch + torchdiffeq for the classical
+baseline (`src/quantum_liquid_neuralode/`) and JAX + Equinox + Diffrax +
+PennyLane for the QLNN (`src/qlnn_/`). Both packages share the
+data preprocessing, evaluation, bootstrap, and effective-dimension
+modules so head-to-head numbers are bit-identical comparable.
 
 ## Commands
 
