@@ -108,12 +108,12 @@ def main() -> None:
             c = rows["classical"][pct]
             q_mae = q["test"]["mae_raw"]["mean"] if q else None
             c_mae = c["test"]["mae_raw"]["mean"] if c else None
+            def _fmt(x): return f"{x:.4f}" if x is not None else "—"
+            def _hit(x): return "YES" if (x is not None and x <= target_mae) else "NO"
             md.append(
-                f"- {pct}%: classical={c_mae:.4f} | QLNN={q_mae:.4f} | "
-                f"QLNN reaches target ({q_mae:.4f} <= {target_mae:.4f}): "
-                f"{'YES' if q_mae is not None and q_mae <= target_mae else 'NO'} | "
-                f"classical reaches target: "
-                f"{'YES' if c_mae is not None and c_mae <= target_mae else 'NO'}"
+                f"- {pct}%: classical={_fmt(c_mae)} | QLNN={_fmt(q_mae)} | "
+                f"QLNN reaches target: {_hit(q_mae)} | "
+                f"classical reaches target: {_hit(c_mae)}"
             )
 
     out_md = ROOT / "sample_efficiency_table.md"
