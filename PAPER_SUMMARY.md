@@ -1,8 +1,28 @@
-# Quantum-Liquid Neural ODE Bioreactor Paper — Phase A/B/C Synthesis
+# Liquid Neural Networks vs Quantum Liquid Neural Networks — Paper Synthesis
 
-**Status:** All three remediation phases complete. 10 git commits. 120/120 tests passing. Results frozen with provenance (git SHA + data SHA-256 + package versions).
+**Status:** Phases A/B/C complete + scope refocused. 12+ commits.
+**Paper claim:** Classical Liquid-ODE vs Quantum Liquid Neural Network on
+bioreactor OD forecasting, head-to-head at matched parameter count, under
+a peer-review-grade locked evaluation protocol.
 
-This document is the synthesis of every Phase A/B/C result and is meant as the starting point for the paper's methods + results sections.
+**The QWGAN-GP step was dropped** after the Phase A/B/C audit (see
+`hypothesis.md` v2 "Deviations from v1"). A single-run dataset cannot
+support a "synthetic data improves forecasting" claim without a held-out
+second run; the QWGAN-GP investment would have been multi-day for a
+likely-null result. The paper now focuses on the core LNN-vs-QLNN
+comparison.
+
+## The three claims (v2, pre-registered)
+
+| # | Claim | Evidence we have | Status |
+|---|---|---|---|
+| 1 | **Reproducibility** — QLNN has σ ratio ≥ 2× tighter than classical at matched params | Phase C empirical (3.77×) | ✅ pre-reg threshold met by anchor |
+| 2 | **Expressivity** — at matched params, QLNN reaches higher normalized effective dimension (Abbas et al. 2021) | Step 5 in flight | ⏳ |
+| 3 | **Sample efficiency** — QLNN reaches target test MAE with less data | Step 6 designed; runs next session | ⏳ |
+
+This document captures Claims 1's data, plus all of the foundational
+Phase A/B/C results that the paper's Methods and Baseline sections will
+build on.
 
 ---
 
