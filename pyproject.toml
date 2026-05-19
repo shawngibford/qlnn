@@ -33,6 +33,11 @@ dev = [
   "matplotlib>=3.7",
   "seaborn>=0.12",
 ]
+# Circuit-search Bayesian optimization (Phase 3 of the QLNN ansatz search).
+# Optional because the per-axis grid (Phase 2) doesn't need it.
+search = [
+  "optuna>=3.5",
+]
 
 [tool.setuptools]
 package-dir = {"" = "src"}
