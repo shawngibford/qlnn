@@ -1,0 +1,1426 @@
+{
+  "datasets": [
+    "qzeta_od",
+    "lotka_volterra_m472",
+    "lotka_volterra_full",
+    "fitzhugh_nagumo_m472",
+    "fitzhugh_nagumo_full",
+    "van_der_pol_m472",
+    "van_der_pol_full",
+    "lorenz_m472",
+    "lorenz_full",
+    "kuramoto_m472",
+    "kuramoto_full"
+  ],
+  "models": [
+    "classical_H2",
+    "classical_H4",
+    "classical_H8",
+    "classical_H16",
+    "classical_H32",
+    "qlnn_data_reuploading__R0_control",
+    "qlnn_data_reuploading__R1_weight_decay",
+    "qlnn_data_reuploading__R2_physics_prior",
+    "qlnn_data_reuploading__R3_smooth_convergence",
+    "qlnn_hardware_efficient__R0_control",
+    "qlnn_hardware_efficient__R1_weight_decay",
+    "qlnn_hardware_efficient__R2_physics_prior",
+    "qlnn_hardware_efficient__R3_smooth_convergence",
+    "qlnn_strongly_entangling__R0_control",
+    "qlnn_strongly_entangling__R1_weight_decay",
+    "qlnn_strongly_entangling__R2_physics_prior",
+    "qlnn_strongly_entangling__R3_smooth_convergence",
+    "qlnn_brickwall__R0_control",
+    "qlnn_brickwall__R1_weight_decay",
+    "qlnn_brickwall__R2_physics_prior",
+    "qlnn_brickwall__R3_smooth_convergence"
+  ],
+  "configs": [
+    {
+      "stem": "qzeta_od__classical_H2",
+      "dataset": "qzeta_od",
+      "model": "classical_H2",
+      "stack": "classical"
+    },
+    {
+      "stem": "qzeta_od__classical_H4",
+      "dataset": "qzeta_od",
+      "model": "classical_H4",
+      "stack": "classical"
+    },
+    {
+      "stem": "qzeta_od__classical_H8",
+      "dataset": "qzeta_od",
+      "model": "classical_H8",
+      "stack": "classical"
+    },
+    {
+      "stem": "qzeta_od__classical_H16",
+      "dataset": "qzeta_od",
+      "model": "classical_H16",
+      "stack": "classical"
+    },
+    {
+      "stem": "qzeta_od__classical_H32",
+      "dataset": "qzeta_od",
+      "model": "classical_H32",
+      "stack": "classical"
+    },
+    {
+      "stem": "qzeta_od__qlnn_data_reuploading__R0_control",
+      "dataset": "qzeta_od",
+      "model": "qlnn_data_reuploading__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_data_reuploading__R1_weight_decay",
+      "dataset": "qzeta_od",
+      "model": "qlnn_data_reuploading__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_data_reuploading__R2_physics_prior",
+      "dataset": "qzeta_od",
+      "model": "qlnn_data_reuploading__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_data_reuploading__R3_smooth_convergence",
+      "dataset": "qzeta_od",
+      "model": "qlnn_data_reuploading__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_hardware_efficient__R0_control",
+      "dataset": "qzeta_od",
+      "model": "qlnn_hardware_efficient__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_hardware_efficient__R1_weight_decay",
+      "dataset": "qzeta_od",
+      "model": "qlnn_hardware_efficient__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_hardware_efficient__R2_physics_prior",
+      "dataset": "qzeta_od",
+      "model": "qlnn_hardware_efficient__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_hardware_efficient__R3_smooth_convergence",
+      "dataset": "qzeta_od",
+      "model": "qlnn_hardware_efficient__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_strongly_entangling__R0_control",
+      "dataset": "qzeta_od",
+      "model": "qlnn_strongly_entangling__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_strongly_entangling__R1_weight_decay",
+      "dataset": "qzeta_od",
+      "model": "qlnn_strongly_entangling__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_strongly_entangling__R2_physics_prior",
+      "dataset": "qzeta_od",
+      "model": "qlnn_strongly_entangling__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_strongly_entangling__R3_smooth_convergence",
+      "dataset": "qzeta_od",
+      "model": "qlnn_strongly_entangling__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_brickwall__R0_control",
+      "dataset": "qzeta_od",
+      "model": "qlnn_brickwall__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_brickwall__R1_weight_decay",
+      "dataset": "qzeta_od",
+      "model": "qlnn_brickwall__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_brickwall__R2_physics_prior",
+      "dataset": "qzeta_od",
+      "model": "qlnn_brickwall__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_brickwall__R3_smooth_convergence",
+      "dataset": "qzeta_od",
+      "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__classical_H2",
+      "dataset": "lotka_volterra_m472",
+      "model": "classical_H2",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_m472__classical_H4",
+      "dataset": "lotka_volterra_m472",
+      "model": "classical_H4",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_m472__classical_H8",
+      "dataset": "lotka_volterra_m472",
+      "model": "classical_H8",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_m472__classical_H16",
+      "dataset": "lotka_volterra_m472",
+      "model": "classical_H16",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_m472__classical_H32",
+      "dataset": "lotka_volterra_m472",
+      "model": "classical_H32",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_data_reuploading__R0_control",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_data_reuploading__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_data_reuploading__R1_weight_decay",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_data_reuploading__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_data_reuploading__R2_physics_prior",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_data_reuploading__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_data_reuploading__R3_smooth_convergence",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_data_reuploading__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_hardware_efficient__R0_control",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_hardware_efficient__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_hardware_efficient__R1_weight_decay",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_hardware_efficient__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_hardware_efficient__R2_physics_prior",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_hardware_efficient__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_hardware_efficient__R3_smooth_convergence",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_hardware_efficient__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_strongly_entangling__R0_control",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_strongly_entangling__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_strongly_entangling__R1_weight_decay",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_strongly_entangling__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_strongly_entangling__R2_physics_prior",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_strongly_entangling__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_strongly_entangling__R3_smooth_convergence",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_strongly_entangling__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_brickwall__R0_control",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_brickwall__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_brickwall__R1_weight_decay",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_brickwall__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_brickwall__R2_physics_prior",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_brickwall__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_brickwall__R3_smooth_convergence",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__classical_H2",
+      "dataset": "lotka_volterra_full",
+      "model": "classical_H2",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_full__classical_H4",
+      "dataset": "lotka_volterra_full",
+      "model": "classical_H4",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_full__classical_H8",
+      "dataset": "lotka_volterra_full",
+      "model": "classical_H8",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_full__classical_H16",
+      "dataset": "lotka_volterra_full",
+      "model": "classical_H16",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_full__classical_H32",
+      "dataset": "lotka_volterra_full",
+      "model": "classical_H32",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_data_reuploading__R0_control",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_data_reuploading__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_data_reuploading__R1_weight_decay",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_data_reuploading__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_data_reuploading__R2_physics_prior",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_data_reuploading__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_data_reuploading__R3_smooth_convergence",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_data_reuploading__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_hardware_efficient__R0_control",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_hardware_efficient__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_hardware_efficient__R1_weight_decay",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_hardware_efficient__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_hardware_efficient__R2_physics_prior",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_hardware_efficient__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_hardware_efficient__R3_smooth_convergence",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_hardware_efficient__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_strongly_entangling__R0_control",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_strongly_entangling__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_strongly_entangling__R1_weight_decay",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_strongly_entangling__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_strongly_entangling__R2_physics_prior",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_strongly_entangling__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_strongly_entangling__R3_smooth_convergence",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_strongly_entangling__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_brickwall__R0_control",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_brickwall__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_brickwall__R1_weight_decay",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_brickwall__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_brickwall__R2_physics_prior",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_brickwall__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_brickwall__R3_smooth_convergence",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__classical_H2",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "classical_H2",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__classical_H4",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "classical_H4",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__classical_H8",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "classical_H8",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__classical_H16",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "classical_H16",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__classical_H32",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "classical_H32",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_data_reuploading__R0_control",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_data_reuploading__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_data_reuploading__R1_weight_decay",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_data_reuploading__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_data_reuploading__R2_physics_prior",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_data_reuploading__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_data_reuploading__R3_smooth_convergence",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_data_reuploading__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_hardware_efficient__R0_control",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_hardware_efficient__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_hardware_efficient__R1_weight_decay",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_hardware_efficient__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_hardware_efficient__R2_physics_prior",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_hardware_efficient__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_hardware_efficient__R3_smooth_convergence",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_hardware_efficient__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_strongly_entangling__R0_control",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_strongly_entangling__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_strongly_entangling__R1_weight_decay",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_strongly_entangling__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_strongly_entangling__R2_physics_prior",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_strongly_entangling__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_strongly_entangling__R3_smooth_convergence",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_strongly_entangling__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_brickwall__R0_control",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_brickwall__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_brickwall__R1_weight_decay",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_brickwall__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_brickwall__R2_physics_prior",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_brickwall__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_brickwall__R3_smooth_convergence",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__classical_H2",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "classical_H2",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__classical_H4",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "classical_H4",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__classical_H8",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "classical_H8",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__classical_H16",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "classical_H16",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__classical_H32",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "classical_H32",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_data_reuploading__R0_control",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_data_reuploading__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_data_reuploading__R1_weight_decay",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_data_reuploading__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_data_reuploading__R2_physics_prior",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_data_reuploading__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_data_reuploading__R3_smooth_convergence",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_data_reuploading__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_hardware_efficient__R0_control",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_hardware_efficient__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_hardware_efficient__R1_weight_decay",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_hardware_efficient__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_hardware_efficient__R2_physics_prior",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_hardware_efficient__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_hardware_efficient__R3_smooth_convergence",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_hardware_efficient__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_strongly_entangling__R0_control",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_strongly_entangling__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_strongly_entangling__R1_weight_decay",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_strongly_entangling__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_strongly_entangling__R2_physics_prior",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_strongly_entangling__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_strongly_entangling__R3_smooth_convergence",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_strongly_entangling__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_brickwall__R0_control",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_brickwall__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_brickwall__R1_weight_decay",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_brickwall__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_brickwall__R2_physics_prior",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_brickwall__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_brickwall__R3_smooth_convergence",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__classical_H2",
+      "dataset": "van_der_pol_m472",
+      "model": "classical_H2",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_m472__classical_H4",
+      "dataset": "van_der_pol_m472",
+      "model": "classical_H4",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_m472__classical_H8",
+      "dataset": "van_der_pol_m472",
+      "model": "classical_H8",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_m472__classical_H16",
+      "dataset": "van_der_pol_m472",
+      "model": "classical_H16",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_m472__classical_H32",
+      "dataset": "van_der_pol_m472",
+      "model": "classical_H32",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_data_reuploading__R0_control",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_data_reuploading__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_data_reuploading__R1_weight_decay",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_data_reuploading__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_data_reuploading__R2_physics_prior",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_data_reuploading__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_data_reuploading__R3_smooth_convergence",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_data_reuploading__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_hardware_efficient__R0_control",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_hardware_efficient__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_hardware_efficient__R1_weight_decay",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_hardware_efficient__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_hardware_efficient__R2_physics_prior",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_hardware_efficient__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_hardware_efficient__R3_smooth_convergence",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_hardware_efficient__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_strongly_entangling__R0_control",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_strongly_entangling__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_strongly_entangling__R1_weight_decay",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_strongly_entangling__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_strongly_entangling__R2_physics_prior",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_strongly_entangling__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_strongly_entangling__R3_smooth_convergence",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_strongly_entangling__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_brickwall__R0_control",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_brickwall__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_brickwall__R1_weight_decay",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_brickwall__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_brickwall__R2_physics_prior",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_brickwall__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_brickwall__R3_smooth_convergence",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__classical_H2",
+      "dataset": "van_der_pol_full",
+      "model": "classical_H2",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_full__classical_H4",
+      "dataset": "van_der_pol_full",
+      "model": "classical_H4",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_full__classical_H8",
+      "dataset": "van_der_pol_full",
+      "model": "classical_H8",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_full__classical_H16",
+      "dataset": "van_der_pol_full",
+      "model": "classical_H16",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_full__classical_H32",
+      "dataset": "van_der_pol_full",
+      "model": "classical_H32",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_data_reuploading__R0_control",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_data_reuploading__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_data_reuploading__R1_weight_decay",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_data_reuploading__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_data_reuploading__R2_physics_prior",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_data_reuploading__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_data_reuploading__R3_smooth_convergence",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_data_reuploading__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_hardware_efficient__R0_control",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_hardware_efficient__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_hardware_efficient__R1_weight_decay",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_hardware_efficient__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_hardware_efficient__R2_physics_prior",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_hardware_efficient__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_hardware_efficient__R3_smooth_convergence",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_hardware_efficient__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_strongly_entangling__R0_control",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_strongly_entangling__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_strongly_entangling__R1_weight_decay",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_strongly_entangling__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_strongly_entangling__R2_physics_prior",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_strongly_entangling__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_strongly_entangling__R3_smooth_convergence",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_strongly_entangling__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_brickwall__R0_control",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_brickwall__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_brickwall__R1_weight_decay",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_brickwall__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_brickwall__R2_physics_prior",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_brickwall__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_brickwall__R3_smooth_convergence",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__classical_H2",
+      "dataset": "lorenz_m472",
+      "model": "classical_H2",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_m472__classical_H4",
+      "dataset": "lorenz_m472",
+      "model": "classical_H4",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_m472__classical_H8",
+      "dataset": "lorenz_m472",
+      "model": "classical_H8",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_m472__classical_H16",
+      "dataset": "lorenz_m472",
+      "model": "classical_H16",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_m472__classical_H32",
+      "dataset": "lorenz_m472",
+      "model": "classical_H32",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_data_reuploading__R0_control",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_data_reuploading__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_data_reuploading__R1_weight_decay",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_data_reuploading__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_data_reuploading__R2_physics_prior",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_data_reuploading__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_data_reuploading__R3_smooth_convergence",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_data_reuploading__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_hardware_efficient__R0_control",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_hardware_efficient__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_hardware_efficient__R1_weight_decay",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_hardware_efficient__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_hardware_efficient__R2_physics_prior",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_hardware_efficient__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_hardware_efficient__R3_smooth_convergence",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_hardware_efficient__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_strongly_entangling__R0_control",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_strongly_entangling__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_strongly_entangling__R1_weight_decay",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_strongly_entangling__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_strongly_entangling__R2_physics_prior",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_strongly_entangling__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_strongly_entangling__R3_smooth_convergence",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_strongly_entangling__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_brickwall__R0_control",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_brickwall__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_brickwall__R1_weight_decay",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_brickwall__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_brickwall__R2_physics_prior",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_brickwall__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_brickwall__R3_smooth_convergence",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__classical_H2",
+      "dataset": "lorenz_full",
+      "model": "classical_H2",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_full__classical_H4",
+      "dataset": "lorenz_full",
+      "model": "classical_H4",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_full__classical_H8",
+      "dataset": "lorenz_full",
+      "model": "classical_H8",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_full__classical_H16",
+      "dataset": "lorenz_full",
+      "model": "classical_H16",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_full__classical_H32",
+      "dataset": "lorenz_full",
+      "model": "classical_H32",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_full__qlnn_data_reuploading__R0_control",
+      "dataset": "lorenz_full",
+      "model": "qlnn_data_reuploading__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_data_reuploading__R1_weight_decay",
+      "dataset": "lorenz_full",
+      "model": "qlnn_data_reuploading__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_data_reuploading__R2_physics_prior",
+      "dataset": "lorenz_full",
+      "model": "qlnn_data_reuploading__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_data_reuploading__R3_smooth_convergence",
+      "dataset": "lorenz_full",
+      "model": "qlnn_data_reuploading__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_hardware_efficient__R0_control",
+      "dataset": "lorenz_full",
+      "model": "qlnn_hardware_efficient__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_hardware_efficient__R1_weight_decay",
+      "dataset": "lorenz_full",
+      "model": "qlnn_hardware_efficient__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_hardware_efficient__R2_physics_prior",
+      "dataset": "lorenz_full",
+      "model": "qlnn_hardware_efficient__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_hardware_efficient__R3_smooth_convergence",
+      "dataset": "lorenz_full",
+      "model": "qlnn_hardware_efficient__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_strongly_entangling__R0_control",
+      "dataset": "lorenz_full",
+      "model": "qlnn_strongly_entangling__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_strongly_entangling__R1_weight_decay",
+      "dataset": "lorenz_full",
+      "model": "qlnn_strongly_entangling__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_strongly_entangling__R2_physics_prior",
+      "dataset": "lorenz_full",
+      "model": "qlnn_strongly_entangling__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_strongly_entangling__R3_smooth_convergence",
+      "dataset": "lorenz_full",
+      "model": "qlnn_strongly_entangling__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_brickwall__R0_control",
+      "dataset": "lorenz_full",
+      "model": "qlnn_brickwall__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_brickwall__R1_weight_decay",
+      "dataset": "lorenz_full",
+      "model": "qlnn_brickwall__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_brickwall__R2_physics_prior",
+      "dataset": "lorenz_full",
+      "model": "qlnn_brickwall__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_brickwall__R3_smooth_convergence",
+      "dataset": "lorenz_full",
+      "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__classical_H2",
+      "dataset": "kuramoto_m472",
+      "model": "classical_H2",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_m472__classical_H4",
+      "dataset": "kuramoto_m472",
+      "model": "classical_H4",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_m472__classical_H8",
+      "dataset": "kuramoto_m472",
+      "model": "classical_H8",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_m472__classical_H16",
+      "dataset": "kuramoto_m472",
+      "model": "classical_H16",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_m472__classical_H32",
+      "dataset": "kuramoto_m472",
+      "model": "classical_H32",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_data_reuploading__R0_control",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_data_reuploading__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_data_reuploading__R1_weight_decay",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_data_reuploading__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_data_reuploading__R2_physics_prior",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_data_reuploading__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_data_reuploading__R3_smooth_convergence",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_data_reuploading__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_hardware_efficient__R0_control",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_hardware_efficient__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_hardware_efficient__R1_weight_decay",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_hardware_efficient__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_hardware_efficient__R2_physics_prior",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_hardware_efficient__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_hardware_efficient__R3_smooth_convergence",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_hardware_efficient__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_strongly_entangling__R0_control",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_strongly_entangling__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_strongly_entangling__R1_weight_decay",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_strongly_entangling__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_strongly_entangling__R2_physics_prior",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_strongly_entangling__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_strongly_entangling__R3_smooth_convergence",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_strongly_entangling__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_brickwall__R0_control",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_brickwall__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_brickwall__R1_weight_decay",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_brickwall__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_brickwall__R2_physics_prior",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_brickwall__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_brickwall__R3_smooth_convergence",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__classical_H2",
+      "dataset": "kuramoto_full",
+      "model": "classical_H2",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_full__classical_H4",
+      "dataset": "kuramoto_full",
+      "model": "classical_H4",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_full__classical_H8",
+      "dataset": "kuramoto_full",
+      "model": "classical_H8",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_full__classical_H16",
+      "dataset": "kuramoto_full",
+      "model": "classical_H16",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_full__classical_H32",
+      "dataset": "kuramoto_full",
+      "model": "classical_H32",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_data_reuploading__R0_control",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_data_reuploading__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_data_reuploading__R1_weight_decay",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_data_reuploading__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_data_reuploading__R2_physics_prior",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_data_reuploading__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_data_reuploading__R3_smooth_convergence",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_data_reuploading__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_hardware_efficient__R0_control",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_hardware_efficient__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_hardware_efficient__R1_weight_decay",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_hardware_efficient__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_hardware_efficient__R2_physics_prior",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_hardware_efficient__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_hardware_efficient__R3_smooth_convergence",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_hardware_efficient__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_strongly_entangling__R0_control",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_strongly_entangling__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_strongly_entangling__R1_weight_decay",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_strongly_entangling__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_strongly_entangling__R2_physics_prior",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_strongly_entangling__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_strongly_entangling__R3_smooth_convergence",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_strongly_entangling__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_brickwall__R0_control",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_brickwall__R0_control",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_brickwall__R1_weight_decay",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_brickwall__R1_weight_decay",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_brickwall__R2_physics_prior",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_brickwall__R2_physics_prior",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_brickwall__R3_smooth_convergence",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    }
+  ]
+}
