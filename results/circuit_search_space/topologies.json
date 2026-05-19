@@ -1,0 +1,327 @@
+{
+  "n_distinct_topologies": 28,
+  "axes": {
+    "family": [
+      "brickwall",
+      "data_reuploading",
+      "hardware_efficient",
+      "strongly_entangling"
+    ],
+    "num_qubits": [
+      "2",
+      "4",
+      "6"
+    ],
+    "num_layers": [
+      "1",
+      "2",
+      "3",
+      "5"
+    ],
+    "encoding": [
+      "rx",
+      "ry"
+    ],
+    "entanglement": [
+      "all_to_all",
+      "linear",
+      "ring",
+      "template"
+    ]
+  },
+  "topologies": [
+    {
+      "family": "brickwall",
+      "num_qubits": 2,
+      "num_layers": 1,
+      "encoding": "rx",
+      "entanglement": "template",
+      "model_keys": [
+        "qlnn_prior_brickwall_q2l1_rx_all_to_all"
+      ]
+    },
+    {
+      "family": "brickwall",
+      "num_qubits": 4,
+      "num_layers": 3,
+      "encoding": "rx",
+      "entanglement": "template",
+      "model_keys": [
+        "qlnn_brickwall__R0_control",
+        "qlnn_brickwall__R1_weight_decay",
+        "qlnn_brickwall__R2_physics_prior",
+        "qlnn_brickwall__R3_smooth_convergence",
+        "qlnn_prior_brickwall_q4l3_rx_all_to_all"
+      ]
+    },
+    {
+      "family": "brickwall",
+      "num_qubits": 4,
+      "num_layers": 5,
+      "encoding": "ry",
+      "entanglement": "template",
+      "model_keys": [
+        "qlnn_prior_brickwall_q4l5_ry_all_to_all"
+      ]
+    },
+    {
+      "family": "brickwall",
+      "num_qubits": 6,
+      "num_layers": 1,
+      "encoding": "ry",
+      "entanglement": "template",
+      "model_keys": [
+        "qlnn_prior_brickwall_q6l1_ry_ring"
+      ]
+    },
+    {
+      "family": "brickwall",
+      "num_qubits": 6,
+      "num_layers": 5,
+      "encoding": "ry",
+      "entanglement": "template",
+      "model_keys": [
+        "qlnn_prior_brickwall_q6l5_ry_linear"
+      ]
+    },
+    {
+      "family": "data_reuploading",
+      "num_qubits": 2,
+      "num_layers": 3,
+      "encoding": "rx",
+      "entanglement": "ring",
+      "model_keys": [
+        "qlnn_prior_data_reuploading_q2l3_rx_ring"
+      ]
+    },
+    {
+      "family": "data_reuploading",
+      "num_qubits": 4,
+      "num_layers": 1,
+      "encoding": "rx",
+      "entanglement": "ring",
+      "model_keys": [
+        "qlnn_prior_data_reuploading_q4l1_rx_ring"
+      ]
+    },
+    {
+      "family": "data_reuploading",
+      "num_qubits": 4,
+      "num_layers": 2,
+      "encoding": "rx",
+      "entanglement": "linear",
+      "model_keys": [
+        "qlnn_prior_data_reuploading_q4l2_rx_linear"
+      ]
+    },
+    {
+      "family": "data_reuploading",
+      "num_qubits": 4,
+      "num_layers": 2,
+      "encoding": "rx",
+      "entanglement": "ring",
+      "model_keys": [
+        "qlnn_prior_data_reuploading_q4l2_rx_ring"
+      ]
+    },
+    {
+      "family": "data_reuploading",
+      "num_qubits": 4,
+      "num_layers": 3,
+      "encoding": "rx",
+      "entanglement": "all_to_all",
+      "model_keys": [
+        "qlnn_prior_data_reuploading_q4l3_rx_all_to_all"
+      ]
+    },
+    {
+      "family": "data_reuploading",
+      "num_qubits": 4,
+      "num_layers": 3,
+      "encoding": "rx",
+      "entanglement": "linear",
+      "model_keys": [
+        "qlnn_prior_data_reuploading_q4l3_rx_linear"
+      ]
+    },
+    {
+      "family": "data_reuploading",
+      "num_qubits": 4,
+      "num_layers": 3,
+      "encoding": "rx",
+      "entanglement": "ring",
+      "model_keys": [
+        "qlnn_data_reuploading__R0_control",
+        "qlnn_data_reuploading__R1_weight_decay",
+        "qlnn_data_reuploading__R2_physics_prior",
+        "qlnn_data_reuploading__R3_smooth_convergence"
+      ]
+    },
+    {
+      "family": "data_reuploading",
+      "num_qubits": 4,
+      "num_layers": 3,
+      "encoding": "ry",
+      "entanglement": "ring",
+      "model_keys": [
+        "qlnn_prior_data_reuploading_q4l3_ry_ring"
+      ]
+    },
+    {
+      "family": "data_reuploading",
+      "num_qubits": 4,
+      "num_layers": 5,
+      "encoding": "rx",
+      "entanglement": "ring",
+      "model_keys": [
+        "qlnn_prior_data_reuploading_q4l5_rx_ring"
+      ]
+    },
+    {
+      "family": "data_reuploading",
+      "num_qubits": 4,
+      "num_layers": 5,
+      "encoding": "ry",
+      "entanglement": "linear",
+      "model_keys": [
+        "qlnn_prior_data_reuploading_q4l5_ry_linear"
+      ]
+    },
+    {
+      "family": "data_reuploading",
+      "num_qubits": 6,
+      "num_layers": 1,
+      "encoding": "rx",
+      "entanglement": "linear",
+      "model_keys": [
+        "qlnn_prior_data_reuploading_q6l1_rx_linear"
+      ]
+    },
+    {
+      "family": "data_reuploading",
+      "num_qubits": 6,
+      "num_layers": 3,
+      "encoding": "rx",
+      "entanglement": "ring",
+      "model_keys": [
+        "qlnn_prior_data_reuploading_q6l3_rx_ring"
+      ]
+    },
+    {
+      "family": "hardware_efficient",
+      "num_qubits": 2,
+      "num_layers": 3,
+      "encoding": "rx",
+      "entanglement": "linear",
+      "model_keys": [
+        "qlnn_prior_hardware_efficient_q2l3_rx_linear"
+      ]
+    },
+    {
+      "family": "hardware_efficient",
+      "num_qubits": 4,
+      "num_layers": 2,
+      "encoding": "ry",
+      "entanglement": "linear",
+      "model_keys": [
+        "qlnn_prior_hardware_efficient_q4l2_ry_linear"
+      ]
+    },
+    {
+      "family": "hardware_efficient",
+      "num_qubits": 4,
+      "num_layers": 3,
+      "encoding": "rx",
+      "entanglement": "linear",
+      "model_keys": [
+        "qlnn_prior_hardware_efficient_q4l3_rx_linear"
+      ]
+    },
+    {
+      "family": "hardware_efficient",
+      "num_qubits": 4,
+      "num_layers": 3,
+      "encoding": "rx",
+      "entanglement": "ring",
+      "model_keys": [
+        "qlnn_hardware_efficient__R0_control",
+        "qlnn_hardware_efficient__R1_weight_decay",
+        "qlnn_hardware_efficient__R2_physics_prior",
+        "qlnn_hardware_efficient__R3_smooth_convergence"
+      ]
+    },
+    {
+      "family": "hardware_efficient",
+      "num_qubits": 4,
+      "num_layers": 5,
+      "encoding": "rx",
+      "entanglement": "linear",
+      "model_keys": [
+        "qlnn_prior_hardware_efficient_q4l5_rx_linear"
+      ]
+    },
+    {
+      "family": "strongly_entangling",
+      "num_qubits": 2,
+      "num_layers": 2,
+      "encoding": "rx",
+      "entanglement": "template",
+      "model_keys": [
+        "qlnn_prior_strongly_entangling_q2l2_rx_tmpl"
+      ]
+    },
+    {
+      "family": "strongly_entangling",
+      "num_qubits": 4,
+      "num_layers": 1,
+      "encoding": "rx",
+      "entanglement": "template",
+      "model_keys": [
+        "qlnn_prior_strongly_entangling_q4l1_rx_tmpl"
+      ]
+    },
+    {
+      "family": "strongly_entangling",
+      "num_qubits": 4,
+      "num_layers": 3,
+      "encoding": "rx",
+      "entanglement": "template",
+      "model_keys": [
+        "qlnn_strongly_entangling__R0_control",
+        "qlnn_strongly_entangling__R1_weight_decay",
+        "qlnn_strongly_entangling__R2_physics_prior",
+        "qlnn_strongly_entangling__R3_smooth_convergence"
+      ]
+    },
+    {
+      "family": "strongly_entangling",
+      "num_qubits": 4,
+      "num_layers": 3,
+      "encoding": "ry",
+      "entanglement": "template",
+      "model_keys": [
+        "qlnn_prior_strongly_entangling_q4l3_ry_tmpl"
+      ]
+    },
+    {
+      "family": "strongly_entangling",
+      "num_qubits": 6,
+      "num_layers": 2,
+      "encoding": "ry",
+      "entanglement": "template",
+      "model_keys": [
+        "qlnn_prior_strongly_entangling_q6l2_ry_tmpl"
+      ]
+    },
+    {
+      "family": "strongly_entangling",
+      "num_qubits": 6,
+      "num_layers": 3,
+      "encoding": "rx",
+      "entanglement": "template",
+      "model_keys": [
+        "qlnn_prior_strongly_entangling_q6l3_rx_tmpl"
+      ]
+    }
+  ]
+}

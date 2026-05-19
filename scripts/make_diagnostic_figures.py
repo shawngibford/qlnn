@@ -714,11 +714,88 @@ def fig_master_comparison():
     _save(fig, "fig_master_comparison")
 
 
+# ===========================================================================
+# SUPPLEMENT — full circuit-topology gallery (all 28 distinct topologies)
+# ===========================================================================
+#
+# Standard QML main-text practice = family templates + a parametric
+# search-space table (scripts/build_circuit_search_space.py). This is the
+# COMPLETENESS supplement: every distinct topology drawn via qml.draw_mpl,
+# one figure per ansatz family. Reads
+# results/circuit_search_space/topologies.json (regime is a training knob,
+# not topology — it does not appear here).
+
+def _gallery_one_family(family: str, topos: list[dict]):
+    try:
+        import pennylane as qml
+        from qlnn_.circuits import AnsatzConfig, build
+    except Exception as e:
+        print(f"SKIP fig_circuit_gallery_{family}: import failed ({e})")
+        return
+    rng = np.random.default_rng(0)
+    n = len(topos)
+    fig, axes = plt.subplots(n, 1, figsize=(11, 2.5 * n), squeeze=False)
+    for ax, t in zip(axes[:, 0], topos):
+        params: dict = {"encoding": t["encoding"]}
+        if t["entanglement"] != "template":
+            params["entanglement"] = t["entanglement"]
+        if family == "brickwall":
+            params["reupload"] = False
+        try:
+            circ = build(AnsatzConfig(name=family,
+                                      num_qubits=t["num_qubits"],
+                                      num_layers=t["num_layers"],
+                                      params=params))
+            w = 0.1 * rng.standard_normal(circ.weight_shape)
+            x = np.linspace(-0.5, 0.5, t["num_qubits"])
+            qml.draw_mpl(circ._qnode, style="pennylane")(x, w)
+            tmp = OUT / f"_tmp_gal_{family}_{t['num_qubits']}_{t['num_layers']}.png"
+            plt.savefig(tmp, dpi=130, bbox_inches="tight")
+            plt.close()
+            ax.imshow(plt.imread(tmp))
+            tmp.unlink()
+        except Exception as e:  # pragma: no cover
+            ax.text(0.5, 0.5, f"draw failed: {e}", ha="center")
+        ax.axis("off")
+        ent = (t["entanglement"] if t["entanglement"] != "template"
+               else "template-fixed")
+        ax.set_title(f"{family}  ·  {t['num_qubits']}q / {t['num_layers']}L  "
+                     f"·  encode={t['encoding']}  ·  ent={ent}", fontsize=9)
+    fig.suptitle(f"Circuit gallery — {family} "
+                 f"({n} distinct topologies)", y=1.005, fontsize=12)
+    fig.tight_layout()
+    _save(fig, f"fig_circuit_gallery_{family}")
+
+
+def fig_circuit_gallery():
+    """Supplement: render every distinct circuit topology, one figure per
+    ansatz family. Gracefully skips if the search-space table is absent."""
+    p = ROOT / "results" / "circuit_search_space" / "topologies.json"
+    if not p.exists():
+        print("SKIP fig_circuit_gallery: run "
+              "scripts/build_circuit_search_space.py first")
+        return
+    with p.open() as f:
+        payload = json.load(f)
+    by_fam: dict[str, list[dict]] = {}
+    for t in payload["topologies"]:
+        by_fam.setdefault(t["family"], []).append(t)
+    for fam in sorted(by_fam):
+        _gallery_one_family(fam, sorted(
+            by_fam[fam],
+            key=lambda t: (t["num_qubits"], t["num_layers"],
+                           t["encoding"], t["entanglement"])))
+    print(f"circuit gallery: {payload['n_distinct_topologies']} topologies "
+          f"across {len(by_fam)} families")
+
+
 T1 = [
     fig_learning_curves, fig_forecast_trajectory, fig_pred_vs_actual,
     fig_residual_analysis, fig_paired_bootstrap, fig_seed_strip,
     fig_all_circuit_diagrams,
 ]
+
+SUPP = [fig_circuit_gallery]
 
 T2 = [
     fig_accuracy_variance_frontier, fig_regularization_arrows,
@@ -727,6 +804,6 @@ T2 = [
 
 
 if __name__ == "__main__":
-    for fn in T1 + T2:
+    for fn in T1 + T2 + SUPP:
         fn()
     print(f"\nDiagnostic figures written to {OUT}/")

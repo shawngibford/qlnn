@@ -324,7 +324,7 @@ property of the model or the dataset?** — is answerable only if the
 
 ---
 
-## 10. Figure inventory (21 figures, `paper/figures/*.png`)
+## 10. Figure inventory (25 figures + a parametric search-space table)
 
 **Headline / claims (`scripts/make_paper_figures.py`):**
 - `fig_horizon_ablation` — R²+MAE vs h; argues h=3 is discriminating.
@@ -355,6 +355,22 @@ property of the model or the dataset?** — is answerable only if the
 - `fig_master_comparison` — every config in (MAE,σ) space + the empty
   G1/G2 feasible box (the Option-B problem stated visually; 40 configs,
   0 in the box pre-Option-B).
+
+**Circuit presentation (main text + supplement):**
+- Main text = the 4-family templates (`fig_all_circuit_diagrams`) +
+  `fig_quantum_circuit` (reference) + a **parametric circuit
+  search-space table** (`results/circuit_search_space/search_space_table.md`,
+  `scripts/build_circuit_search_space.py`) — axes ×
+  levels + the 28-topology list. This is the standard QML way (not 28
+  diagrams in the body).
+- Supplement = **full gallery**, every distinct topology drawn via
+  `qml.draw_mpl`, one figure per family:
+  `fig_circuit_gallery_data_reuploading` (12),
+  `fig_circuit_gallery_strongly_entangling` (6),
+  `fig_circuit_gallery_hardware_efficient` (5),
+  `fig_circuit_gallery_brickwall` (5) = **28 distinct topologies total**.
+  Note: a regime (R0–R3) is a *training* knob, not a topology — the 48
+  models / 529 configs collapse to 28 distinct circuit diagrams.
 
 ---
 
