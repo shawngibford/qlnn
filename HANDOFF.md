@@ -1,9 +1,46 @@
-# ⏯️ PICK UP HERE — in-flight as of commit `707debb` (next-chat handoff)
+# ⏯️ PICK UP HERE — MAJOR PIVOT APPROVED (next-chat handoff)
 
-**The original 3-claim paper is done & verified. The project has since
-expanded massively (circuit search → Option-B → ODE battery → 529-config
-unified matrix → expressivity program). Read `PROJECT_DOSSIER.md` for the
-full picture; this section is the operational pick-up.**
+**The project has PIVOTED.** The bioreactor-OD work is a rigorous null
+on an n=1 dataset (not publishable positive) and is **archived, not
+deleted** (`verify_paper_integrity` stays green; `PAPER_SUMMARY.md` /
+3-claims framing **superseded**). The new project is a **Quantum Liquid
+NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
+
+**Authoritative spec: the approved plan at
+`~/.claude/plans/i-want-to-automate-quiet-cerf.md` ("# PIVOT — QLNN
+ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
+describes the *old* (now-superseded) program; keep for archive only.
+
+### PIVOT pick-up order (do these; everything below #1 is the OLD program)
+
+0. **Setup done this session**: `refs/` has 8 symlinked SOTA PDFs
+   (gitignored); the 10-ansatz roster + P3a faithfulness gate are in
+   the plan.
+1. **P1 — write `ODE_PDE_PRE_REG.md`** (keystone, no compute; template
+   = `hypothesis.md`): the falsifiable Schuld-Fourier hypothesis, the
+   two task defs (DQC-style **solver** + data-driven **forecaster**),
+   metric set (rollout + **relative-L2** + **valid-prediction-time**,
+   NEVER 1-step MAE), matched-comparison + equal-HPO protocol, the
+   **MANDATORY non-liquid Neural-ODE baseline** (isolates
+   quantum-vs-liquid confound), underfitting control. Commit before
+   any P6 run.
+2. **P3a — PDF-grounded faithfulness gate** (BEFORE coding circuits):
+   read each PDF in `refs/` via the **Read tool, page ranges** (NOT
+   abstracts/priors — this session's QPINN agent failed by using
+   training knowledge), write `refs/CIRCUIT_SPECS.md` gate-by-gate spec
+   cards with section/eq citations; dual-agent cross-check. Foundational
+   3 (Kyriienko 2011.10395 `chebyshev_dqc`, Schuld 2008.08605
+   `data_reuploading`, Lubasch 1907.09032 `lubasch_multicopy`) — spec
+   from arXiv full-text HTML (recommend user upload those 3 PDFs too).
+3. **P2/P3/P4/P5 → P6 → P7 → P8** per the plan (PDE generators; solver
+   physics-residual + autodiff prototype; forecaster rollout retask;
+   matched baselines incl. non-liquid Neural-ODE/MLP/PINN; unified
+   matrix v2 over {5 ODE + Burgers/Allen-Cahn/KdV} × {solver,forecaster}
+   × 10 ansätze; T3 triangulation; new dossier).
+
+### 1. There is a DETACHED background training job — do NOT wait on it
+*(OLD Option-B program — now superseded by the pivot, but let it finish
+cleanly; its results feed the archived dossier only, not the new paper.)*
 
 ### 1. There is a DETACHED background training job — do NOT wait on it
 

@@ -58,3 +58,4 @@ results/*
 !results/master_comparison.json
 !results/master_comparison.md
 !results/master_comparison.csv
+refs/
