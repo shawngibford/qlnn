@@ -48,3 +48,6 @@ results/*
 !results/qlnn_hybrid_h3_physics/
 !results/effective_dimension/
 !results/sample_efficiency/
+!results/circuit_search/
+!results/circuit_search_promoted/
+!results/circuit_search_optuna/
