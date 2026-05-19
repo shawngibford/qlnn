@@ -437,14 +437,223 @@ def fig_all_circuit_diagrams():
     _save(fig, "fig_all_circuit_diagrams")
 
 
+# ===========================================================================
+# T2 — Option-B narrative (renders once the O-2 sweep + summarizer land)
+# ===========================================================================
+#
+# Inputs:
+#   results/option_b/option_b_table.json   (scripts/summarize_option_b.py)
+#   results/baseline_lock.json             (the G1/G2 gate values)
+# Optional context overlay:
+#   results/circuit_search/circuit_search_table.json (prior search points)
+
+_REGIME_ORDER = ["R0_control", "R1_weight_decay", "R2_physics_prior",
+                 "R3_smooth_convergence"]
+_CIRCUIT_COLOR = {
+    "se_6q3l": "#009E73", "dr_4q3l": C_QLNN, "he_4q3l": "#E69F00",
+}
+
+
+def _option_b_rows() -> list[dict] | None:
+    p = ROOT / "results" / "option_b" / "option_b_table.json"
+    if not p.exists():
+        return None
+    with p.open() as f:
+        rows = json.load(f)
+    return rows or None
+
+
+def _gates() -> tuple[float, float]:
+    """(G1 MAE bar, G2 σ gate) from the frozen baseline lock."""
+    lock = _load_json("results/baseline_lock.json")
+    g1 = lock["classical"]["matched_param_H4"]["test_mae"]["mean"]
+    g2 = 0.5 * lock["claim1_sigma_ratio"]["sigma_classical_H4"]
+    return g1, g2
+
+
+# ---------------------------------------------------------------------------
+# T2.1 — accuracy↔variance frontier with the G1/G2 feasible box
+# ---------------------------------------------------------------------------
+def fig_accuracy_variance_frontier():
+    rows = _option_b_rows()
+    if rows is None:
+        print("SKIP fig_accuracy_variance_frontier: run the O-2 sweep + "
+              "scripts/summarize_option_b.py first")
+        return
+    g1, g2 = _gates()
+
+    fig, ax = plt.subplots(figsize=(8.5, 6.0))
+
+    # Prior-search context (faint grey) if available.
+    prior = ROOT / "results" / "circuit_search" / "circuit_search_table.json"
+    if prior.exists():
+        with prior.open() as f:
+            for r in json.load(f):
+                mu = r["test_mae_raw"]["mean"]
+                sd = r["test_mae_raw"].get("std")
+                if mu is None or sd is None:
+                    continue
+                ax.scatter(mu, sd, s=22, color=C_NULL, alpha=0.35, zorder=1)
+        ax.scatter([], [], s=22, color=C_NULL, alpha=0.35,
+                   label="prior search (proxy / promoted)")
+
+    # Option-B points, colored by circuit, regime as marker.
+    regime_marker = {"R0_control": "o", "R1_weight_decay": "s",
+                     "R2_physics_prior": "^", "R3_smooth_convergence": "D"}
+    for r in rows:
+        ax.scatter(r["test_mae_mean"], r["test_mae_sigma"],
+                   s=95, color=_CIRCUIT_COLOR.get(r["circuit"], "grey"),
+                   marker=regime_marker.get(r["regime"], "o"),
+                   edgecolor="black", linewidth=0.6, zorder=4)
+
+    # Feasible box: MAE < g1 AND σ ≤ g2.
+    ax.axvline(g1, color=C_CLASSICAL, linestyle="--", linewidth=1.4,
+               label=f"G1: MAE = {g1:.4f} (classical H=4)")
+    ax.axhline(g2, color="purple", linestyle="--", linewidth=1.4,
+               label=f"G2: σ = {g2:.5f} (½·σ_classical)")
+    xlo = min(min(r["test_mae_mean"] for r in rows), g1) - 0.003
+    ylo = -0.001
+    ax.add_patch(plt.Rectangle((xlo, ylo), g1 - xlo, g2 - ylo,
+                               facecolor="green", alpha=0.10, zorder=0))
+    ax.text(xlo + 0.0015, g2 * 0.5, "FEASIBLE\n(Option-B)", fontsize=9,
+            color="green", fontweight="bold", va="center")
+
+    # Legend proxies for circuit color + regime marker.
+    for ck, col in _CIRCUIT_COLOR.items():
+        ax.scatter([], [], s=95, color=col, edgecolor="black",
+                   linewidth=0.6, label=f"circuit: {ck}")
+    for rk, mk in regime_marker.items():
+        ax.scatter([], [], s=95, color="white", marker=mk,
+                   edgecolor="black", linewidth=0.6,
+                   label=f"regime: {rk}")
+
+    ax.set_xlabel("Test MAE at h=3 (raw OD, 3-seed proxy)")
+    ax.set_ylabel("σ of test MAE across seeds")
+    ax.set_title("Accuracy↔variance frontier — does any circuit×regime "
+                 "land in the Option-B feasible box?")
+    ax.legend(loc="upper right", fontsize=7, frameon=True, ncol=2)
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    _save(fig, "fig_accuracy_variance_frontier")
+
+
+# ---------------------------------------------------------------------------
+# T2.2 — regularization-regime arrows (R0 → {R1,R2,R3}) per circuit
+# ---------------------------------------------------------------------------
+def fig_regularization_arrows():
+    rows = _option_b_rows()
+    if rows is None:
+        print("SKIP fig_regularization_arrows: run the O-2 sweep + "
+              "summarizer first")
+        return
+    g1, g2 = _gates()
+    by_circuit: dict[str, dict[str, dict]] = {}
+    for r in rows:
+        by_circuit.setdefault(r["circuit"], {})[r["regime"]] = r
+
+    fig, ax = plt.subplots(figsize=(8.5, 6.0))
+    for ck, regimes in by_circuit.items():
+        col = _CIRCUIT_COLOR.get(ck, "grey")
+        r0 = regimes.get("R0_control")
+        if r0 is None:
+            continue
+        x0, y0 = r0["test_mae_mean"], r0["test_mae_sigma"]
+        ax.scatter(x0, y0, s=120, color=col, edgecolor="black",
+                   linewidth=0.8, zorder=4, marker="*")
+        ax.annotate(f"{ck} R0", (x0, y0), fontsize=8, fontweight="bold",
+                    xytext=(5, 5), textcoords="offset points")
+        for rk in ("R1_weight_decay", "R2_physics_prior",
+                   "R3_smooth_convergence"):
+            rr = regimes.get(rk)
+            if rr is None:
+                continue
+            x1, y1 = rr["test_mae_mean"], rr["test_mae_sigma"]
+            ax.annotate(
+                "", xy=(x1, y1), xytext=(x0, y0),
+                arrowprops=dict(arrowstyle="->", color=col, lw=1.6,
+                                alpha=0.8))
+            ax.scatter(x1, y1, s=55, color=col, edgecolor="black",
+                       linewidth=0.4, zorder=4)
+            ax.annotate(rk.split("_")[0], (x1, y1), fontsize=7,
+                        xytext=(3, -9), textcoords="offset points")
+
+    ax.axvline(g1, color=C_CLASSICAL, linestyle="--", linewidth=1.2)
+    ax.axhline(g2, color="purple", linestyle="--", linewidth=1.2)
+    ax.add_patch(plt.Rectangle(
+        (ax.get_xlim()[0], -0.001), g1 - ax.get_xlim()[0], g2 + 0.001,
+        facecolor="green", alpha=0.10, zorder=0))
+    ax.set_xlabel("Test MAE at h=3 (raw OD, 3-seed proxy)")
+    ax.set_ylabel("σ of test MAE across seeds")
+    ax.set_title("Does regularization pull circuits toward the feasible "
+                 "box? R0→{R1,R2,R3} per circuit")
+    ax.legend(handles=[plt.Line2D([], [], color=c, marker="*", linestyle="",
+                                  markersize=12, label=ck)
+                       for ck, c in _CIRCUIT_COLOR.items()],
+              loc="upper right", frameon=True)
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    _save(fig, "fig_regularization_arrows")
+
+
+# ---------------------------------------------------------------------------
+# T2.3 — circuit × regime penalized-objective heatmap
+# ---------------------------------------------------------------------------
+def fig_circuit_regime_heatmap():
+    rows = _option_b_rows()
+    if rows is None:
+        print("SKIP fig_circuit_regime_heatmap: run the O-2 sweep + "
+              "summarizer first")
+        return
+    circuits = sorted({r["circuit"] for r in rows})
+    regimes = [rk for rk in _REGIME_ORDER
+               if any(r["regime"] == rk for r in rows)]
+    grid = np.full((len(circuits), len(regimes)), np.nan)
+    g1pass = np.zeros_like(grid, dtype=bool)
+    g2pass = np.zeros_like(grid, dtype=bool)
+    for r in rows:
+        i = circuits.index(r["circuit"])
+        j = regimes.index(r["regime"]) if r["regime"] in regimes else None
+        if j is None:
+            continue
+        grid[i, j] = r["penalized"]
+        g1pass[i, j] = r["g1_accuracy_pass"]
+        g2pass[i, j] = r["g2_sigma_pass"]
+
+    fig, ax = plt.subplots(figsize=(8, 4.6))
+    im = ax.imshow(grid, cmap="viridis_r", aspect="auto")
+    ax.set_xticks(range(len(regimes)))
+    ax.set_xticklabels(regimes, rotation=20, ha="right")
+    ax.set_yticks(range(len(circuits)))
+    ax.set_yticklabels(circuits)
+    for i in range(len(circuits)):
+        for j in range(len(regimes)):
+            if np.isnan(grid[i, j]):
+                continue
+            marks = ("✓G1" if g1pass[i, j] else "✗G1") + " " + \
+                    ("✓G2" if g2pass[i, j] else "✗G2")
+            ax.text(j, i, f"{grid[i, j]:.4f}\n{marks}", ha="center",
+                    va="center", fontsize=8,
+                    color="white" if grid[i, j] > np.nanmean(grid) else "black")
+    fig.colorbar(im, ax=ax, label="penalized objective (lower = better)")
+    ax.set_title("Circuit × regime — penalized objective "
+                 "(MAE + 5·relu(σ−gate)); ✓G1✓G2 = Option-B candidate")
+    fig.tight_layout()
+    _save(fig, "fig_circuit_regime_heatmap")
+
+
 T1 = [
     fig_learning_curves, fig_forecast_trajectory, fig_pred_vs_actual,
     fig_residual_analysis, fig_paired_bootstrap, fig_seed_strip,
     fig_all_circuit_diagrams,
 ]
 
+T2 = [
+    fig_accuracy_variance_frontier, fig_regularization_arrows,
+    fig_circuit_regime_heatmap,
+]
+
 
 if __name__ == "__main__":
-    for fn in T1:
+    for fn in T1 + T2:
         fn()
     print(f"\nDiagnostic figures written to {OUT}/")
