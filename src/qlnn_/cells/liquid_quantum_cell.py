@@ -35,6 +35,7 @@ import jax
 import jax.nn as jnn
 import jax.numpy as jnp
 
+from ..circuits import AnsatzConfig
 from ..encoders.quantum_feature_encoder import (
     QuantumFeatureEncoder,
     QuantumFeatureEncoderConfig,
@@ -53,9 +54,13 @@ class LiquidQuantumCellConfig:
         tau_min: Lower bound on each time constant (softplus offset).
         tau_init: Initial value of `cell.tau()`. Must satisfy
             `tau_init > tau_min` so the inverse-softplus is well-defined.
-        ring_entanglement: Pass-through to `QuantumFeatureEncoderConfig`.
+        ring_entanglement: Pass-through to `QuantumFeatureEncoderConfig`
+            (used only when `ansatz` is None — historical default path).
         init_w_std: Pass-through to `QuantumFeatureEncoderConfig`.
         init_circuit_std: Pass-through to `QuantumFeatureEncoderConfig`.
+        ansatz: Optional declarative ansatz spec. When None (default),
+            the encoder builds the historical data-reuploading circuit so
+            existing checkpoints and YAML configs keep working unchanged.
     """
 
     input_dim: int
@@ -68,6 +73,9 @@ class LiquidQuantumCellConfig:
     ring_entanglement: bool = True
     init_w_std: float = 0.1
     init_circuit_std: float = 0.05
+
+    # New: ansatz spec (None = backward-compat default).
+    ansatz: AnsatzConfig | None = None
 
     def __post_init__(self) -> None:
         if self.input_dim < 1:
@@ -135,6 +143,7 @@ class LiquidQuantumCell(eqx.Module):
             ring_entanglement=config.ring_entanglement,
             init_w_std=config.init_w_std,
             init_circuit_std=config.init_circuit_std,
+            ansatz=config.ansatz,
         )
         self.encoder = QuantumFeatureEncoder(encoder_cfg, key=k_encoder)
 

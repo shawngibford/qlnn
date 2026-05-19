@@ -38,6 +38,7 @@ import pandas as pd
 import torch
 
 from qlnn_ import QLNNForecaster, QLNNForecasterConfig
+from qlnn_.circuits import AnsatzConfig
 from qlnn_.diagnostics import effective_dimension as ed_jax
 from quantum_liquid_neuralode.data_processing import (
     apply_minmax,
@@ -141,6 +142,22 @@ def _rebuild_qlnn(cfg: dict, ckpt: Path, od_index: int, seed: int) -> eqx.Module
     model_cfg = cfg["model"]
     win = cfg["windows"]
     feature_cols = list(cfg["data"]["feature_cols"])
+
+    # Read the ansatz spec if present so the rebuilt skeleton matches the
+    # circuit the checkpoint was trained with. Absent = legacy
+    # data_reuploading default.
+    ansatz_block = model_cfg.get("ansatz")
+    ansatz_cfg: AnsatzConfig | None
+    if ansatz_block is None:
+        ansatz_cfg = None
+    else:
+        ansatz_cfg = AnsatzConfig(
+            name=str(ansatz_block["name"]),
+            num_qubits=int(model_cfg["num_qubits"]),
+            num_layers=int(model_cfg["num_layers"]),
+            params=dict(ansatz_block.get("params") or {}),
+        )
+
     fcfg = QLNNForecasterConfig(
         input_dim=len(feature_cols),
         num_qubits=int(model_cfg["num_qubits"]),
@@ -156,6 +173,7 @@ def _rebuild_qlnn(cfg: dict, ckpt: Path, od_index: int, seed: int) -> eqx.Module
         dt0=float(model_cfg["dt0"]),
         max_steps=int(model_cfg["max_steps"]),
         init_head_std=float(model_cfg["init_head_std"]),
+        ansatz=ansatz_cfg,
     )
     # The Equinox checkpoint is just the leaves; we rebuild a skeleton with
     # the same seed (matches the trainer's init) and deserialize into it.

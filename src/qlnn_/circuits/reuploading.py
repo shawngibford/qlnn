@@ -10,6 +10,18 @@ series (see Schuld et al. 2021, arXiv:2008.08605).
 
 The circuit is built lazily as a PennyLane `QNode` with the JAX interface, so
 we can JIT-compile and take `jax.grad` through it.
+
+Registered as ``"data_reuploading"`` in the ansatz registry. The supported
+``AnsatzConfig.params`` keys are:
+
+    ring_entanglement : bool   (default True; legacy alias for entanglement="ring")
+    entanglement      : str    one of "linear", "ring", "all_to_all" (default "ring")
+    device_name       : str    PennyLane device (default "default.qubit")
+
+Backward compatibility: the historical ``DataReuploadingCircuit`` /
+``DataReuploadingConfig`` API is preserved so existing call-sites keep
+working. New code should prefer
+``circuits.build(AnsatzConfig(name="data_reuploading", ...))``.
 """
 
 from __future__ import annotations
@@ -20,6 +32,8 @@ from typing import Callable
 import jax.numpy as jnp
 import pennylane as qml
 
+from .protocol import AnsatzConfig, AnsatzProtocol, register
+
 
 @dataclass(frozen=True)
 class DataReuploadingConfig:
@@ -29,6 +43,9 @@ class DataReuploadingConfig:
     # the linear chain into a ring. Tends to help with all-to-all coupling on
     # small qubit counts.
     ring_entanglement: bool = True
+    # Optional finer-grained entanglement override. If None, derives from
+    # `ring_entanglement` (True → "ring", False → "linear").
+    entanglement: str | None = None
     # Pennylane device name. "default.qubit" is the modern unified device that
     # picks the JAX interface automatically when called from JAX code.
     device_name: str = "default.qubit"
@@ -38,6 +55,49 @@ class DataReuploadingConfig:
             raise ValueError(f"num_qubits must be >= 1, got {self.num_qubits}")
         if self.num_layers < 1:
             raise ValueError(f"num_layers must be >= 1, got {self.num_layers}")
+        if self.entanglement is not None and self.entanglement not in (
+            "linear", "ring", "all_to_all"
+        ):
+            raise ValueError(
+                f"entanglement must be one of 'linear', 'ring', 'all_to_all', "
+                f"got {self.entanglement!r}"
+            )
+
+    @property
+    def resolved_entanglement(self) -> str:
+        """The effective entanglement pattern, accounting for the legacy
+        `ring_entanglement` bool alias."""
+        if self.entanglement is not None:
+            return self.entanglement
+        return "ring" if self.ring_entanglement else "linear"
+
+
+def _entangle(num_qubits: int, pattern: str) -> None:
+    """Emit the entangling block for `pattern` on `num_qubits` wires.
+
+    Patterns:
+        linear      — chain CNOTs i -> i+1
+        ring        — chain CNOTs + wrap-around (n-1) -> 0 (only if n > 2)
+        all_to_all  — CNOTs between every ordered pair (i, j), i < j
+    """
+    if num_qubits < 2:
+        return
+    if pattern == "linear":
+        for i in range(num_qubits - 1):
+            qml.CNOT(wires=[i, i + 1])
+        return
+    if pattern == "ring":
+        for i in range(num_qubits - 1):
+            qml.CNOT(wires=[i, i + 1])
+        if num_qubits > 2:
+            qml.CNOT(wires=[num_qubits - 1, 0])
+        return
+    if pattern == "all_to_all":
+        for i in range(num_qubits):
+            for j in range(i + 1, num_qubits):
+                qml.CNOT(wires=[i, j])
+        return
+    raise ValueError(f"unknown entanglement pattern: {pattern!r}")
 
 
 def _build_qnode(cfg: DataReuploadingConfig) -> Callable:
@@ -53,6 +113,7 @@ def _build_qnode(cfg: DataReuploadingConfig) -> Callable:
         Rotation parameters per layer / qubit (Rot = RZ ∘ RY ∘ RZ).
     """
     dev = qml.device(cfg.device_name, wires=cfg.num_qubits)
+    entanglement = cfg.resolved_entanglement
 
     @qml.qnode(dev, interface="jax")
     def circuit(inputs: jnp.ndarray, weights: jnp.ndarray) -> jnp.ndarray:
@@ -67,12 +128,8 @@ def _build_qnode(cfg: DataReuploadingConfig) -> Callable:
             for i in range(cfg.num_qubits):
                 qml.Rot(weights[layer, i, 0], weights[layer, i, 1], weights[layer, i, 2], wires=i)
 
-            # Entangling block — linear chain (optionally closed into a ring).
-            if cfg.num_qubits >= 2:
-                for i in range(cfg.num_qubits - 1):
-                    qml.CNOT(wires=[i, i + 1])
-                if cfg.ring_entanglement and cfg.num_qubits > 2:
-                    qml.CNOT(wires=[cfg.num_qubits - 1, 0])
+            # Entangling block.
+            _entangle(cfg.num_qubits, entanglement)
 
         # Return a tuple of measurement processes; PennyLane wraps the tuple as
         # a sequence of scalar outputs. The wrapper below stacks them into a
@@ -120,3 +177,22 @@ class DataReuploadingCircuit:
         if isinstance(out, tuple):
             return jnp.stack(out)
         return out
+
+
+# ---------------------------------------------------------------------------
+# Registry hook
+# ---------------------------------------------------------------------------
+def _factory(cfg: AnsatzConfig) -> AnsatzProtocol:
+    """Build a `DataReuploadingCircuit` from an `AnsatzConfig`."""
+    params = cfg.params or {}
+    drc = DataReuploadingConfig(
+        num_qubits=cfg.num_qubits,
+        num_layers=cfg.num_layers,
+        ring_entanglement=bool(params.get("ring_entanglement", True)),
+        entanglement=params.get("entanglement"),
+        device_name=str(params.get("device_name", "default.qubit")),
+    )
+    return DataReuploadingCircuit(drc)
+
+
+register("data_reuploading", _factory, overwrite=True)

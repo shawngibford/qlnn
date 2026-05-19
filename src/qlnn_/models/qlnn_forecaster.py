@@ -43,6 +43,7 @@ import jax
 import jax.numpy as jnp
 
 from ..cells.liquid_quantum_cell import LiquidQuantumCell, LiquidQuantumCellConfig
+from ..circuits import AnsatzConfig
 
 
 def _inv_softplus(y: float) -> float:
@@ -79,6 +80,10 @@ class QLNNForecasterConfig:
     max_steps: int = 4096
     # Init scale for initial-state encoder and delta head.
     init_head_std: float = 0.1
+    # Optional declarative ansatz spec. When None (default), the cell builds
+    # the historical data-reuploading circuit so existing checkpoints and
+    # YAML configs keep working unchanged.
+    ansatz: AnsatzConfig | None = None
 
     def __post_init__(self) -> None:
         if self.solver not in ("tsit5", "dopri5"):
@@ -155,6 +160,7 @@ class QLNNForecaster(eqx.Module):
             num_layers=config.num_layers,
             tau_min=config.tau_min,
             tau_init=config.tau_init,
+            ansatz=config.ansatz,
         )
         self.cell = LiquidQuantumCell(cell_cfg, key=k_cell)
 

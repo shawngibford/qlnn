@@ -34,6 +34,7 @@ from qlnn_ import (
     history_to_dicts,
     train_one_qlnn,
 )
+from qlnn_.circuits import AnsatzConfig
 from quantum_liquid_neuralode.data_processing import (
     apply_minmax,
     fit_minmax,
@@ -53,6 +54,51 @@ from quantum_liquid_neuralode.utils import write_provenance
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
+
+
+# ---------------------------------------------------------------------------
+# Ansatz selection helper.
+# ---------------------------------------------------------------------------
+def _parse_ansatz_block(
+    block: Any | None,
+    *,
+    num_qubits: int,
+    num_layers: int,
+) -> AnsatzConfig | None:
+    """Parse an optional `model.ansatz` YAML block into an `AnsatzConfig`.
+
+    Schema:
+        model:
+          ansatz:
+            name: hardware_efficient       # one of the registered ansätze
+            params:                        # ansatz-specific knobs
+              entanglement: ring
+              encoding: rx
+
+    Returns None when `block` is absent so the QLNN forecaster falls back to
+    its historical data-reuploading default (preserving every existing
+    checkpoint and config).
+    """
+    if block is None:
+        return None
+    if not isinstance(block, dict):
+        raise ValueError(
+            f"model.ansatz must be a mapping with `name:` and optional `params:`, got {type(block).__name__}"
+        )
+    name = block.get("name")
+    if not isinstance(name, str) or not name:
+        raise ValueError("model.ansatz.name must be a non-empty string")
+    params = block.get("params", {}) or {}
+    if not isinstance(params, dict):
+        raise ValueError(
+            f"model.ansatz.params must be a mapping, got {type(params).__name__}"
+        )
+    return AnsatzConfig(
+        name=name,
+        num_qubits=num_qubits,
+        num_layers=num_layers,
+        params=dict(params),
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -320,6 +366,14 @@ def main() -> None:
     for seed in seeds:
         log(f"\n=== seed {seed} ===")
 
+        # Optional `model.ansatz` block selects a PQC topology from the
+        # ansatz registry. Absent = historical data_reuploading default.
+        ansatz_cfg = _parse_ansatz_block(
+            model_cfg.get("ansatz"),
+            num_qubits=int(model_cfg["num_qubits"]),
+            num_layers=int(model_cfg["num_layers"]),
+        )
+
         forecaster_cfg = QLNNForecasterConfig(
             input_dim=len(feature_cols),
             num_qubits=int(model_cfg["num_qubits"]),
@@ -335,6 +389,7 @@ def main() -> None:
             dt0=float(model_cfg["dt0"]),
             max_steps=int(model_cfg["max_steps"]),
             init_head_std=float(model_cfg["init_head_std"]),
+            ansatz=ansatz_cfg,
         )
 
         model = QLNNForecaster(forecaster_cfg, key=jax.random.PRNGKey(seed))
