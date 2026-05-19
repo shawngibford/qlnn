@@ -641,6 +641,79 @@ def fig_circuit_regime_heatmap():
     _save(fig, "fig_circuit_regime_heatmap")
 
 
+# ---------------------------------------------------------------------------
+# T2.4 (capstone) — master all-vs-all comparison
+# ---------------------------------------------------------------------------
+def fig_master_comparison():
+    """Every classical + quantum configuration on shared (MAE, σ) axes
+    with the G1/G2 feasible box. Reads results/master_comparison.json
+    (scripts/build_master_comparison.py). One glance: where the whole
+    population sits vs the Option-B target.
+    """
+    p = ROOT / "results" / "master_comparison.json"
+    if not p.exists():
+        print("SKIP fig_master_comparison: run "
+              "scripts/build_master_comparison.py first")
+        return
+    with p.open() as f:
+        rows = json.load(f)
+    g1, g2 = _gates()
+
+    style = {
+        "classical_sweep":  (C_CLASSICAL, "o", "classical sweep"),
+        "qlnn_reference":   ("black", "*", "QLNN reference"),
+        "option_b":         (C_QLNN, "D", "Option-B circuit×regime"),
+    }
+
+    def _bucket(src: str) -> str:
+        if src.startswith("prior_search"):
+            return "prior_search"
+        return src
+
+    fig, ax = plt.subplots(figsize=(9.5, 6.5))
+    seen = set()
+    for r in rows:
+        mae, sd = r["test_mae_mean"], r["test_mae_sigma"]
+        if mae is None:
+            continue
+        b = _bucket(r["source"])
+        col, mk, lab = style.get(
+            b, (C_NULL, ".", "prior search (proxy/promoted)"))
+        y = sd if sd is not None else 0.0
+        ax.scatter(mae, y, s=(70 if b != "prior_search" else 26),
+                   color=col, marker=mk,
+                   alpha=(0.9 if b != "prior_search" else 0.35),
+                   edgecolor="black" if b != "prior_search" else "none",
+                   linewidth=0.5, zorder=(4 if b != "prior_search" else 1),
+                   label=lab if lab not in seen else None)
+        seen.add(lab)
+        if sd is None:
+            # 1-seed proxy: mark σ as undefined on a baseline rug.
+            ax.scatter(mae, 0.0, s=18, color=col, marker="|",
+                       alpha=0.4, zorder=1)
+
+    ax.axvline(g1, color=C_CLASSICAL, linestyle="--", linewidth=1.4,
+               label=f"G1: MAE={g1:.4f}")
+    ax.axhline(g2, color="purple", linestyle="--", linewidth=1.4,
+               label=f"G2: σ={g2:.5f}")
+    x0 = ax.get_xlim()[0]
+    ax.add_patch(plt.Rectangle((x0, -0.0005), g1 - x0, g2 + 0.0005,
+                               facecolor="green", alpha=0.10, zorder=0))
+    ax.text(x0 + 0.001, g2 * 0.5, "FEASIBLE\n(Option-B)", fontsize=9,
+            color="green", fontweight="bold", va="center")
+
+    n_pass = sum(r["G1_accuracy_pass"] and r["G2_reproducibility_pass"]
+                 for r in rows)
+    ax.set_xlabel("Test MAE at h=3 (raw OD)")
+    ax.set_ylabel("σ of test MAE across seeds (0 = single-seed proxy)")
+    ax.set_title(f"Master comparison — {len(rows)} configs; "
+                 f"{n_pass} in the Option-B feasible box")
+    ax.legend(loc="upper right", fontsize=7, frameon=True)
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    _save(fig, "fig_master_comparison")
+
+
 T1 = [
     fig_learning_curves, fig_forecast_trajectory, fig_pred_vs_actual,
     fig_residual_analysis, fig_paired_bootstrap, fig_seed_strip,
@@ -649,7 +722,7 @@ T1 = [
 
 T2 = [
     fig_accuracy_variance_frontier, fig_regularization_arrows,
-    fig_circuit_regime_heatmap,
+    fig_circuit_regime_heatmap, fig_master_comparison,
 ]
 
 

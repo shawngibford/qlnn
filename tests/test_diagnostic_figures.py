@@ -27,12 +27,12 @@ def test_t1_registry_is_seven_callables():
     }
 
 
-def test_t2_registry_is_three_callables():
-    assert len(mod.T2) == 3
+def test_t2_registry_is_four_callables():
+    assert len(mod.T2) == 4
     assert all(callable(fn) for fn in mod.T2)
     assert {fn.__name__ for fn in mod.T2} == {
         "fig_accuracy_variance_frontier", "fig_regularization_arrows",
-        "fig_circuit_regime_heatmap",
+        "fig_circuit_regime_heatmap", "fig_master_comparison",
     }
 
 
@@ -40,7 +40,7 @@ def test_t2_skips_when_option_b_results_absent(tmp_path, monkeypatch, capsys):
     monkeypatch.setattr(mod, "ROOT", tmp_path)
     for fn in mod.T2:
         fn()
-    assert capsys.readouterr().out.count("SKIP") == 3
+    assert capsys.readouterr().out.count("SKIP") == 4
 
 
 def test_all_t1_skip_gracefully_when_data_absent(tmp_path, monkeypatch, capsys):
