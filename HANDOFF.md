@@ -1,8 +1,89 @@
+# ⏯️ PICK UP HERE — in-flight as of commit `707debb` (next-chat handoff)
+
+**The original 3-claim paper is done & verified. The project has since
+expanded massively (circuit search → Option-B → ODE battery → 529-config
+unified matrix → expressivity program). Read `PROJECT_DOSSIER.md` for the
+full picture; this section is the operational pick-up.**
+
+### 1. There is a DETACHED background training job — do NOT wait on it
+
+`O-2` Option-B sweep resume is running detached (survives chat end).
+Status at handoff: **9/12 configs done**, 3 missing:
+`se_6q3l__{R1_weight_decay,R2_physics_prior,R3_smooth_convergence}`
+(the slow 6-qubit configs, ~1h each).
+
+- **Check progress:**
+  `ls results/option_b/*/seeds_summary.json | wc -l`  (target = 12)
+- **If it died / to re-resume the missing ones** (idempotent — skips
+  any already having `seeds_summary.json`):
+  ```bash
+  cd <repo>; export PYTHONPATH=$PWD/src
+  for s in se_6q3l__R1_weight_decay se_6q3l__R2_physics_prior se_6q3l__R3_smooth_convergence; do
+    [ -f results/option_b/$s/seeds_summary.json ] && continue
+    .venv/bin/python scripts/train_qlnn.py --config configs/option_b/$s.yaml \
+      --output-dir results/option_b/$s --quiet
+  done
+  ```
+
+### 2. ⚠️ HARD RULE: never remove the `data` symlink while jobs run
+
+`data -> /Users/shawngibford/dev/phd/qlnn/data` (qZETA + synthetic CSVs;
+`data/` is gitignored). An earlier chat ran `rm -f data` to avoid
+staging it and **killed the O-2 sweep mid-run**. Instead: leave the
+symlink in place; commit with **explicit `git add <paths>`, never
+`git add -A`/`.`** so it is never staged. If `data` is absent, recreate:
+`ln -sfn /Users/shawngibford/dev/phd/qlnn/data data`.
+
+### 3. When O-2 hits 12/12 — the immediate sequence (user-gated)
+
+```bash
+export PYTHONPATH=$PWD/src
+.venv/bin/python scripts/summarize_option_b.py            # 12-row penalized table
+.venv/bin/python scripts/build_master_comparison.py       # all-vs-all
+.venv/bin/python scripts/make_diagnostic_figures.py       # renders T2 + master
+```
+Then **present the table + `fig_master_comparison` + top-3 to the user
+and PAUSE for the tier-1 go/no-go** (5-seed promotion of top-3). Do not
+auto-run tier-1.
+
+### 4. Gated pipeline order (each step is a user go/no-go; nothing
+contends with another)
+
+O-2 (finishing) → **tier-1** (top-3 → 5-seed, `run_circuit_search.sh`
+pattern) → **tier-2** (G1+G2 survivors → 4 SE fractions) → **T3 exec**
+(`analyze_quantum_trainability.py`, ~2-4h) → **unified matrix**
+(`run_unified_matrix.sh ONLY=<dataset>`, one of 11 groups per gate,
+multi-day) → **separate horizon phase**. The Option-B gate is
+`scripts/check_circuit_regression.py`.
+
+### 5. Still to BUILD (no compute — safe anytime, do these next)
+
+- **E-2 expressivity architecture extensions** (the user's "circuits not
+  expressive enough" concern): (a) richer measurements ⟨ZZ⟩/⟨XX⟩ —
+  **this breaks the locked `output_dim == num_qubits` cell contract**,
+  so it needs the SAME backward-compat + integrity-gate rigor as the
+  O-1 plumbing (default-off PauliZ, every committed claim untouched);
+  (b) de-bottlenecked encoder (the 7→4 `tanh` squash is the prime
+  suspect); (c) high re-upload (8/12 layers) + 8-qubit axes. Mirror the
+  ansatz-registry / O-1 pattern.
+- **E-3**: fold the E-2 axes into a gated expanded search, interpreted
+  with the T3 curves (measure-before-scale — naive scaling → barren
+  plateaus).
+
+### 6. Verification gate before any commit
+
+`pytest` (full), `scripts/verify_paper_integrity.py` exits 0 (the 3
+locked claims must never move), figure scripts regenerate. The dossier
+header (`PROJECT_DOSSIER.md` snapshot line + §13 status board) must be
+bumped when O-2 completes or a verdict lands.
+
+---
+
 # Handoff to the next coding agent
 
-You're picking up a paper-ready research codebase. Empirical work is **complete**.
-What's left is small code tweaks (this doc) and the paper draft itself
-(out of scope for a coding agent — needs the user's voice).
+You're picking up a paper-ready research codebase. Empirical work for
+the 3 pre-registered claims is **complete**; the expansion work above is
+in-flight/gated.
 
 **Read this file first. Then read `PAPER_SUMMARY.md` and `hypothesis.md`.**
 Don't re-litigate decisions documented as locked.
