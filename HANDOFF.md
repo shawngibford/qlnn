@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P3
+### PIVOT pick-up order — ⏩ RESUME AT P3 strand-2
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -52,28 +52,63 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   `scripts/generate_pde_data.py` → `data/pde/*.npz` + manifest
   (gitignored; script committed). Full suite 162 green;
   `verify_paper_integrity` exit-0.
-- ⏩ **P3 — NEXT. Ansatz implementations + solver path.** Two strands:
-  1. **Implement the 10-ansatz roster** from `refs/CIRCUIT_SPECS.md`
-     (the dual-verified binding manifest — read it, not the PDFs).
-     Existing 4 already in `src/qlnn_/circuits/`. Add the 6 literature
-     families: `chebyshev_dqc`, `lubasch_multicopy`, `te_qpinn_fnn`,
-     `te_qpinn_qnn`, `qcpinn`, `rf_qrc`. Each ships: registry
-     registration; docstring citing exact source (PDF/arXiv + the
-     eq/fig numbers in CIRCUIT_SPECS.md); a unit test asserting that
-     family's "unit-test hook"; every `[DECLARED DESIGN CHOICE]`
-     resolved with a one-line cited rationale in the docstring. Also
-     clean the 2 logged `reuploading.py` caveats (add terminal
-     `W^(L+1)`; fix the Pérez-Salinas→architecture citation, keep
-     Schuld for Fourier-expressivity) and regenerate any baseline lock
-     that touches.
-  2. **Solver path** — new
-     `src/qlnn_/training/physics_residual_loss.py`. Input-coordinate
-     derivative through the QNODE: **`jax.jacrev` ONLY** (Diffrax
-     `custom_vjp` forbids forward-mode — locked gotcha #1). PROTOTYPE
-     the nested autodiff on the toy ODE `u'=−u`, known solution
-     `u=e^{−t}`, trained purely by physics residual, BEFORE any
-     scale-up (P3 acceptance gate). New task module; the existing
-     forecaster + `verify_paper_integrity` stay untouched.
+- ✅ **P3 strand-1 DONE** (commit `77009ce`) — solver path + the
+  acceptance gate. `src/qlnn_/training/physics_residual_loss.py`:
+  Chebyshev-tower DQC circuit faithful to `CIRCUIT_SPECS.md` §5
+  (Kyriienko 2011.10395 — tower Eq.15, HEA Rz-Rx-Rz+ring-CNOT Fig.5a,
+  Σ⟨Z⟩ readout §III.3); **Lagaris hard-IC trial solution**
+  u=u0+(t−t0)·N(t) (IC structural — NOT a soft penalty at the
+  Chebyshev-singular x=−1 endpoint); interior collocation excludes the
+  inherently-degenerate bare ±1. **THE NESTED AUTODIFF WORKS** (Risk
+  #2 retired): grad over the param pytree of a loss containing
+  `jax.jacrev` w.r.t. the scalar coordinate of the PennyLane JAX
+  QNode — finite, converges. Gate test (3, green): `u'=−u` solved by
+  physics residual alone, recovers `e^{−t}` to interior MAE ≈0.003
+  (seed0, deterministic), ≤0.0074 across seeds {0,1,2}. Full suite
+  165 green; `verify_paper_integrity` exit-0.
+- ⏩ **P3 strand-2 — NEXT. Remaining literature circuits + cleanup.**
+  Implement the rest of the roster from `refs/CIRCUIT_SPECS.md` (the
+  dual-verified binding manifest — read IT, not the PDFs). Pattern =
+  `src/qlnn_/circuits/hardware_efficient.py` (Config / `_build_qnode`
+  / Circuit / `_factory` / `register`). Each ships: docstring citing
+  the exact source + the eq/fig numbers in CIRCUIT_SPECS.md; a unit
+  test asserting that family's "unit-test hook"; every
+  `[DECLARED DESIGN CHOICE]` resolved with a one-line cited rationale.
+
+  **ARCHITECTURE DECISION (made in strand-1, honor it):** the registry
+  `(inputs:(Q,)) → (Q,) PauliZ` contract is the **forecaster** encoder
+  interface. Several families are **solver-native** and must NOT be
+  forced into it (doing so manufactures the infidelity P3a exists to
+  prevent):
+  - `chebyshev_dqc` — DONE as a solver builder in
+    `physics_residual_loss.py` (scalar-coord → scalar field). Add a
+    thin registry adapter ONLY if a faithful forecaster form exists;
+    otherwise leave solver-native and note it in CIRCUIT_SPECS.md.
+  - `te_qpinn_fnn`, `te_qpinn_qnn`, `qcpinn` — **solver** families
+    (classical/quantum trainable embedding or pre/post nets → PQC →
+    physics residual). Implement as solver builders alongside
+    `chebyshev_dqc` (reuse the `physics_residual_loss.py` train loop /
+    `make_residual_loss`), NOT as forecaster registry ansätze.
+  - `rf_qrc` — **forecaster**-native but a *fixed random reservoir +
+    trained linear readout* (Tikhonov ridge, Eq.3), NOT a trainable
+    PQC. It needs its own train path (closed-form readout), not the
+    gradient ansatz contract. Implement as an `rf_qrc` module with its
+    documented QRC-C4 construction + a ridge-readout fit + unit-test
+    hook (trained params == readout only; reservoir invariant to the
+    fit).
+  - `lubasch_multicopy` — context/baseline; implement the multi-copy
+    Hadamard-test construction as a standalone faithful circuit +
+    unit-test hook (r=1 ⇒ plain overlap, ancilla ⟨σ_z⟩=1). Registry
+    membership only if a faithful forecaster mapping exists.
+  Update `refs/CIRCUIT_SPECS.md` "Implementation binding" with each
+  family's solver-vs-forecaster home + the registry-vs-solver-builder
+  decision, so P6's "families × {solver|forecaster} as applicable"
+  cross is unambiguous.
+
+  Also: clean the 2 logged `reuploading.py` caveats (add terminal
+  `W^(L+1)`; fix the Pérez-Salinas→architecture citation, keep Schuld
+  for the Fourier-expressivity claim) and regenerate any baseline lock
+  that touches. Keep `pytest` green + `verify_paper_integrity` exit-0.
 - **P4 → P5 → P6 → P7 → P8** per the plan. P4 retasks the forecaster to
   long-horizon autoregressive rollout (kill 1-step MAE). P5 adds the
   matched baselines incl. the MANDATORY non-liquid Neural-ODE. P6 is
