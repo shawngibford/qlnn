@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P2
+### PIVOT pick-up order — ⏩ RESUME AT P3
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -38,24 +38,48 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   Helmholtz/cavity-NS/wave/Klein-Gordon/conv-diff. `reuploading.py`
   confirmed Schuld-faithful (H1 mechanism real in-code) with 2
   non-blocking P3 caveats logged in CIRCUIT_SPECS.md.
-- ⏩ **P2 — NEXT. PDE data generators.** New
+- ✅ **P2 DONE** (commit `11fc134`) —
   `src/quantum_liquid_neuralode/data_processing/pde_systems.py`:
-  method-of-lines numpy RK4 (mirror `synthetic_ode.py`) for **viscous
-  Burgers (smooth ν-large AND shock ν-small regimes — the regime split
-  is pre-registered in H1), Allen–Cahn, KdV**. Emit an **npz field
-  artifact** (`u[t,x]` + grid + IC/BC + invariants), NOT the qZETA CSV
-  schema (that seam is blocked). Validation tests with `synthetic_ode`
-  rigor: Burgers shock-formation time, Allen–Cahn front speed, KdV
-  soliton mass+energy conservation. Keep `pytest` green +
+  Fourier-spectral + Cox-Matthews integrating-factor RK4 (numpy-only,
+  deterministic) for **burgers_smooth / burgers_shock / allen_cahn /
+  kdv**. Emits npz FIELD artifacts (`u[t,x]` + grids + IC + periodic
+  BC + invariants + sha256 lock), NOT the CSV seam. H1 regime tags
+  bound in code + asserted vs the pre-reg. 16 validation tests green
+  (Burgers gradient catastrophe at inviscid t*≈1 vs none smooth +
+  mass<1e-8; Allen-Cahn narrow-front RELAXES to √2·eps, stationary,
+  G-L energy strictly decreasing Lyapunov; KdV soliton conserves
+  mass+momentum <5e-3, amplitude c/2, speed c, rel-L2<0.10).
+  `scripts/generate_pde_data.py` → `data/pde/*.npz` + manifest
+  (gitignored; script committed). Full suite 162 green;
   `verify_paper_integrity` exit-0.
-- **P3 → P4 → P5 → P6 → P7 → P8** per the plan. P3 implements the 10
-  ansätze from `refs/CIRCUIT_SPECS.md` (each: registry + cited docstring
-  + unit-test hook; resolve every `[DECLARED DESIGN CHOICE]` with a
-  cited rationale; clean up the 2 `reuploading.py` caveats). P3 also
-  prototypes solver nested autodiff (`u'=−u`, `jax.jacrev` only)
-  before scale. P6 is gated/system-grouped; no >30-min sweep without
-  user go-ahead; commit `ODE_PDE_PRE_REG.md` is already in place
-  before any P6 run.
+- ⏩ **P3 — NEXT. Ansatz implementations + solver path.** Two strands:
+  1. **Implement the 10-ansatz roster** from `refs/CIRCUIT_SPECS.md`
+     (the dual-verified binding manifest — read it, not the PDFs).
+     Existing 4 already in `src/qlnn_/circuits/`. Add the 6 literature
+     families: `chebyshev_dqc`, `lubasch_multicopy`, `te_qpinn_fnn`,
+     `te_qpinn_qnn`, `qcpinn`, `rf_qrc`. Each ships: registry
+     registration; docstring citing exact source (PDF/arXiv + the
+     eq/fig numbers in CIRCUIT_SPECS.md); a unit test asserting that
+     family's "unit-test hook"; every `[DECLARED DESIGN CHOICE]`
+     resolved with a one-line cited rationale in the docstring. Also
+     clean the 2 logged `reuploading.py` caveats (add terminal
+     `W^(L+1)`; fix the Pérez-Salinas→architecture citation, keep
+     Schuld for Fourier-expressivity) and regenerate any baseline lock
+     that touches.
+  2. **Solver path** — new
+     `src/qlnn_/training/physics_residual_loss.py`. Input-coordinate
+     derivative through the QNODE: **`jax.jacrev` ONLY** (Diffrax
+     `custom_vjp` forbids forward-mode — locked gotcha #1). PROTOTYPE
+     the nested autodiff on the toy ODE `u'=−u`, known solution
+     `u=e^{−t}`, trained purely by physics residual, BEFORE any
+     scale-up (P3 acceptance gate). New task module; the existing
+     forecaster + `verify_paper_integrity` stay untouched.
+- **P4 → P5 → P6 → P7 → P8** per the plan. P4 retasks the forecaster to
+  long-horizon autoregressive rollout (kill 1-step MAE). P5 adds the
+  matched baselines incl. the MANDATORY non-liquid Neural-ODE. P6 is
+  the gated/system-grouped unified matrix v2 — `ODE_PDE_PRE_REG.md` is
+  already committed before any P6 run; no >30-min sweep without user
+  go-ahead. P7 = T3 triangulation; P8 = new dossier.
 
 ### 1. There is a DETACHED background training job — do NOT wait on it
 *(OLD Option-B program — now superseded by the pivot, but let it finish
