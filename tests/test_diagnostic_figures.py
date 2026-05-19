@@ -35,6 +35,18 @@ def test_supp_registry_and_gallery_skips_without_table(
     assert "SKIP fig_circuit_gallery" in capsys.readouterr().out
 
 
+def test_t3_registry_and_skips_without_analysis(
+        tmp_path, monkeypatch, capsys):
+    assert {fn.__name__ for fn in mod.T3} == {
+        "fig_expressibility", "fig_entangling_capability",
+        "fig_barren_plateau", "fig_fisher_spectrum",
+    }
+    monkeypatch.setattr(mod, "ROOT", tmp_path)
+    for fn in mod.T3:
+        fn()
+    assert capsys.readouterr().out.count("SKIP") == 4
+
+
 def test_t2_registry_is_four_callables():
     assert len(mod.T2) == 4
     assert all(callable(fn) for fn in mod.T2)

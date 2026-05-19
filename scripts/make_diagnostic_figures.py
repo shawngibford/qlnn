@@ -789,10 +789,131 @@ def fig_circuit_gallery():
           f"across {len(by_fam)} families")
 
 
+# ===========================================================================
+# T3 — quantum-trainability / expressivity (reads results/quantum_trainability)
+# ===========================================================================
+def _qt(name: str):
+    p = ROOT / "results" / "quantum_trainability" / f"{name}.json"
+    if not p.exists():
+        return None
+    with p.open() as f:
+        return json.load(f)
+
+
+def fig_expressibility():
+    rows = _qt("expressibility")
+    if rows is None:
+        print("SKIP fig_expressibility: run "
+              "scripts/analyze_quantum_trainability.py first")
+        return
+    fig, ax = plt.subplots(figsize=(12, 5))
+    rows = sorted(rows, key=lambda r: (r["family"], r["num_qubits"],
+                                       r["num_layers"]))
+    labels = [f"{r['family'][:4]} {r['num_qubits']}q{r['num_layers']}L "
+              f"{r['encoding']}/{r['entanglement'][:3]}" for r in rows]
+    vals = [r["expressibility_kl_to_haar"] for r in rows]
+    fam_col = {"data": C_QLNN, "hard": "#E69F00",
+               "stro": "#009E73", "bric": "#CC79A7"}
+    cols = [fam_col.get(r["family"][:4], C_NULL) for r in rows]
+    ax.bar(range(len(rows)), vals, color=cols, edgecolor="black",
+           linewidth=0.3)
+    ax.set_xticks(range(len(rows)))
+    ax.set_xticklabels(labels, rotation=90, fontsize=6)
+    ax.set_ylabel("KL( P_circuit || P_Haar )  — lower = more expressive")
+    ax.set_title("Expressibility (Sim et al. 2019) per circuit topology")
+    ax.grid(True, axis="y", alpha=0.3)
+    fig.tight_layout()
+    _save(fig, "fig_expressibility")
+
+
+def fig_entangling_capability():
+    rows = _qt("entangling")
+    if rows is None:
+        print("SKIP fig_entangling_capability: run T3 analysis first")
+        return
+    fig, ax = plt.subplots(figsize=(12, 5))
+    rows = sorted(rows, key=lambda r: (r["family"], r["num_qubits"],
+                                       r["num_layers"]))
+    labels = [f"{r['family'][:4]} {r['num_qubits']}q{r['num_layers']}L"
+              for r in rows]
+    mu = [r["meyer_wallach_Q_mean"] for r in rows]
+    sd = [r["meyer_wallach_Q_std"] for r in rows]
+    ax.bar(range(len(rows)), mu, yerr=sd, color=C_QLNN,
+           edgecolor="black", linewidth=0.3, capsize=2)
+    ax.set_xticks(range(len(rows)))
+    ax.set_xticklabels(labels, rotation=90, fontsize=6)
+    ax.set_ylabel("Meyer-Wallach Q (0 = product, 1 = max entangled)")
+    ax.set_title("Entangling capability per circuit topology")
+    ax.grid(True, axis="y", alpha=0.3)
+    fig.tight_layout()
+    _save(fig, "fig_entangling_capability")
+
+
+def fig_barren_plateau():
+    rows = _qt("barren_plateau")
+    if rows is None:
+        print("SKIP fig_barren_plateau: run T3 analysis first")
+        return
+    fig, ax = plt.subplots(figsize=(8.5, 5.5))
+    fams = sorted({r["family"] for r in rows})
+    fam_col = {"data_reuploading": C_QLNN, "hardware_efficient": "#E69F00",
+               "strongly_entangling": "#009E73", "brickwall": "#CC79A7"}
+    for fam in fams:
+        for depth in sorted({r["num_layers"] for r in rows
+                             if r["family"] == fam}):
+            pts = sorted([r for r in rows if r["family"] == fam
+                          and r["num_layers"] == depth],
+                         key=lambda r: r["num_qubits"])
+            xs = [p["num_qubits"] for p in pts]
+            ys = [p["grad_var"] for p in pts]
+            ax.plot(xs, ys, marker="o", color=fam_col.get(fam, C_NULL),
+                    alpha=0.4 + 0.15 * depth, linewidth=1.3,
+                    label=f"{fam} L={depth}")
+    ax.set_yscale("log")
+    ax.set_xlabel("num_qubits")
+    ax.set_ylabel("Var[∂⟨Z₀⟩/∂θ]  (log) — exp. decay = barren plateau")
+    ax.set_title("Barren-plateau scaling — can these circuits be scaled?")
+    ax.legend(fontsize=7, frameon=True, ncol=2)
+    ax.grid(True, alpha=0.3)
+    fig.tight_layout()
+    _save(fig, "fig_barren_plateau")
+
+
+def fig_fisher_spectrum():
+    fs = _qt("fisher_spectrum")
+    if fs is None:
+        print("SKIP fig_fisher_spectrum: run T3 analysis first")
+        return
+    fig, ax = plt.subplots(figsize=(7, 4.5))
+    c = fs.get("classical_H4") or {}
+    q = fs.get("qlnn_h3") or {}
+    labels, means, stds, cols = [], [], [], []
+    if c:
+        labels.append("Classical H=4"); means.append(c["mean"])
+        stds.append(c["std"]); cols.append(C_CLASSICAL)
+    if q:
+        labels.append("QLNN h=3"); means.append(q["mean"])
+        stds.append(q["std"]); cols.append(C_QLNN)
+    ax.bar(range(len(labels)), means, yerr=stds, color=cols,
+           edgecolor="black", capsize=6)
+    ax.set_xticks(range(len(labels))); ax.set_xticklabels(labels)
+    ax.set_ylabel("d_norm (effective dimension proxy)")
+    ax.set_title("Fisher / effective-dimension — expressivity vs variance\n"
+                 "(full eigenspectrum pending --emit-spectrum recompute)")
+    ax.grid(True, axis="y", alpha=0.3)
+    fig.tight_layout()
+    _save(fig, "fig_fisher_spectrum")
+
+
 T1 = [
     fig_learning_curves, fig_forecast_trajectory, fig_pred_vs_actual,
     fig_residual_analysis, fig_paired_bootstrap, fig_seed_strip,
     fig_all_circuit_diagrams,
+]
+
+T3 = [
+    fig_expressibility, fig_entangling_capability,
+    fig_barren_plateau, fig_fisher_spectrum,
 ]
 
 SUPP = [fig_circuit_gallery]
@@ -804,6 +925,6 @@ T2 = [
 
 
 if __name__ == "__main__":
-    for fn in T1 + T2 + SUPP:
+    for fn in T1 + T2 + T3 + SUPP:
         fn()
     print(f"\nDiagnostic figures written to {OUT}/")

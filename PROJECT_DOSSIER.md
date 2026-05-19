@@ -430,7 +430,8 @@ empirical-Fisher accumulator uses numpy-float64 on the side);
 | Synthetic ODE harness | ✅ DONE+tested; runs ⏸ GATED |
 | Unified 529-config matrix | ✅ generators+tests DONE; runs ⏸ GATED |
 | Separate horizon phase | ⏸ GATED (deferred, curated subset) |
-| T3 quantum-trainability (barren plateau / expressibility / MW-Q / Fisher spectrum) | ⏸ GATED (not built) |
+| T3 quantum-trainability (expressibility KL-to-Haar / Meyer-Wallach Q / barren-plateau scaling / Fisher) — **directly answers the "are circuits expressive enough?" concern** | ✅ analysis+figures BUILT, 7/7 smoke; execution ⏸ GATED after O-2 |
+| Expressivity expansion E-2 (richer measurements ⟨ZZ⟩/⟨XX⟩, de-bottlenecked encoder, high re-upload, 8 qubits) | ⏸ NEXT BUILD (backward-compat, integrity-gated like O-1) |
 | **Paper prose (intro/methods/results/discussion)** | ❌ **NOT STARTED** — needs the author's voice |
 
 ---

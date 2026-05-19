@@ -54,6 +54,7 @@ results/*
 !results/baseline_lock.json
 !results/option_b/
 !results/circuit_search_space/
+!results/quantum_trainability/
 !results/master_comparison.json
 !results/master_comparison.md
 !results/master_comparison.csv
