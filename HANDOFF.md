@@ -177,7 +177,75 @@ results/effective_dimension/effective_dimension.md      # paper Table 5 candidat
 paper/figures/fig_horizon_ablation.{png,pdf}            # paper Figure 1
 paper/figures/fig_sample_efficiency.{png,pdf}           # paper Figure 2 (THE headline)
 paper/figures/fig_reproducibility.{png,pdf}             # paper Figure 3
+paper/figures/fig_quantum_circuit.{png,pdf}             # paper Figure 4 — locked PQC architecture
+paper/figures/fig_dataset_overview.{png,pdf}            # paper Figure 5 — qZETA + splits
+paper/figures/fig_baseline_metrics.{png,pdf}            # paper Figure 6 — 4 metrics × all baselines
+paper/figures/fig_param_sweep.{png,pdf}                 # paper Figure 7 — params Pareto
+paper/figures/fig_horizon_full_metrics.{png,pdf}        # paper Figure 8 — h sweep, all 4 metrics
+paper/figures/fig_sample_efficiency_full.{png,pdf}      # paper Figure 9 — sample-eff, all 4 metrics
+paper/figures/fig_effective_dimension.{png,pdf}         # paper Figure 10 — Claim 2 d_norm curves
 ```
+
+NOTE: `fig_dataset_overview` is the only figure that needs the raw CSV at
+generation time. It skips with a clear warning if `data/raw/qZETA_data_copy.csv`
+is missing (e.g. running inside a worktree where `data/` is gitignored).
+Symlink the main-repo `data/` into the worktree to regenerate it.
+
+---
+
+## Circuit search (new — Phase 1 plumbing landed, Phase 2/3 are user-gated)
+
+The QLNN's parameterized quantum circuit is now **pluggable** via an ansatz
+registry (`src/qlnn_/circuits/protocol.py`). Four ansätze ship registered:
+`data_reuploading` (the legacy default), `hardware_efficient`,
+`strongly_entangling`, `brickwall`. YAML configs select one via an optional
+`model.ansatz: {name, params}` block — absent = legacy data_reuploading,
+which is why every existing checkpoint still deserializes (verified by
+`tests/qlnn_/test_qlnn_forecaster_ansatz_swap.py`).
+
+The search itself runs in two phases — both are *user-gated* because of the
+8h overnight budget locked in the plan:
+
+```bash
+# Phase 2 — per-axis ablation grid (12 configs × ~5 min single seed ≈ 1 h).
+bash scripts/run_circuit_search.sh
+.venv/bin/python scripts/summarize_circuit_search.py
+# → results/circuit_search/circuit_search_table.{md,json,csv}
+
+# Phase 3 — Optuna Bayesian search on the most-informative axes
+.venv/bin/python scripts/circuit_search_optuna.py --n-trials 50
+# → results/circuit_search_optuna/trial_*/seeds_summary.json
+# → results/circuit_search_optuna/qlnn_circuit_search_v1_top.json
+# (resumable across sessions via the SQLite study DB)
+
+# Both phases run at SINGLE SEED (proxy budget). The top-K circuits get
+# promoted to the full 5-seed locked protocol BY THE USER in a separate
+# session before any number lands in PAPER_SUMMARY.md.
+```
+
+Generators / scripts:
+- `scripts/generate_circuit_search_configs.py` — single source of truth for the
+  per-axis grid. Edit the dicts at the top to extend the grid.
+- `scripts/run_circuit_search.sh` — shell loop over configs/circuit_search/*.yaml.
+  Symlinks the existing 5-seed `results/qlnn_hybrid_h3/seed_0/` as the
+  reference cell unless `REUSE_REFERENCE=0` is set.
+- `scripts/summarize_circuit_search.py` — emits the per-axis table + JSON + CSV.
+- `scripts/circuit_search_optuna.py` — TPE-sampler Bayesian search. Requires
+  `pip install -e ".[search]"` (Optuna is an opt-in extra).
+
+Figures (auto-skip until search results land):
+- `paper/figures/fig_ansatz_axis_effects.{png,pdf}` — paper Figure 11
+- `paper/figures/fig_circuit_pareto.{png,pdf}` — paper Figure 12
+
+Risks / gotchas the next agent should know:
+- `scripts/run_effective_dimension.py:_rebuild_qlnn` was taught to read the
+  ansatz block from the saved YAML — needed for non-default circuits to
+  deserialize their checkpoints correctly.
+- `jax_enable_x64` stays off (locked decision #5). Verified that none of
+  the new ansätze trip that.
+- The proxy-budget numbers from Phases 2/3 are NOT paper-grade. Promotion
+  to the full 5-seed locked protocol is the user's gate before
+  `PAPER_SUMMARY.md` is updated.
 
 ### Reproduce pipeline
 

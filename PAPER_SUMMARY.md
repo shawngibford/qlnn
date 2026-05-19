@@ -156,6 +156,88 @@ A/B/C audit; rationale in `hypothesis.md` v2 "Deviations from v1.")
 
 ---
 
+## Circuit search — post-hoc ansatz exploration (added 2026-05-19)
+
+After locking the three pre-registered claims, we ran an automated search
+over QLNN circuit topology to answer "what quantum circuits work best for
+this ODE-forecasting problem?". This is exploratory science **outside the
+pre-registration** — the results inform discussion (§7), not headline
+claims (§1–§6).
+
+**Protocol.** Two-phase search at single-seed *proxy* budget, followed by
+**top-K promotion to the full 5-seed locked h=3 protocol** before any
+ranking is treated as paper-grade:
+
+- **Phase 2 (axis ablation, ~1 h):** 12 single-seed YAML configs that
+  vary one axis at a time — `entanglement` ∈ {linear, ring, all_to_all},
+  `variational gate` ∈ {Rot, RY+RZ, RX+RY+RZ}, `encoding` ∈ {RX, RY},
+  `depth` ∈ {1, 2, 3, 5}, `qubits` ∈ {2, 4, 6}, plus a brickwall
+  ansatz-family point. Results in `results/circuit_search/`.
+- **Phase 3 (Optuna TPE, ~3 h, 22 trials):** Bayesian search over the
+  same discrete space, val MSE_norm as the objective. Halted early when
+  TPE converged on a phantom-optimum brickwall configuration (the
+  driver previously suggested an `entanglement` knob for brickwall and
+  strongly_entangling, which both ignore it — fixed mid-run by adding
+  them to a `FIXED_TOPOLOGY` skip set in
+  `scripts/circuit_search_optuna.py`). Results in
+  `results/circuit_search_optuna/`.
+- **Phase 4 (promotion, ~6 h):** top-3 by **proxy test MAE** from the
+  combined Phase 2 + 3 pool, re-run at the locked 5-seed h=3 protocol.
+  Results in `results/circuit_search_promoted/`.
+
+**Phase 4 verdict — the proxy ranking did NOT survive 5-seed promotion.**
+
+| Proxy rank | Circuit (Q/L/ansatz/encoding) | Proxy MAE (1 seed) | Promoted MAE (5 seeds, mean ± 95% CI) | Δ vs reference 0.2655 ± 0.0054 |
+|---|---|---|---|---|
+| 1 | 4q / 5L / data_reuploading / ring / RX | 0.2466 | 0.2638 ± 0.0155 | −0.0017 (within CI) |
+| 2 | 4q / 3L / hardware_efficient / ring / RX | 0.2610 | 0.2661 ± 0.0105 | +0.0006 (within CI) |
+| **3** | **6q / 3L / strongly_entangling / RX** | **0.2612** | **0.2555 ± 0.0314** | **−0.0100 (suggestive winner; CI overlaps reference)** |
+
+Single-seed proxy rank-1 (`data_reuploading 4q/5L`, 0.2466) was a lucky
+seed — its 5-seed mean lands at 0.2638, statistically indistinguishable
+from the reference. The actual best-performing circuit is the proxy-rank-3
+`strongly_entangling 6q/3L`, but its CI half-width (±0.0314) overlaps the
+reference's CI (±0.0054), so the **headline reproducibility claim
+(Claim 1) still holds**: no searched circuit *robustly* beats the
+data_reuploading 4q/3L reference, and the higher-variance candidates
+demonstrate why σ-tightness matters.
+
+**Implications for the paper (§7 Discussion):**
+
+1. **Proxy budgets lie at this dataset size.** With n=472 train windows,
+   single-seed val MSE noise is large enough to scramble the test-MAE
+   ranking of three circuits within 0.2 MAE units of each other.
+   Replicate this finding in any future low-data QLNN study before
+   trusting a single-seed search.
+2. **Quantum architecture matters less than seed variance here.** The
+   range across 12+22 searched circuits at fixed h=3 is roughly
+   0.25 to 0.29 test MAE; the *within-circuit* 5-seed CI on the
+   suggestive winner is ±0.03 — comparable to the *across-circuit* spread.
+   The dataset isn't expressive enough to discriminate ansatz topology at
+   this scale.
+3. **Deeper data_reuploading (L=5) didn't pan out.** Phase 2's L=5 proxy
+   was the best single-seed result (0.2466), but its 5-seed promotion
+   landed essentially at the reference. Counter-example to "more layers
+   help" naïve intuition for re-uploading circuits.
+4. **The brickwall ansatz template has no entanglement knob in this
+   implementation.** Optuna sampled `entanglement` for brickwall trials
+   even though `BrickwallCircuit.__call__` ignores it (the even/odd-pair
+   pattern is fixed). This was caught mid-run and fixed in
+   `scripts/circuit_search_optuna.py`. Future circuit-search work
+   should either extend the brickwall API to accept alternative CNOT
+   patterns, or document the fixed-topology constraint up front.
+
+Figures: `paper/figures/fig_ansatz_axis_effects.{png,pdf}`,
+`fig_circuit_pareto.{png,pdf}`, `fig_promotion_validation.{png,pdf}`.
+The plumbing (ansatz registry, runner, summarizer, Optuna driver) lives
+under `src/qlnn_/circuits/`, `scripts/run_circuit_search.sh`,
+`scripts/summarize_circuit_search.py`, and
+`scripts/circuit_search_optuna.py`. The circuit-search additions don't
+touch any number in the three pre-registered claims and don't change the
+existing `verify_paper_integrity.py` checks.
+
+---
+
 ## What's left
 
 The empirical work is complete. All three pre-registered claims have
