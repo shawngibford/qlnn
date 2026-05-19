@@ -1,0 +1,114 @@
+{
+  "description": "Frozen baseline lock for the QLNN circuit-search Option-B optimization. Any candidate circuit promoted to paper-grade MUST pass scripts/check_circuit_regression.py against these numbers. Generated from committed results/ at the stated git SHA.",
+  "locked_at_git_sha": "c1a4453ed549ef0fbc537ad15cfdd0b98c005ac9",
+  "eval_protocol": "locked h=3, 5 seeds, train-only OD MinMax + clip 3.8, window 24",
+  "classical": {
+    "matched_param_H4": {
+      "params": 90,
+      "source": "results/param_sweep/euler_h3_hidden4",
+      "test_mae": {
+        "mean": 0.259438,
+        "std": 0.016615,
+        "ci95_half_width": 0.02063,
+        "n_seeds": 5
+      }
+    },
+    "best_param_sweep_cell_H2": {
+      "params": 42,
+      "source": "results/param_sweep/euler_h3_hidden2",
+      "test_mae": {
+        "mean": 0.244938,
+        "std": 0.02236,
+        "ci95_half_width": 0.027763,
+        "n_seeds": 5
+      },
+      "note": "lowest classical MAE across the param sweep \u2014 the hardest accuracy bar"
+    }
+  },
+  "qlnn_reference": {
+    "circuit": "data_reuploading 4q/3L ring RX",
+    "source": "results/qlnn_hybrid_h3",
+    "test_mae": {
+      "mean": 0.265526,
+      "std": 0.004367,
+      "ci95_half_width": 0.005423,
+      "n_seeds": 5
+    }
+  },
+  "claim1_sigma_ratio": {
+    "sigma_classical_H4": 0.016615,
+    "sigma_qlnn_reference": 0.004367,
+    "ratio": 3.8043,
+    "prereg_threshold_ratio": 2.0,
+    "paper_anchor_ratio": 3.77
+  },
+  "sample_efficiency": {
+    "pct10": {
+      "classical": {
+        "mean": 0.278822,
+        "std": 0.019223,
+        "ci95_half_width": 0.023869,
+        "n_seeds": 5
+      },
+      "qlnn_reference": {
+        "mean": 0.268632,
+        "std": 0.006406,
+        "ci95_half_width": 0.007954,
+        "n_seeds": 5
+      },
+      "qlnn_wins": true
+    },
+    "pct25": {
+      "classical": {
+        "mean": 0.25456,
+        "std": 0.023227,
+        "ci95_half_width": 0.02884,
+        "n_seeds": 5
+      },
+      "qlnn_reference": {
+        "mean": 0.250719,
+        "std": 0.016125,
+        "ci95_half_width": 0.020022,
+        "n_seeds": 5
+      },
+      "qlnn_wins": true
+    },
+    "pct50": {
+      "classical": {
+        "mean": 0.256432,
+        "std": 0.021382,
+        "ci95_half_width": 0.026549,
+        "n_seeds": 5
+      },
+      "qlnn_reference": {
+        "mean": 0.263289,
+        "std": 0.005957,
+        "ci95_half_width": 0.007397,
+        "n_seeds": 5
+      },
+      "qlnn_wins": false
+    },
+    "pct100": {
+      "classical": {
+        "mean": 0.259438,
+        "std": 0.016615,
+        "ci95_half_width": 0.02063,
+        "n_seeds": 5
+      },
+      "qlnn_reference": {
+        "mean": 0.265526,
+        "std": 0.004367,
+        "ci95_half_width": 0.005423,
+        "n_seeds": 5
+      },
+      "qlnn_wins": false
+    }
+  },
+  "option_B_gates": {
+    "G1_accuracy": "candidate.test_mae.mean < classical.matched_param_H4 (0.2594) at h=3, 5 seeds",
+    "G2_reproducibility": "candidate.test_mae.std <= 0.5 * sigma_classical_H4 (<= 0.008310) i.e. keep Claim-1 >=2x tightness",
+    "G3_no_regression_pct10": "candidate sample-efficiency MAE at 10% data < classical 0.2788 (QLNN must keep this win)",
+    "G4_no_regression_pct25": "candidate sample-efficiency MAE at 25% data < classical 0.2546 (QLNN must keep this win)",
+    "G5_no_regression_vs_reference": "candidate must not be WORSE than the current QLNN reference at 50% and 100% fractions (no overall regression)"
+  }
+}

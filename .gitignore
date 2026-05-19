@@ -51,3 +51,4 @@ results/*
 !results/circuit_search/
 !results/circuit_search_promoted/
 !results/circuit_search_optuna/
+!results/baseline_lock.json
