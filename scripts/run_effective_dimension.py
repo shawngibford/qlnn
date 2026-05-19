@@ -173,6 +173,7 @@ def _rebuild_qlnn(cfg: dict, ckpt: Path, od_index: int, seed: int) -> eqx.Module
         dt0=float(model_cfg["dt0"]),
         max_steps=int(model_cfg["max_steps"]),
         init_head_std=float(model_cfg["init_head_std"]),
+        init_circuit_std=float(model_cfg.get("init_circuit_std", 0.05)),
         ansatz=ansatz_cfg,
     )
     # The Equinox checkpoint is just the leaves; we rebuild a skeleton with

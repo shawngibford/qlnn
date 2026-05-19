@@ -34,6 +34,12 @@ class QLNNTrainerConfig:
     eval_every: int = 5
     patience: int = 5
     grad_clip_norm: float = 1.0  # 0 disables
+    # LR schedule. "constant" (default) keeps the historical scalar-LR Adam
+    # path bit-identical for every existing run / checkpoint. "cosine" uses
+    # optax.cosine_decay_schedule from cfg.lr → 0 over the full training
+    # horizon (epochs × steps_per_epoch) — a variance-reducing
+    # smooth-convergence regime for the Option-B circuit search.
+    lr_schedule: str = "constant"
     # Physics regularizers. Default off; the +physics ablation overrides this.
     physics: QLNNPhysicsLossConfig = field(default_factory=QLNNPhysicsLossConfig)
 
@@ -50,6 +56,10 @@ class QLNNTrainerConfig:
             raise ValueError("lr > 0")
         if self.grad_clip_norm < 0:
             raise ValueError("grad_clip_norm >= 0")
+        if self.lr_schedule not in ("constant", "cosine"):
+            raise ValueError(
+                f"lr_schedule must be 'constant' or 'cosine', got {self.lr_schedule!r}"
+            )
 
 
 @dataclass(frozen=True)
@@ -73,19 +83,41 @@ class QLNNTrainResult:
     test_metrics: ForecastMetrics
 
 
-def _build_optimizer(cfg: QLNNTrainerConfig) -> optax.GradientTransformation:
+def _build_optimizer(
+    cfg: QLNNTrainerConfig, total_steps: int | None = None
+) -> optax.GradientTransformation:
     """Construct the Optax optimizer chain from cfg.
 
     - grad_clip_norm > 0 -> prepend optax.clip_by_global_norm
     - weight_decay > 0   -> optax.adamw, else optax.adam
+    - lr_schedule == "cosine" -> learning rate follows
+      optax.cosine_decay_schedule(cfg.lr → 0) over `total_steps`;
+      "constant" (default) passes the scalar cfg.lr unchanged so the
+      historical path is bit-identical.
+
+    `total_steps` is required when lr_schedule == "cosine"; ignored
+    otherwise. It is `epochs × steps_per_epoch`, computed by the caller
+    where n_train is known.
     """
+    if cfg.lr_schedule == "cosine":
+        if total_steps is None or total_steps <= 0:
+            raise ValueError(
+                "lr_schedule='cosine' requires total_steps > 0 "
+                f"(got {total_steps!r})"
+            )
+        learning_rate: float | optax.Schedule = optax.cosine_decay_schedule(
+            init_value=cfg.lr, decay_steps=int(total_steps)
+        )
+    else:
+        learning_rate = cfg.lr
+
     chain: list[optax.GradientTransformation] = []
     if cfg.grad_clip_norm > 0:
         chain.append(optax.clip_by_global_norm(cfg.grad_clip_norm))
     if cfg.weight_decay > 0:
-        chain.append(optax.adamw(cfg.lr, weight_decay=cfg.weight_decay))
+        chain.append(optax.adamw(learning_rate, weight_decay=cfg.weight_decay))
     else:
-        chain.append(optax.adam(cfg.lr))
+        chain.append(optax.adam(learning_rate))
     return optax.chain(*chain)
 
 
@@ -189,8 +221,12 @@ def train_one_qlnn(
     t_train_j = jnp.asarray(t_train)
     y_train_j = jnp.asarray(y_train)
 
-    # --- Optimizer
-    opt = _build_optimizer(cfg)
+    # --- Optimizer. total_steps = epochs × steps_per_epoch, only consulted
+    # by the cosine LR schedule (constant schedule ignores it).
+    _n_train = int(x_train_j.shape[0])
+    _steps_per_epoch = max(1, -(-_n_train // cfg.batch_size))  # ceil division
+    _total_steps = cfg.epochs * _steps_per_epoch
+    opt = _build_optimizer(cfg, total_steps=_total_steps)
     opt_state = opt.init(eqx.filter(model, eqx.is_array))
 
     # --- Per-batch loss (data MSE optionally + logistic-growth physics term).

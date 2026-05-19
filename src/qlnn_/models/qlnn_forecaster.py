@@ -80,6 +80,12 @@ class QLNNForecasterConfig:
     max_steps: int = 4096
     # Init scale for initial-state encoder and delta head.
     init_head_std: float = 0.1
+    # Std-dev of the PQC circuit-weight init (passed through to the
+    # QuantumFeatureEncoder). Default 0.05 reproduces the historical
+    # near-identity initialization; the Option-B circuit search treats this
+    # as a regularization knob (smaller ⇒ more stable, larger ⇒ more
+    # expressive but higher seed variance).
+    init_circuit_std: float = 0.05
     # Optional declarative ansatz spec. When None (default), the cell builds
     # the historical data-reuploading circuit so existing checkpoints and
     # YAML configs keep working unchanged.
@@ -160,6 +166,7 @@ class QLNNForecaster(eqx.Module):
             num_layers=config.num_layers,
             tau_min=config.tau_min,
             tau_init=config.tau_init,
+            init_circuit_std=config.init_circuit_std,
             ansatz=config.ansatz,
         )
         self.cell = LiquidQuantumCell(cell_cfg, key=k_cell)
