@@ -11,32 +11,51 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order (do these; everything below #1 is the OLD program)
+### PIVOT pick-up order — ⏩ RESUME AT P2
 
-0. **Setup done this session**: `refs/` has 8 symlinked SOTA PDFs
-   (gitignored); the 10-ansatz roster + P3a faithfulness gate are in
-   the plan.
-1. **P1 — write `ODE_PDE_PRE_REG.md`** (keystone, no compute; template
-   = `hypothesis.md`): the falsifiable Schuld-Fourier hypothesis, the
-   two task defs (DQC-style **solver** + data-driven **forecaster**),
-   metric set (rollout + **relative-L2** + **valid-prediction-time**,
-   NEVER 1-step MAE), matched-comparison + equal-HPO protocol, the
-   **MANDATORY non-liquid Neural-ODE baseline** (isolates
-   quantum-vs-liquid confound), underfitting control. Commit before
-   any P6 run.
-2. **P3a — PDF-grounded faithfulness gate** (BEFORE coding circuits):
-   read each PDF in `refs/` via the **Read tool, page ranges** (NOT
-   abstracts/priors — this session's QPINN agent failed by using
-   training knowledge), write `refs/CIRCUIT_SPECS.md` gate-by-gate spec
-   cards with section/eq citations; dual-agent cross-check. Foundational
-   3 (Kyriienko 2011.10395 `chebyshev_dqc`, Schuld 2008.08605
-   `data_reuploading`, Lubasch 1907.09032 `lubasch_multicopy`) — spec
-   from arXiv full-text HTML (recommend user upload those 3 PDFs too).
-3. **P2/P3/P4/P5 → P6 → P7 → P8** per the plan (PDE generators; solver
-   physics-residual + autodiff prototype; forecaster rollout retask;
-   matched baselines incl. non-liquid Neural-ODE/MLP/PINN; unified
-   matrix v2 over {5 ODE + Burgers/Allen-Cahn/KdV} × {solver,forecaster}
-   × 10 ansätze; T3 triangulation; new dossier).
+**Branch note (read first):** the pivot lives on the worktree branch
+that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
+ansatz registry / circuit-search / unified-matrix / synthetic_ode / T3
+infra the plan says to reuse). `refs/` is gitignored, so its **PDF
+symlinks must be recreated per worktree** — re-`ln -sf` the 8
+`/Users/shawngibford/dev/phd/qlnn/*.pdf` files into `refs/` if absent.
+The committed P3a `.md` evidence trail (force-added) travels with git.
+
+- ✅ **P0 setup** — `refs/` symlinks recreated; 10-ansatz roster +
+  P3a gate locked in the plan.
+- ✅ **P1 DONE** (commit `2646d74`) — `ODE_PDE_PRE_REG.md`: falsifiable
+  H1 (Schuld-Fourier regime partition stated as QLNN−NeuralODE
+  advantage gap, confirm/falsify rules), solver+forecaster task defs,
+  rollout/relative-L2/VPT metric set (1-step MAE banned), mandatory
+  non-liquid Neural-ODE baseline, underfit/skyline guards.
+  `verify_paper_integrity` exits 0 (OD frozen).
+- ✅ **P3a DONE** (commit `51bee95`) — all 7 literature ansätze
+  PDF/arXiv-grounded + **independently dual-verified**;
+  `refs/CIRCUIT_SPECS.md` is the binding manifest P3 consumes.
+  Gate caught & corrected two plan errors: `te_qpinn_qnn` source =
+  `2605.13892v1` (NOT Berger s41598 — Berger has no quantum
+  trainable embedding); `qcpinn` real PDEs =
+  Helmholtz/cavity-NS/wave/Klein-Gordon/conv-diff. `reuploading.py`
+  confirmed Schuld-faithful (H1 mechanism real in-code) with 2
+  non-blocking P3 caveats logged in CIRCUIT_SPECS.md.
+- ⏩ **P2 — NEXT. PDE data generators.** New
+  `src/quantum_liquid_neuralode/data_processing/pde_systems.py`:
+  method-of-lines numpy RK4 (mirror `synthetic_ode.py`) for **viscous
+  Burgers (smooth ν-large AND shock ν-small regimes — the regime split
+  is pre-registered in H1), Allen–Cahn, KdV**. Emit an **npz field
+  artifact** (`u[t,x]` + grid + IC/BC + invariants), NOT the qZETA CSV
+  schema (that seam is blocked). Validation tests with `synthetic_ode`
+  rigor: Burgers shock-formation time, Allen–Cahn front speed, KdV
+  soliton mass+energy conservation. Keep `pytest` green +
+  `verify_paper_integrity` exit-0.
+- **P3 → P4 → P5 → P6 → P7 → P8** per the plan. P3 implements the 10
+  ansätze from `refs/CIRCUIT_SPECS.md` (each: registry + cited docstring
+  + unit-test hook; resolve every `[DECLARED DESIGN CHOICE]` with a
+  cited rationale; clean up the 2 `reuploading.py` caveats). P3 also
+  prototypes solver nested autodiff (`u'=−u`, `jax.jacrev` only)
+  before scale. P6 is gated/system-grouped; no >30-min sweep without
+  user go-ahead; commit `ODE_PDE_PRE_REG.md` is already in place
+  before any P6 run.
 
 ### 1. There is a DETACHED background training job — do NOT wait on it
 *(OLD Option-B program — now superseded by the pivot, but let it finish
