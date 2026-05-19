@@ -33,7 +33,34 @@
     "qlnn_brickwall__R0_control",
     "qlnn_brickwall__R1_weight_decay",
     "qlnn_brickwall__R2_physics_prior",
-    "qlnn_brickwall__R3_smooth_convergence"
+    "qlnn_brickwall__R3_smooth_convergence",
+    "classical_H4_dopri5",
+    "classical_H4_physics",
+    "qlnn_prior_data_reuploading_q4l3_rx_linear",
+    "qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+    "qlnn_prior_data_reuploading_q4l3_ry_ring",
+    "qlnn_prior_data_reuploading_q4l1_rx_ring",
+    "qlnn_prior_data_reuploading_q4l2_rx_ring",
+    "qlnn_prior_data_reuploading_q4l5_rx_ring",
+    "qlnn_prior_data_reuploading_q2l3_rx_ring",
+    "qlnn_prior_data_reuploading_q6l3_rx_ring",
+    "qlnn_prior_hardware_efficient_q4l2_ry_linear",
+    "qlnn_prior_brickwall_q2l1_rx_all_to_all",
+    "qlnn_prior_brickwall_q6l5_ry_linear",
+    "qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+    "qlnn_prior_hardware_efficient_q4l3_rx_linear",
+    "qlnn_prior_brickwall_q6l1_ry_ring",
+    "qlnn_prior_data_reuploading_q4l5_ry_linear",
+    "qlnn_prior_brickwall_q4l5_ry_all_to_all",
+    "qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+    "qlnn_prior_hardware_efficient_q2l3_rx_linear",
+    "qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+    "qlnn_prior_data_reuploading_q6l1_rx_linear",
+    "qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+    "qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+    "qlnn_prior_data_reuploading_q4l2_rx_linear",
+    "qlnn_prior_hardware_efficient_q4l5_rx_linear",
+    "qlnn_prior_brickwall_q4l3_rx_all_to_all"
   ],
   "configs": [
     {
@@ -163,6 +190,168 @@
       "stack": "qlnn"
     },
     {
+      "stem": "qzeta_od__classical_H4_dopri5",
+      "dataset": "qzeta_od",
+      "model": "classical_H4_dopri5",
+      "stack": "classical"
+    },
+    {
+      "stem": "qzeta_od__classical_H4_physics",
+      "dataset": "qzeta_od",
+      "model": "classical_H4_physics",
+      "stack": "classical"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_brickwall_q6l5_ry_linear",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_brickwall_q6l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_brickwall_q6l1_ry_ring",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_brickwall_q6l1_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "dataset": "qzeta_od",
+      "model": "qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
       "stem": "lotka_volterra_m472__classical_H2",
       "dataset": "lotka_volterra_m472",
       "model": "classical_H2",
@@ -286,6 +475,168 @@
       "stem": "lotka_volterra_m472__qlnn_brickwall__R3_smooth_convergence",
       "dataset": "lotka_volterra_m472",
       "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__classical_H4_dopri5",
+      "dataset": "lotka_volterra_m472",
+      "model": "classical_H4_dopri5",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_m472__classical_H4_physics",
+      "dataset": "lotka_volterra_m472",
+      "model": "classical_H4_physics",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_brickwall_q6l5_ry_linear",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_brickwall_q6l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_brickwall_q6l1_ry_ring",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_brickwall_q6l1_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_m472__qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "dataset": "lotka_volterra_m472",
+      "model": "qlnn_prior_brickwall_q4l3_rx_all_to_all",
       "stack": "qlnn"
     },
     {
@@ -415,6 +766,168 @@
       "stack": "qlnn"
     },
     {
+      "stem": "lotka_volterra_full__classical_H4_dopri5",
+      "dataset": "lotka_volterra_full",
+      "model": "classical_H4_dopri5",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_full__classical_H4_physics",
+      "dataset": "lotka_volterra_full",
+      "model": "classical_H4_physics",
+      "stack": "classical"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_brickwall_q6l5_ry_linear",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_brickwall_q6l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_brickwall_q6l1_ry_ring",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_brickwall_q6l1_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lotka_volterra_full__qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "dataset": "lotka_volterra_full",
+      "model": "qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
       "stem": "fitzhugh_nagumo_m472__classical_H2",
       "dataset": "fitzhugh_nagumo_m472",
       "model": "classical_H2",
@@ -538,6 +1051,168 @@
       "stem": "fitzhugh_nagumo_m472__qlnn_brickwall__R3_smooth_convergence",
       "dataset": "fitzhugh_nagumo_m472",
       "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__classical_H4_dopri5",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "classical_H4_dopri5",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__classical_H4_physics",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "classical_H4_physics",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_brickwall_q6l5_ry_linear",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_brickwall_q6l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_brickwall_q6l1_ry_ring",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_brickwall_q6l1_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_m472__qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "dataset": "fitzhugh_nagumo_m472",
+      "model": "qlnn_prior_brickwall_q4l3_rx_all_to_all",
       "stack": "qlnn"
     },
     {
@@ -667,6 +1342,168 @@
       "stack": "qlnn"
     },
     {
+      "stem": "fitzhugh_nagumo_full__classical_H4_dopri5",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "classical_H4_dopri5",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__classical_H4_physics",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "classical_H4_physics",
+      "stack": "classical"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_brickwall_q6l5_ry_linear",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_brickwall_q6l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_brickwall_q6l1_ry_ring",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_brickwall_q6l1_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "fitzhugh_nagumo_full__qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "dataset": "fitzhugh_nagumo_full",
+      "model": "qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
       "stem": "van_der_pol_m472__classical_H2",
       "dataset": "van_der_pol_m472",
       "model": "classical_H2",
@@ -790,6 +1627,168 @@
       "stem": "van_der_pol_m472__qlnn_brickwall__R3_smooth_convergence",
       "dataset": "van_der_pol_m472",
       "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__classical_H4_dopri5",
+      "dataset": "van_der_pol_m472",
+      "model": "classical_H4_dopri5",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_m472__classical_H4_physics",
+      "dataset": "van_der_pol_m472",
+      "model": "classical_H4_physics",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_brickwall_q6l5_ry_linear",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_brickwall_q6l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_brickwall_q6l1_ry_ring",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_brickwall_q6l1_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_m472__qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "dataset": "van_der_pol_m472",
+      "model": "qlnn_prior_brickwall_q4l3_rx_all_to_all",
       "stack": "qlnn"
     },
     {
@@ -919,6 +1918,168 @@
       "stack": "qlnn"
     },
     {
+      "stem": "van_der_pol_full__classical_H4_dopri5",
+      "dataset": "van_der_pol_full",
+      "model": "classical_H4_dopri5",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_full__classical_H4_physics",
+      "dataset": "van_der_pol_full",
+      "model": "classical_H4_physics",
+      "stack": "classical"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_brickwall_q6l5_ry_linear",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_brickwall_q6l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_brickwall_q6l1_ry_ring",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_brickwall_q6l1_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "van_der_pol_full__qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "dataset": "van_der_pol_full",
+      "model": "qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
       "stem": "lorenz_m472__classical_H2",
       "dataset": "lorenz_m472",
       "model": "classical_H2",
@@ -1042,6 +2203,168 @@
       "stem": "lorenz_m472__qlnn_brickwall__R3_smooth_convergence",
       "dataset": "lorenz_m472",
       "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__classical_H4_dopri5",
+      "dataset": "lorenz_m472",
+      "model": "classical_H4_dopri5",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_m472__classical_H4_physics",
+      "dataset": "lorenz_m472",
+      "model": "classical_H4_physics",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_brickwall_q6l5_ry_linear",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_brickwall_q6l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_brickwall_q6l1_ry_ring",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_brickwall_q6l1_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_m472__qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "dataset": "lorenz_m472",
+      "model": "qlnn_prior_brickwall_q4l3_rx_all_to_all",
       "stack": "qlnn"
     },
     {
@@ -1171,6 +2494,168 @@
       "stack": "qlnn"
     },
     {
+      "stem": "lorenz_full__classical_H4_dopri5",
+      "dataset": "lorenz_full",
+      "model": "classical_H4_dopri5",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_full__classical_H4_physics",
+      "dataset": "lorenz_full",
+      "model": "classical_H4_physics",
+      "stack": "classical"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_brickwall_q6l5_ry_linear",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_brickwall_q6l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_brickwall_q6l1_ry_ring",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_brickwall_q6l1_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "lorenz_full__qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "dataset": "lorenz_full",
+      "model": "qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
       "stem": "kuramoto_m472__classical_H2",
       "dataset": "kuramoto_m472",
       "model": "classical_H2",
@@ -1294,6 +2779,168 @@
       "stem": "kuramoto_m472__qlnn_brickwall__R3_smooth_convergence",
       "dataset": "kuramoto_m472",
       "model": "qlnn_brickwall__R3_smooth_convergence",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__classical_H4_dopri5",
+      "dataset": "kuramoto_m472",
+      "model": "classical_H4_dopri5",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_m472__classical_H4_physics",
+      "dataset": "kuramoto_m472",
+      "model": "classical_H4_physics",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_brickwall_q6l5_ry_linear",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_brickwall_q6l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_brickwall_q6l1_ry_ring",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_brickwall_q6l1_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_m472__qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "dataset": "kuramoto_m472",
+      "model": "qlnn_prior_brickwall_q4l3_rx_all_to_all",
       "stack": "qlnn"
     },
     {
@@ -1421,6 +3068,175 @@
       "dataset": "kuramoto_full",
       "model": "qlnn_brickwall__R3_smooth_convergence",
       "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__classical_H4_dopri5",
+      "dataset": "kuramoto_full",
+      "model": "classical_H4_dopri5",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_full__classical_H4_physics",
+      "dataset": "kuramoto_full",
+      "model": "classical_H4_physics",
+      "stack": "classical"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_data_reuploading_q4l3_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_data_reuploading_q4l1_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_data_reuploading_q4l5_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_data_reuploading_q2l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_data_reuploading_q6l3_rx_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_hardware_efficient_q4l2_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_brickwall_q2l1_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_brickwall_q6l5_ry_linear",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_brickwall_q6l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_strongly_entangling_q2l2_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_hardware_efficient_q4l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_brickwall_q6l1_ry_ring",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_brickwall_q6l1_ry_ring",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_data_reuploading_q4l5_ry_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_brickwall_q4l5_ry_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_strongly_entangling_q6l2_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_hardware_efficient_q2l3_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_strongly_entangling_q4l1_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_data_reuploading_q6l1_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_strongly_entangling_q6l3_rx_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_strongly_entangling_q4l3_ry_tmpl",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_data_reuploading_q4l2_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_hardware_efficient_q4l5_rx_linear",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "kuramoto_full__qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "dataset": "kuramoto_full",
+      "model": "qlnn_prior_brickwall_q4l3_rx_all_to_all",
+      "stack": "qlnn"
+    },
+    {
+      "stem": "qzeta_od__classical_H4_fixed_od_clip",
+      "dataset": "qzeta_od",
+      "model": "classical_H4_fixed_od_clip",
+      "stack": "classical",
+      "qzeta_only": true
     }
   ]
 }

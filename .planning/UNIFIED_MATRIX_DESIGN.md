@@ -19,11 +19,26 @@ bioreactor run alone can't separate the two.
   R1_weight_decay, R2_physics_prior, R3_smooth_convergence}
   (`train_qlnn.py`). Generalizes Option-B's 3×4=12 to the full 4×4.
 
-**Excluded (judgment calls — revisit if a reviewer wants them):** Optuna
-trials / prior axis-ablation / promoted runs (search *scratch*, not
-distinct models); bioreactor-only ablations (dopri5, +physics-on-classical,
-fixed-OD-clip, horizon sweep — qZETA artifacts that don't transfer to
-signed-state ODEs).
+**FAIR-COMPARISON EXPANSION (user-directed — these were folded in):**
+- **Prior topologies (25):** the axis-ablation grid + 20 dedup'd unique
+  Optuna specs + promoted runs, as fixed dataset-agnostic circuit
+  topologies, run at **native regime (R0) only** (the 4-regime study
+  stays scoped to the core 4 families). Auto-dedup'd against the core
+  family R0 baselines so no redundancy.
+- **dopri5, classical+physics (2):** bioreactor-origin classical
+  ablations generalized as model variants at matched H=4. Whether the
+  bioprocess logistic prior helps on Lorenz is itself informative.
+- **fixed-OD-clip:** NOT a model — a fixed-`[0,3.8]` preprocessing
+  variant undefined for signed ODE states. Kept as a **single
+  qZETA-only** flagged config (`qzeta_only: True`), excluded from the
+  model-suite-identity contract.
+- **horizon sweep:** an *eval-protocol* axis, deferred to a **separate
+  gated horizon phase** on a curated model subset (avoids a 4× blow-up
+  of the model matrix). The unified matrix stays at the locked h=3.
+
+Final model suite: **48** = 7 classical (5 capacity + dopri5 + physics)
++ 41 qlnn (16 family×regime + 25 prior topologies). Matrix = 48 × 11
++ 1 qZETA-only = **529 configs**.
 
 ## Datasets (11)
 
