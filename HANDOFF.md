@@ -134,18 +134,33 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   | te_qpinn_qnn   | 0.524    | 1.044     | 0.978        |
   | qcpinn         | 0.0058   | 2.315     | 0.995        |
 
-  Key findings:
-  1. **Lorenz universally fails (relL2≈1.0)** across all 4 families —
-     first pre-baseline H1 datapoint supporting the predicted
-     chaotic-broadband failure boundary.
+  Key descriptive observations (NOT H1 evidence — see caveats):
+  1. **Lorenz universally fails (relL2≈1.0)** across all 4 families,
+     consistent with the pre-registered broadband regime partition.
+     **CAVEAT (audit, P3.8):** the T=2 horizon ≈ 1.8 Lyapunov times
+     (pre-reg specifies 10 LTE); chaos hasn't fully developed.
+     Failure here is transient-nonlinear-difficulty + broadband
+     character, not chaotic-regime per se. P3.8 re-ran Lorenz at
+     T=5.0 (~5.5 LTE) to disentangle. Also: relL2=1.0 uses a
+     predict-zero baseline; P3.8 adds the more honest predict-mean
+     baseline for chaotic systems.
   2. **qcpinn dominates LV (relL2 0.005)** but its 1412 classical
-     params (706 × d=2) dwarf the 30 PQC — R1 confirmed.
+     params (706 × d=2) dwarf the 30 PQC — R1 confirmed empirically.
      chebyshev_dqc at relL2 0.10 is the pure-quantum baseline.
   3. **Van der Pol stiffness defeats everyone** at μ=5 over 10 time
      units; qcpinn overshoots; a real solver-path gap for P6.
   4. **te_qpinn_qnn reproduces its P3.5 flat-line ceiling** on the
-     vector tasks (1.4964/1.4998/1.4944 MAE on LV) — robust T3
-     signal across scalar AND vector solver tasks.
+     vector tasks (1.4964/1.4998/1.4944 MAE on LV) **at a single
+     (n=4, L=5, K=3) configuration**. The "structural trainability
+     ceiling" interpretation requires a hyperparameter sweep —
+     deferred to P7's T3 triangulation. Reframe: this is observed-
+     in-one-config, not proven structural.
+
+  **H1 framing reform (P3.8 audit):** H1 is defined in P1 §2 as the
+  **QLNN − NeuralODE advantage gap**. Lorenz absolute failures across
+  QLNN families are NOT H1 evidence — H1 requires the NeuralODE
+  baseline (scheduled for P5). The above are descriptive regime-map
+  data pending the H1 contrast.
 
   Figure: `paper/figures/fig_p3_6_multi_state.{png,pdf}`. Per-component
   dispatch validated; gradient mass flows independently into each
@@ -163,17 +178,39 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   3-PDE solver-demo results (3 seeds each, 600 steps,
   chebyshev_dqc_2d, 8 qubits, 5 HEA layers):
 
-  | PDE              | mean relL2 | H1 reading                          |
+  | PDE              | mean relL2 | regime tag (NOT H1 evidence)        |
   |------------------|------------|-------------------------------------|
   | heat             | 0.059      | SMOOTH (analytic ref; well below 0.10 gate) |
-  | burgers_smooth   | 0.380      | SMOOTH/PERIODIC (2.6× better than predict-zero) |
-  | allen_cahn       | 0.769      | **BROADBAND failure** — H1 PDE-side prediction confirmed |
+  | burgers_smooth   | 0.380      | SMOOTH/PERIODIC (P3.8: did NOT meet plan's relL2<0.30 gate at 600 steps; retry at 1500 steps in P3.8) |
+  | allen_cahn       | 0.769      | BROADBAND/MULTISCALE regime (CAVEAT below) |
 
-  The Allen-Cahn collapse mirrors P3.6's Lorenz failure on the ODE
-  side: same family recovers smooth systems, materially fails on
-  broadband-multiscale systems. Higher per-seed variance on Allen-
-  Cahn (0.651-0.836) vs the smooth PDEs (~0.005 std) is consistent
-  with the trainability difficulty on broadband regimes.
+  **Allen-Cahn caveat (P3.8 audit):** the P3.7 sweep used n_x_colloc=28
+  → Δx≈0.224, vs Allen-Cahn equilibrium front width √2·ε≈0.085. The
+  solver had **<1 collocation point per front**. The observed
+  "broadband failure" may reflect sub-Nyquist spatial aliasing rather
+  than a regime-structural property. P3.8 re-runs Allen-Cahn at
+  n_x_colloc=64, n_t_colloc=32, steps=1800 (1.2 collocation points
+  per front; 10× P3.7's resolution-to-front ratio) to disentangle.
+  Also: final_loss=9.23 at 600 steps suggests under-convergence vs
+  PDE_BENCH's configured 1800.
+
+  **H1 framing reform (P3.8 audit):** H1 is defined in P1 §2 as the
+  **QLNN − NeuralODE advantage gap**. Allen-Cahn absolute failure is
+  NOT H1 evidence — H1 requires the NeuralODE baseline (scheduled for
+  P5). The above are descriptive regime-map data; H1 verdict awaits
+  P5. P3.8 ADDS a classical MLP-PINN baseline (the audit's #1
+  missing comparison) which gives the solver-side analogue (the
+  forecaster NeuralODE baseline still waits for P5).
+
+  **P3.8 smoke result (heat seed 0, both models capacity-matched ~120-180 params):**
+  - chebyshev_dqc_2d:   relL2 0.0553, MAE 0.0302, BC violation 0.40
+  - classical_pinn:      relL2 0.0054, MAE 0.0026, BC violation lower
+
+  Classical PINN is ~10× more accurate at matched capacity on the
+  smooth analytic case. The audit's prediction (no quantum advantage
+  on a smooth-low-frequency problem given physics-informed training)
+  is being borne out empirically. Full P3.8 sweep (3 PDEs × 2 models
+  × 3 seeds + Lorenz × 4 families at T=5) in progress.
 
   Figure: `paper/figures/fig_p3_7_pde_solver.{png,pdf}` — 3-row
   snapshot grid (t=0 / T/2 / T per PDE) + log-scale relL2 bar
