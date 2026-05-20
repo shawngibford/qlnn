@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P4
+### PIVOT pick-up order — ⏩ RESUME AT P3.8 deferred (AC + Lorenz) → P4
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -220,7 +220,41 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   PennyLane has no Apple-Metal quantum backend); single family this
   phase (cross-family on PDEs = P6); sibling module to
   `physics_residual_loss.py` (1D gate contract immutable).
-- ⏩ **P4 — NEXT. Forecaster long-horizon autoregressive rollout.**
+- 🟡 **P3.8 PARTIAL** — peer-review iteration (commits `29f097e` →
+  `84d58db`, 5 atomic). The audit's 3 BLOCKERs are CLOSED via
+  framing reform (HANDOFF + READMEs) + the new classical MLP-PINN
+  baseline module. Partial sweep landed: heat + Burgers smooth × 2
+  models × 3 seeds = 12 runs. Headline:
+
+  | PDE | quantum (chebyshev_dqc_2d) | classical_pinn | advantage |
+  |---|---:|---:|---|
+  | heat | 0.056 | **0.0045** | ~12× classical |
+  | burgers_smooth | 0.358 | **0.027** | ~13× classical |
+
+  At matched capacity, the classical PINN substantially outperforms
+  the quantum solver on both smooth PDEs. The audit's central
+  hypothesis (no quantum advantage on smooth low-Fourier-order
+  problems given physics-informed training) is empirically supported.
+  Burgers gate target relL2<0.30 STILL missed even at corrected
+  1500 steps — confirms a quantum-solver expressivity ceiling, not
+  just under-convergence.
+
+  Figure: `paper/figures/fig_p3_8_review_iteration.{png,pdf}`.
+
+  **Deferred to next session (compute-heavy; ~5 hr):**
+  - Allen-Cahn at n_x_colloc=64, n_t_colloc=32, steps=1800 — both
+    quantum AND classical PINN, n=3 seeds. Tests whether P3.7's
+    "broadband failure" was sub-Nyquist aliasing (Δx=0.224 vs front
+    width 0.085) or a regime-structural property. ~3 hr CPU.
+  - Lorenz extended to T=5 (~5.5 Lyapunov times) for all 4 quantum
+    families with the predict-mean baseline. ~2 hr CPU.
+  Re-run from the existing CLI:
+  `python scripts/run_p3_8_review_iteration.py --pdes allen_cahn --skip-lorenz`
+  then `--pdes (none) --lorenz-families chebyshev_dqc te_qpinn_fnn ...`.
+  After both complete, re-render the figure with
+  `make_p3_8_review_figure.py` — the same script handles the full
+  data.
+- ⏩ **P4 — NEXT (after P3.8 deferred wraps up). Forecaster long-horizon autoregressive rollout.**
   Retask the data-driven forecaster from the persistence-trivial
   h-step MAE protocol to **autoregressive multi-step rollout on the
   P2 PDE fields + the existing 5 ODE systems** (ODE_PDE_PRE_REG.md
