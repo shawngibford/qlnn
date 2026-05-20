@@ -1,0 +1,41 @@
+{
+  "families": [
+    "chebyshev_dqc",
+    "te_qpinn_fnn",
+    "te_qpinn_qnn",
+    "qcpinn"
+  ],
+  "systems": [
+    "lotka_volterra",
+    "van_der_pol",
+    "lorenz"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "steps_override": null,
+  "per_family_default_steps": {
+    "chebyshev_dqc": 1200,
+    "te_qpinn_fnn": 1500,
+    "te_qpinn_qnn": 2000,
+    "qcpinn": 1500
+  },
+  "system_descriptions": {
+    "lotka_volterra": "Lotka-Volterra (prey, predator), \u03b1=1.1, \u03b2=0.4, \u03b4=0.1, \u03b3=0.4 \u2014 H1 SMOOTH/PERIODIC",
+    "van_der_pol": "Van der Pol stiff relaxation oscillator, \u03bc=5.0 \u2014 borderline SMOOTH/PERIODIC (stiff but periodic)",
+    "lorenz": "Lorenz \u03c3=10, \u03c1=28, \u03b2=8/3 \u2014 H1 BROADBAND/CHAOTIC"
+  },
+  "system_regimes": {
+    "lotka_volterra": "smooth_periodic",
+    "van_der_pol": "smooth_periodic",
+    "lorenz": "broadband_multiscale"
+  },
+  "system_dims": {
+    "lotka_volterra": 2,
+    "van_der_pol": 2,
+    "lorenz": 3
+  },
+  "scope_note": "P3.6 multi-state ODE solver demo (extends P3.5 to vector-state). NOT a paper claim; not in verify_paper_integrity contract."
+}

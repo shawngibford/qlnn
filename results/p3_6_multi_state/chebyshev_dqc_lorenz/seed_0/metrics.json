@@ -1,0 +1,22 @@
+{
+  "family": "chebyshev_dqc",
+  "system": "lorenz",
+  "seed": 0,
+  "dim": 3,
+  "regime": "broadband_multiscale",
+  "steps": 1200,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 180,
+  "classical_params": 0,
+  "per_component_pqc_params": 60,
+  "config_str": "per-component: n=4, L=5; dim=3",
+  "final_loss": 5.77086877822876,
+  "mae": 14.16134087070348,
+  "mae_per_component": [
+    8.187658042433677,
+    9.482638299679756,
+    24.813726269997016
+  ],
+  "relative_l2": 1.001276204652427
+}

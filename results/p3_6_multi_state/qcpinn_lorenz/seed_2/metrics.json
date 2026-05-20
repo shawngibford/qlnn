@@ -1,0 +1,22 @@
+{
+  "family": "qcpinn",
+  "system": "lorenz",
+  "seed": 2,
+  "dim": 3,
+  "regime": "broadband_multiscale",
+  "steps": 1500,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 45,
+  "classical_params": 2118,
+  "per_component_pqc_params": 15,
+  "config_str": "per-component: n=5, L=1, Cascade; dim=3",
+  "final_loss": 6.775854110717773,
+  "mae": 13.948975223032818,
+  "mae_per_component": [
+    7.982523210170684,
+    9.04638466796875,
+    24.81801779095903
+  ],
+  "relative_l2": 0.9942744988567344
+}

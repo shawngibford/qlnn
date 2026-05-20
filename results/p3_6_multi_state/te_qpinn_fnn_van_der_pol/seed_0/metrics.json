@@ -1,0 +1,21 @@
+{
+  "family": "te_qpinn_fnn",
+  "system": "van_der_pol",
+  "seed": 0,
+  "dim": 2,
+  "regime": "smooth_periodic",
+  "steps": 1500,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 120,
+  "classical_params": 200,
+  "per_component_pqc_params": 60,
+  "config_str": "per-component: n=4, L=5, H_fnn=16; dim=2",
+  "final_loss": 0.42659685015678406,
+  "mae": 0.7724935529679868,
+  "mae_per_component": [
+    0.9246345069544168,
+    0.620352598981557
+  ],
+  "relative_l2": 0.8213402448263368
+}

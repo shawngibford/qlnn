@@ -1,0 +1,21 @@
+{
+  "family": "qcpinn",
+  "system": "van_der_pol",
+  "seed": 1,
+  "dim": 2,
+  "regime": "smooth_periodic",
+  "steps": 1500,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 30,
+  "classical_params": 1412,
+  "per_component_pqc_params": 15,
+  "config_str": "per-component: n=5, L=1, Cascade; dim=2",
+  "final_loss": 1.7426003217697144,
+  "mae": 0.8156227085285047,
+  "mae_per_component": [
+    0.6371748169544424,
+    0.9940706001025673
+  ],
+  "relative_l2": 0.8674133755975532
+}

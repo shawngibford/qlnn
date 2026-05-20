@@ -1,0 +1,22 @@
+{
+  "family": "te_qpinn_fnn",
+  "system": "lorenz",
+  "seed": 0,
+  "dim": 3,
+  "regime": "broadband_multiscale",
+  "steps": 1500,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 180,
+  "classical_params": 300,
+  "per_component_pqc_params": 60,
+  "config_str": "per-component: n=4, L=5, H_fnn=16; dim=3",
+  "final_loss": 8.502640724182129,
+  "mae": 13.946192312086842,
+  "mae_per_component": [
+    7.958557466390548,
+    9.034310552692414,
+    24.84570891717757
+  ],
+  "relative_l2": 0.9949859624795095
+}

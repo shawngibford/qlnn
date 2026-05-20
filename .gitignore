@@ -59,4 +59,5 @@ results/*
 !results/master_comparison.md
 !results/master_comparison.csv
 !results/p3_solver_demo/
+!results/p3_6_multi_state/
 refs/

@@ -1,0 +1,21 @@
+{
+  "family": "te_qpinn_fnn",
+  "system": "lotka_volterra",
+  "seed": 1,
+  "dim": 2,
+  "regime": "smooth_periodic",
+  "steps": 1500,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 120,
+  "classical_params": 200,
+  "per_component_pqc_params": 60,
+  "config_str": "per-component: n=4, L=5, H_fnn=16; dim=2",
+  "final_loss": 0.24917946755886078,
+  "mae": 0.3943984724881372,
+  "mae_per_component": [
+    0.5422409993147947,
+    0.2465559456614795
+  ],
+  "relative_l2": 0.14074030001929622
+}

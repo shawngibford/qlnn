@@ -1,0 +1,21 @@
+{
+  "family": "qcpinn",
+  "system": "lotka_volterra",
+  "seed": 1,
+  "dim": 2,
+  "regime": "smooth_periodic",
+  "steps": 1500,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 30,
+  "classical_params": 1412,
+  "per_component_pqc_params": 15,
+  "config_str": "per-component: n=5, L=1, Cascade; dim=2",
+  "final_loss": 0.0009019888821057975,
+  "mae": 0.008395355448857165,
+  "mae_per_component": [
+    0.010009503381754275,
+    0.0067812075159600525
+  ],
+  "relative_l2": 0.00294084845578528
+}

@@ -1,0 +1,21 @@
+{
+  "family": "chebyshev_dqc",
+  "system": "van_der_pol",
+  "seed": 1,
+  "dim": 2,
+  "regime": "smooth_periodic",
+  "steps": 1200,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 120,
+  "classical_params": 0,
+  "per_component_pqc_params": 60,
+  "config_str": "per-component: n=4, L=5; dim=2",
+  "final_loss": 2.3637773990631104,
+  "mae": 1.140094575274875,
+  "mae_per_component": [
+    1.3737621469527914,
+    0.9064270035969584
+  ],
+  "relative_l2": 1.1516009635814861
+}
