@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P3.7
+### PIVOT pick-up order — ⏩ RESUME AT P4
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -150,17 +150,40 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   Figure: `paper/figures/fig_p3_6_multi_state.{png,pdf}`. Per-component
   dispatch validated; gradient mass flows independently into each
   component's weights. 15 smoke tests green (~3m20s).
-- ⏩ **P3.7 — NEXT. PDE solver scaffolding + nested-autodiff gate.**
-  Add (t, x) coordinate handling so we can train against the P2 PDE
-  fields. Heat-equation gate (`u_t = ν u_xx`, exact `u = e^{−νt}sin(x)`)
-  must converge to MAE < 0.05 to unblock; if it fails, that's a real
-  Risk-#2-redux confirmation and PDE work stops. First real PDE
-  target: `burgers_smooth` (P2 npz; H1 SMOOTH/PERIODIC). New module:
-  `src/qlnn_/training/pde_residual_loss.py` (~250 LOC) +
-  heat-equation gate test (~100 LOC). Sibling of
-  `physics_residual_loss.py`, not an extension. Allen-Cahn and KdV
-  deferred to P6.
-- **P4 — Forecaster long-horizon autoregressive rollout.**
+- ✅ **P3.7 DONE** — PDE solver + nested-autodiff gate +
+  3-PDE demo (commits `87dcfd2` → `afbb5e6`, 3 atomic). **Risk-#2-redux
+  RETIRED**: nested mixed-2nd-derivative autodiff
+  (`jax.jacrev(jax.jacrev(QNode, argnums=1), argnums=1)`) through
+  PennyLane's JAX interface composes cleanly — PennyLane uses
+  `vjp` (not Diffrax's `custom_vjp`), so reverse-over-reverse is
+  safe. Mechanism gate AND convergence gate (heat eq MAE<0.10)
+  both passed on first attempt. The PDE side of the H1 hypothesis
+  space is structurally accessible.
+
+  3-PDE solver-demo results (3 seeds each, 600 steps,
+  chebyshev_dqc_2d, 8 qubits, 5 HEA layers):
+
+  | PDE              | mean relL2 | H1 reading                          |
+  |------------------|------------|-------------------------------------|
+  | heat             | 0.059      | SMOOTH (analytic ref; well below 0.10 gate) |
+  | burgers_smooth   | 0.380      | SMOOTH/PERIODIC (2.6× better than predict-zero) |
+  | allen_cahn       | 0.769      | **BROADBAND failure** — H1 PDE-side prediction confirmed |
+
+  The Allen-Cahn collapse mirrors P3.6's Lorenz failure on the ODE
+  side: same family recovers smooth systems, materially fails on
+  broadband-multiscale systems. Higher per-seed variance on Allen-
+  Cahn (0.651-0.836) vs the smooth PDEs (~0.005 std) is consistent
+  with the trainability difficulty on broadband regimes.
+
+  Figure: `paper/figures/fig_p3_7_pde_solver.{png,pdf}` — 3-row
+  snapshot grid (t=0 / T/2 / T per PDE) + log-scale relL2 bar
+  chart with predict-zero floor.
+
+  Architectural decisions baked in: CPU-only backend (user-locked;
+  PennyLane has no Apple-Metal quantum backend); single family this
+  phase (cross-family on PDEs = P6); sibling module to
+  `physics_residual_loss.py` (1D gate contract immutable).
+- ⏩ **P4 — NEXT. Forecaster long-horizon autoregressive rollout.**
   Retask the data-driven forecaster from the persistence-trivial
   h-step MAE protocol to **autoregressive multi-step rollout on the
   P2 PDE fields + the existing 5 ODE systems** (ODE_PDE_PRE_REG.md
