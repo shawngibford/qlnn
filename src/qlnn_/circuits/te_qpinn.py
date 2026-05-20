@@ -140,6 +140,8 @@ def build_te_qpinn_fnn(
     The output is `⟨⊗_k Z_k⟩` (Eq. 13), a scalar in [-1, 1]. Drop-in
     compatible with `physics_residual_loss.py:train_solver` (which
     accepts arbitrary param pytrees via optax).
+
+    See module docstring for the te_qpinn_QNN sibling (build_te_qpinn_qnn).
     """
     cfg = cfg or TEQPINNFnnConfig()
     n = cfg.num_qubits
@@ -167,3 +169,146 @@ def build_te_qpinn_fnn(
         return qml.expval(qml.prod(*(qml.PauliZ(k) for k in range(n))))
 
     return circuit
+
+
+# ===========================================================================
+# te_qpinn_qnn — the FULLY-QUANTUM trainable embedding variant
+# ===========================================================================
+#
+# Faithful implementation per CIRCUIT_SPECS §2. **Source attribution
+# corrected by the P3a gate**: the Berger PDF (`s41598-025-02959-z`)
+# defines ONLY the classical-FNN trainable embedding above; the
+# fully-quantum trainable embedding sourced from `2605.13892v1` (QPINN
+# lid-driven cavity), corroborated by `2602.14596v1` and
+# `2602.09291v1`. Architecture (CIRCUIT_SPECS §2, paper Eqs. 10–18,
+# 25–26, Fig. 1, Algorithm 1):
+#
+#     x → affine-normalize x̃ ∈ [-1, 1]
+#       → trainable PQC U_embed(θ_Q)             — the "quantum
+#                                                   trainable embedding"
+#       → α_k = π · ⟨Z_k⟩   (Pauli-Z on each qubit, scaled by π)
+#       → ⊗_k R_y(α_k)                            (re-encode into HEA)
+#       → HEA U_var(θ_var), L variational layers   (Eq. 12)
+#       → readout O = Σ_j Z_j                     (a scalar)
+#
+# **DECLARED DESIGN CHOICES** (U_embed gate-by-gate schedule is
+# "schematic only (Fig. 3)" in ALL THREE sibling sources — flagged by
+# both the primary extractor and the independent dual-check; see
+# CIRCUIT_SPECS §2 final bullet). Resolved as the minimal faithful
+# schedule whose param scaling is **linear in N_q · L_embed**
+# (paper §p.6) and that exercises a "trainable PQC embedding" with
+# nn-CNOT entanglement:
+#
+#   - K_embed embedding layers, each = per-qubit R_y(θ_emb1) and
+#     R_z(θ_emb2 · x̃)  (input-dependent rotation — the embedding sees
+#     the data coordinate), then nn-CNOT chain.
+#     ⇒ 2·N_q·K_embed trained embedding scalars (linear in N_q × K_embed).
+#
+# **Unit-test hook (CIRCUIT_SPECS §2):** trained-param count scales
+# LINEARLY in N_q · L_total (asserted by varying n and L and checking
+# affine fit). The paper's anchor magnitude is ~360 params; we treat
+# this as a soft sanity bound, not a hard equality (the schematic
+# source's exact constant is unspecified).
+
+
+@dataclass(frozen=True)
+class TEQPINNQnnConfig:
+    """`te_qpinn_qnn` config (2605.13892 / corroborated by 2602.14596,
+    2602.09291). Trainable subsystems = quantum embedding PQC +
+    variational HEA. NO classical FNN."""
+
+    num_qubits: int = 4
+    num_layers: int = 5            # L_var, the HEA variational depth
+    num_embed_layers: int = 3      # K_embed, the U_embed depth
+    device_name: str = "default.qubit"
+
+    def __post_init__(self) -> None:
+        if self.num_qubits < 1:
+            raise ValueError(f"num_qubits must be >= 1, got {self.num_qubits}")
+        if self.num_layers < 1:
+            raise ValueError(f"num_layers must be >= 1, got {self.num_layers}")
+        if self.num_embed_layers < 1:
+            raise ValueError(
+                f"num_embed_layers must be >= 1, got {self.num_embed_layers}")
+
+    @property
+    def embed_weight_shape(self) -> tuple[int, int, int]:
+        return (self.num_embed_layers, self.num_qubits, 2)
+
+    @property
+    def var_weight_shape(self) -> tuple[int, int, int]:
+        return (self.num_layers, self.num_qubits, 3)
+
+    @property
+    def n_trained_params(self) -> int:
+        n, L, K = self.num_qubits, self.num_layers, self.num_embed_layers
+        # 2·n·K embedding + 3·n·L variational  (linear in n·(K+L))
+        return 2 * n * K + 3 * n * L
+
+
+def init_te_qpinn_qnn_weights(
+    cfg: TEQPINNQnnConfig, *, seed: int = 0,
+) -> dict:
+    k = jax.random.PRNGKey(seed)
+    k1, k2 = jax.random.split(k, 2)
+    return {
+        "embed_W": 0.3 * jax.random.normal(k1, cfg.embed_weight_shape),
+        "var_W":   0.1 * jax.random.normal(k2, cfg.var_weight_shape),
+    }
+
+
+def build_te_qpinn_qnn(
+    cfg: TEQPINNQnnConfig | None = None,
+) -> Callable[[jnp.ndarray, dict], jnp.ndarray]:
+    """Solver circuit  f(x_scalar, weights) -> scalar.
+
+    Two QNodes under the hood:
+      1. `U_embed(θ_emb)` produces α_k = π·⟨Z_k⟩ as a function of x̃ +
+         trainable θ_emb (paper Eqs. 10–18).
+      2. The downstream circuit re-encodes α_k via R_y(α_k), then
+         applies the HEA variational block, returning Σ_j ⟨Z_j⟩
+         (paper Eq. 26 readout). Trainable params: θ_emb + θ_var.
+    """
+    cfg = cfg or TEQPINNQnnConfig()
+    n = cfg.num_qubits
+    L = cfg.num_layers
+    K = cfg.num_embed_layers
+    dev_e = qml.device(cfg.device_name, wires=n)
+    dev_v = qml.device(cfg.device_name, wires=n)
+
+    @qml.qnode(dev_e, interface="jax")
+    def embed_qnode(x_scalar: jnp.ndarray, embed_W: jnp.ndarray):
+        # K embedding layers — input-dependent R_z plus trainable R_y +
+        # nn-CNOT (declared design choice; see module note).
+        for layer in range(K):
+            for q in range(n):
+                qml.RY(embed_W[layer, q, 0], wires=q)
+                qml.RZ(embed_W[layer, q, 1] * x_scalar, wires=q)
+            for q in range(n - 1):
+                qml.CNOT(wires=[q, q + 1])
+        return tuple(qml.expval(qml.PauliZ(q)) for q in range(n))
+
+    @qml.qnode(dev_v, interface="jax")
+    def var_qnode(alpha: jnp.ndarray, var_W: jnp.ndarray):
+        # Re-encode α_k into HEA solver block.
+        for q in range(n):
+            qml.RY(alpha[q], wires=q)
+        for layer in range(L):
+            for q in range(n):
+                qml.RX(var_W[layer, q, 0], wires=q)
+                qml.RY(var_W[layer, q, 1], wires=q)
+                qml.RZ(var_W[layer, q, 2], wires=q)
+            for q in range(n - 1):
+                qml.CNOT(wires=[q, q + 1])
+        # Readout: Σ_j ⟨Z_j⟩ (paper Eq. 26) — a scalar in [-n, n].
+        if n == 1:
+            return qml.expval(qml.PauliZ(0))
+        return qml.expval(qml.sum(*(qml.PauliZ(q) for q in range(n))))
+
+    def pipeline(x_scalar: jnp.ndarray, weights: dict) -> jnp.ndarray:
+        z = embed_qnode(x_scalar, weights["embed_W"])
+        z = jnp.stack(z) if isinstance(z, tuple) else z
+        alpha = jnp.pi * z                      # α_k = π·⟨Z_k⟩
+        return var_qnode(alpha, weights["var_W"])
+
+    return pipeline
