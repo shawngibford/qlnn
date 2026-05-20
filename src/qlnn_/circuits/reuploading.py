@@ -1,21 +1,44 @@
 """Data-reuploading parameterized quantum circuit (PQC).
 
-Implements the data re-uploading universal classifier pattern from
-Pérez-Salinas et al., 2020 (arXiv:1907.02085) — interleaves angle-encoding
-data layers with parameterized variational layers and entangling layers.
+**Architecture (the form the code emits):** the alternating
+encoding/variational construction
 
-This is the heart of the QLNN's "quantum feature encoder": few qubits, many
-re-uploading layers, exponential expressivity in fitting truncated Fourier
-series (see Schuld et al. 2021, arXiv:2008.08605).
+    U(x) = W^{(L)} S(x) W^{(L-1)} … S(x) W^{(1)}        (default)
+    U(x) = W^{(L+1)} S(x) W^{(L)} … S(x) W^{(1)}        (terminal_block=True)
 
-The circuit is built lazily as a PennyLane `QNode` with the JAX interface, so
-we can JIT-compile and take `jax.grad` through it.
+per **Schuld, Sweke, Meyer**, *"The effect of data encoding on the
+expressive power of variational quantum machine learning models"*,
+**PRA 103, 032430 (2021)** (arXiv:2008.08605), Eq. 4 — the foundational
+truncated-Fourier-series result that hypothesis H1 of
+`ODE_PDE_PRE_REG.md` rests on. With a Pauli (RX) data generator each
+encoding block contributes one integer to the accessible frequency
+spectrum, so an L-layer single-qubit model is band-limited to
+|ω| ≤ L (Schuld §II.2, Eqs. 10–11). The earlier **Pérez-Salinas et al.,
+2020 (arXiv:1907.02085)** "universal classifier" is the predecessor
+lineage of the re-uploading idea, NOT the architecture this code
+implements — the P3a dual-check (refs/CIRCUIT_SPECS.md §7) corrected
+that citation drift.
 
-Registered as ``"data_reuploading"`` in the ansatz registry. The supported
-``AnsatzConfig.params`` keys are:
+**Backward-compat note on the terminal block.** The historical code
+(and every committed OD checkpoint / baseline lock) ends each of the
+L layers with the entangler, omitting the trailing variational
+W^{(L+1)} of canonical Schuld Eq. 4. The dual-check confirmed this is
+a *spectrum-equivalent reduced form* — the accessible Ω that H1
+depends on is unchanged. To preserve checkpoint compatibility the
+default is the historical form (`terminal_block=False`); new code may
+opt into the canonical Eq. 4 form by passing `terminal_block=True`
+(weight shape grows from (L, Q, 3) to (L+1, Q, 3) accordingly).
+
+This is the heart of the QLNN's "quantum feature encoder": few qubits,
+many re-uploading layers, exponential expressivity in fitting
+truncated Fourier series — H1's theoretical backbone.
+
+Registered as ``"data_reuploading"`` in the ansatz registry. The
+supported ``AnsatzConfig.params`` keys are:
 
     ring_entanglement : bool   (default True; legacy alias for entanglement="ring")
     entanglement      : str    one of "linear", "ring", "all_to_all" (default "ring")
+    terminal_block    : bool   (default False; True ⇒ canonical Schuld Eq.4)
     device_name       : str    PennyLane device (default "default.qubit")
 
 Backward compatibility: the historical ``DataReuploadingCircuit`` /
@@ -46,6 +69,11 @@ class DataReuploadingConfig:
     # Optional finer-grained entanglement override. If None, derives from
     # `ring_entanglement` (True → "ring", False → "linear").
     entanglement: str | None = None
+    # If True, append a final variational `Rot` layer AFTER the last
+    # entangler (no data re-upload after it) — the canonical Schuld
+    # Eq. 4 form. Default False preserves OD-checkpoint compatibility;
+    # see module docstring.
+    terminal_block: bool = False
     # Pennylane device name. "default.qubit" is the modern unified device that
     # picks the JAX interface automatically when called from JAX code.
     device_name: str = "default.qubit"
@@ -62,6 +90,12 @@ class DataReuploadingConfig:
                 f"entanglement must be one of 'linear', 'ring', 'all_to_all', "
                 f"got {self.entanglement!r}"
             )
+
+    @property
+    def total_variational_layers(self) -> int:
+        """Number of W blocks in the circuit: L (historical) or L+1
+        (canonical Schuld Eq. 4 with `terminal_block=True`)."""
+        return self.num_layers + (1 if self.terminal_block else 0)
 
     @property
     def resolved_entanglement(self) -> str:
@@ -109,11 +143,14 @@ def _build_qnode(cfg: DataReuploadingConfig) -> Callable:
     inputs : (num_qubits,)
         Bioprocess feature vector for one sample/time-step. Caller is
         responsible for normalizing into the angle-encoding range.
-    weights : (num_layers, num_qubits, 3)
-        Rotation parameters per layer / qubit (Rot = RZ ∘ RY ∘ RZ).
+    weights : (total_variational_layers, num_qubits, 3)
+        Rotation parameters per W block (Rot = RZ ∘ RY ∘ RZ). The shape's
+        first dim is `cfg.num_layers` historically, or `num_layers + 1`
+        when `cfg.terminal_block=True` (canonical Schuld Eq. 4).
     """
     dev = qml.device(cfg.device_name, wires=cfg.num_qubits)
     entanglement = cfg.resolved_entanglement
+    use_terminal = cfg.terminal_block
 
     @qml.qnode(dev, interface="jax")
     def circuit(inputs: jnp.ndarray, weights: jnp.ndarray) -> jnp.ndarray:
@@ -124,12 +161,19 @@ def _build_qnode(cfg: DataReuploadingConfig) -> Callable:
             for i in range(cfg.num_qubits):
                 qml.RX(inputs[i], wires=i)
 
-            # Variational block.
+            # Variational W^{(layer+1)} block.
             for i in range(cfg.num_qubits):
                 qml.Rot(weights[layer, i, 0], weights[layer, i, 1], weights[layer, i, 2], wires=i)
 
             # Entangling block.
             _entangle(cfg.num_qubits, entanglement)
+
+        if use_terminal:
+            # Canonical Schuld Eq. 4: a final W^{(L+1)} variational block
+            # AFTER the last entangler, with no data re-upload after it.
+            tl = cfg.num_layers
+            for i in range(cfg.num_qubits):
+                qml.Rot(weights[tl, i, 0], weights[tl, i, 1], weights[tl, i, 2], wires=i)
 
         # Return a tuple of measurement processes; PennyLane wraps the tuple as
         # a sequence of scalar outputs. The wrapper below stacks them into a
@@ -155,7 +199,7 @@ class DataReuploadingCircuit:
     @property
     def weight_shape(self) -> tuple[int, int, int]:
         c = self.config
-        return (c.num_layers, c.num_qubits, 3)
+        return (c.total_variational_layers, c.num_qubits, 3)
 
     @property
     def output_dim(self) -> int:
@@ -190,6 +234,7 @@ def _factory(cfg: AnsatzConfig) -> AnsatzProtocol:
         num_layers=cfg.num_layers,
         ring_entanglement=bool(params.get("ring_entanglement", True)),
         entanglement=params.get("entanglement"),
+        terminal_block=bool(params.get("terminal_block", False)),
         device_name=str(params.get("device_name", "default.qubit")),
     )
     return DataReuploadingCircuit(drc)
