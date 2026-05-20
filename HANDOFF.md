@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P4
+### PIVOT pick-up order — ⏩ RESUME AT P3.7
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -120,7 +120,47 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   CLI + figure script committed; full suite green;
   `verify_paper_integrity.py` exit-0 (demo intentionally NOT in
   the paper-integrity contract).
-- ⏩ **P4 — NEXT. Forecaster long-horizon autoregressive rollout.**
+- ✅ **P3.6 DONE** — multi-state ODE solver (commits `6633355` →
+  `3fa251a`, 3 atomic). Extends P3.5 to vector-state ODEs via
+  per-component scalar circuits (no AnsatzProtocol refactor; no
+  quantum entanglement across components — minimum-faithful
+  extension). 4 families × 3 H1-relevant systems × 3 seeds = 36 runs.
+  Relative-L2 summary (mean across seeds, lower=better):
+
+  | family         | LV (d=2) | VdP (d=2) | Lorenz (d=3) |
+  |----------------|----------|-----------|--------------|
+  | chebyshev_dqc  | 0.106    | 0.989     | 0.999        |
+  | te_qpinn_fnn   | 0.123    | 0.835     | 0.995        |
+  | te_qpinn_qnn   | 0.524    | 1.044     | 0.978        |
+  | qcpinn         | 0.0058   | 2.315     | 0.995        |
+
+  Key findings:
+  1. **Lorenz universally fails (relL2≈1.0)** across all 4 families —
+     first pre-baseline H1 datapoint supporting the predicted
+     chaotic-broadband failure boundary.
+  2. **qcpinn dominates LV (relL2 0.005)** but its 1412 classical
+     params (706 × d=2) dwarf the 30 PQC — R1 confirmed.
+     chebyshev_dqc at relL2 0.10 is the pure-quantum baseline.
+  3. **Van der Pol stiffness defeats everyone** at μ=5 over 10 time
+     units; qcpinn overshoots; a real solver-path gap for P6.
+  4. **te_qpinn_qnn reproduces its P3.5 flat-line ceiling** on the
+     vector tasks (1.4964/1.4998/1.4944 MAE on LV) — robust T3
+     signal across scalar AND vector solver tasks.
+
+  Figure: `paper/figures/fig_p3_6_multi_state.{png,pdf}`. Per-component
+  dispatch validated; gradient mass flows independently into each
+  component's weights. 15 smoke tests green (~3m20s).
+- ⏩ **P3.7 — NEXT. PDE solver scaffolding + nested-autodiff gate.**
+  Add (t, x) coordinate handling so we can train against the P2 PDE
+  fields. Heat-equation gate (`u_t = ν u_xx`, exact `u = e^{−νt}sin(x)`)
+  must converge to MAE < 0.05 to unblock; if it fails, that's a real
+  Risk-#2-redux confirmation and PDE work stops. First real PDE
+  target: `burgers_smooth` (P2 npz; H1 SMOOTH/PERIODIC). New module:
+  `src/qlnn_/training/pde_residual_loss.py` (~250 LOC) +
+  heat-equation gate test (~100 LOC). Sibling of
+  `physics_residual_loss.py`, not an extension. Allen-Cahn and KdV
+  deferred to P6.
+- **P4 — Forecaster long-horizon autoregressive rollout.**
   Retask the data-driven forecaster from the persistence-trivial
   h-step MAE protocol to **autoregressive multi-step rollout on the
   P2 PDE fields + the existing 5 ODE systems** (ODE_PDE_PRE_REG.md
