@@ -96,6 +96,30 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   shared `params["w"]` pytree convention).
   Per-family commits + tests are visible in `refs/CIRCUIT_SPECS.md`
   "Implementation binding (P3 STATUS)".
+- ✅ **P3.5 DONE** — first visible empirical result (commits
+  `a0f08d5` → `a62477c`, 3 atomic). 4-family head-to-head on
+  `u'=−u` + logistic `u'=u(1−u)` across 3 seeds; the
+  `{w, s, b}` pytree interop pattern that test_qnn_drop_in_interop
+  asserts in theory works in practice for all 4 families. Interior
+  MAE summary (mean over seeds {0,1,2}):
+
+  | family         | expdecay | logistic | params       |
+  |----------------|----------|----------|--------------|
+  | chebyshev_dqc  | 0.0058   | 0.0102   | 60 pqc       |
+  | te_qpinn_fnn   | 0.0003   | 0.0008   | 60 pqc + 100 |
+  | te_qpinn_qnn   | 0.0583   | 0.0351   | 84 pqc       |
+  | qcpinn         | 0.0002   | 0.0014   | 15 pqc + 706 |
+
+  Real findings (not just smoke): te_qpinn_fnn and qcpinn dominate
+  but qcpinn does it with 706 classical params (disclosed in fig);
+  chebyshev's logistic is ~2× worse than expdecay (predicted weakness
+  at sigmoid plateaus where the Chebyshev tower saturates);
+  te_qpinn_qnn underperforms uniformly with near-zero seed variance —
+  a genuine trainability finding for P7's T3 triangulation.
+  Figure: `paper/figures/fig_p3_solver_demo.{png,pdf}`. Library +
+  CLI + figure script committed; full suite green;
+  `verify_paper_integrity.py` exit-0 (demo intentionally NOT in
+  the paper-integrity contract).
 - ⏩ **P4 — NEXT. Forecaster long-horizon autoregressive rollout.**
   Retask the data-driven forecaster from the persistence-trivial
   h-step MAE protocol to **autoregressive multi-step rollout on the
