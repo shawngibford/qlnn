@@ -1,0 +1,12 @@
+{
+  "git_commit": "dcc8289215e7966a193c7b2d45a7baffc4185972",
+  "python_version": "3.11.14",
+  "platform": "macOS-26.0.1-arm64-arm-64bit",
+  "package_versions": {
+    "jax": "0.10.0",
+    "optax": "0.2.8",
+    "pennylane": "0.44.0"
+  },
+  "note": "PARTIAL sweep: heat + burgers_smooth \u00d7 {quantum, classical} \u00d7 3 seeds = 12 runs. allen_cahn + lorenz not run (killed before AC compile).",
+  "wall_clock_end_utc": "2026-05-20T21:45:54.041800Z"
+}

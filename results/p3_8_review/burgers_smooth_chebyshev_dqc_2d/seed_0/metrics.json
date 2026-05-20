@@ -1,0 +1,17 @@
+{
+  "pde": "burgers_smooth",
+  "model": "chebyshev_dqc_2d",
+  "seed": 0,
+  "regime": "smooth_periodic",
+  "steps": 1500,
+  "n_t_colloc": 28,
+  "n_x_colloc": 28,
+  "pqc_params": 120,
+  "classical_params": 0,
+  "config_str": "n_t=4, n_x=4, L=5; colloc=28\u00d728; steps=1500",
+  "audit_reason": "uses PDE_BENCH's intended step count (P3.7 sweep ran at 600); tests whether relL2<0.30 gate was missed at 600 steps due to under-training",
+  "final_loss": 0.10057062655687332,
+  "mae": 0.18188627720210226,
+  "relative_l2": 0.3475108638915672,
+  "bc_violation": 0.8914757679917983
+}

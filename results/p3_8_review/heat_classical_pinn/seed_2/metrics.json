@@ -1,0 +1,17 @@
+{
+  "pde": "heat",
+  "model": "classical_pinn",
+  "seed": 2,
+  "regime": "smooth_periodic",
+  "steps": 1200,
+  "n_t_colloc": 24,
+  "n_x_colloc": 24,
+  "pqc_params": 0,
+  "classical_params": 177,
+  "config_str": "MLP H=11, L=2, target\u2248120; colloc=24\u00d724; steps=1200",
+  "audit_reason": "capacity-matched classical baseline",
+  "final_loss": 2.1796426153741777e-05,
+  "mae": 0.001770224715769291,
+  "relative_l2": 0.0036056150410810504,
+  "bc_violation": 1.6761380752457935
+}

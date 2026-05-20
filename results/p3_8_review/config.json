@@ -1,0 +1,28 @@
+{
+  "pdes_completed": [
+    "heat",
+    "burgers_smooth"
+  ],
+  "pdes_deferred": [
+    "allen_cahn"
+  ],
+  "lorenz_status": "not_started",
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "corrected_pde_configs": {
+    "heat": {
+      "n_t_colloc": 24,
+      "n_x_colloc": 24,
+      "steps": 1200
+    },
+    "burgers_smooth": {
+      "n_t_colloc": 28,
+      "n_x_colloc": 28,
+      "steps": 1500
+    }
+  },
+  "scope_note": "P3.8 audit-driven re-iteration (PARTIAL: heat + burgers, the smooth PDEs). Allen-Cahn at 64\u00d732 + Lorenz extended deferred to a subsequent compute pass."
+}

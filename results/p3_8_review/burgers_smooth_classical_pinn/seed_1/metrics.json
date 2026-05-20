@@ -1,0 +1,17 @@
+{
+  "pde": "burgers_smooth",
+  "model": "classical_pinn",
+  "seed": 1,
+  "regime": "smooth_periodic",
+  "steps": 1500,
+  "n_t_colloc": 28,
+  "n_x_colloc": 28,
+  "pqc_params": 0,
+  "classical_params": 177,
+  "config_str": "MLP H=11, L=2, target\u2248120; colloc=28\u00d728; steps=1500",
+  "audit_reason": "capacity-matched classical baseline",
+  "final_loss": 0.0006719257216900587,
+  "mae": 0.008347618698664582,
+  "relative_l2": 0.019058282697091113,
+  "bc_violation": 1.336216836103168
+}

@@ -1,0 +1,17 @@
+{
+  "pde": "heat",
+  "model": "chebyshev_dqc_2d",
+  "seed": 2,
+  "regime": "smooth_periodic",
+  "steps": 1200,
+  "n_t_colloc": 24,
+  "n_x_colloc": 24,
+  "pqc_params": 120,
+  "classical_params": 0,
+  "config_str": "n_t=4, n_x=4, L=5; colloc=24\u00d724; steps=1200",
+  "audit_reason": "matches the convergence-gate config (P3.7's test_heat_equation_gate_recovers_analytic_at_seed_0); closes the gate-vs-sweep step-budget gap",
+  "final_loss": 0.009023589082062244,
+  "mae": 0.03031486916691065,
+  "relative_l2": 0.05651700164323838,
+  "bc_violation": 0.5004144892896011
+}
