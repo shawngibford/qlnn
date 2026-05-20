@@ -1,0 +1,37 @@
+{
+  "pdes": [
+    "heat",
+    "burgers_smooth",
+    "allen_cahn"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "steps_override": 600,
+  "per_pde_defaults": {
+    "heat": {
+      "steps": 1200,
+      "n_t_colloc": 24,
+      "n_x_colloc": 24,
+      "regime": "smooth_periodic",
+      "description": "Heat: u_t = 0.1\u00b7u_xx, u(0,x)=sin(x); exact u(t,x)=e^{-0.1t}\u00b7sin(x)"
+    },
+    "burgers_smooth": {
+      "steps": 1500,
+      "n_t_colloc": 28,
+      "n_x_colloc": 28,
+      "regime": "smooth_periodic",
+      "description": "Burgers smooth: u_t + u\u00b7u_x = 0.12\u00b7u_xx, u(0,x)=sin(x); reference = data/pde/burgers_smooth.npz"
+    },
+    "allen_cahn": {
+      "steps": 1800,
+      "n_t_colloc": 28,
+      "n_x_colloc": 28,
+      "regime": "broadband_multiscale",
+      "description": "Allen-Cahn: u_t = \u03b5\u00b2\u00b7u_xx + u - u\u00b3 (\u03b5=0.06); IC periodic two-front (narrow\u2192relax); reference = data/pde/allen_cahn.npz"
+    }
+  },
+  "scope_note": "P3.7 PDE solver demo (heat + Burgers + Allen-Cahn). Single family (chebyshev_dqc_2d); cross-family on PDEs is P6 territory. Demo output, NOT a paper claim; not in verify_paper_integrity contract."
+}

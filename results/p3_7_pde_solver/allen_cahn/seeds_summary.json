@@ -1,0 +1,45 @@
+{
+  "pde": "allen_cahn",
+  "regime": "broadband_multiscale",
+  "description": "Allen-Cahn: u_t = \u03b5\u00b2\u00b7u_xx + u - u\u00b3 (\u03b5=0.06); IC periodic two-front (narrow\u2192relax); reference = data/pde/allen_cahn.npz",
+  "n_seeds": 3,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "pqc_params": 120,
+  "config_str": "n_t=4, n_x=4, L=5, steps=600",
+  "metrics": {
+    "mae": {
+      "mean": 0.5545428779847531,
+      "std": 0.0776311023850856,
+      "min": 0.4659598267883706,
+      "max": 0.6107243294901126,
+      "n_seeds": 3,
+      "ci95_half_width": 0.1928619138094998,
+      "ci95_low": 0.3616809641752533,
+      "ci95_high": 0.7474047917942529
+    },
+    "relative_l2": {
+      "mean": 0.768507896836577,
+      "std": 0.1023499947159737,
+      "min": 0.6507053653738322,
+      "max": 0.8356215985090458,
+      "n_seeds": 3,
+      "ci95_half_width": 0.25427200249454646,
+      "ci95_low": 0.5142358943420307,
+      "ci95_high": 1.0227798993311235
+    },
+    "final_loss": {
+      "mean": 9.230888684590658,
+      "std": 1.0295550698719464,
+      "min": 8.274995803833008,
+      "max": 10.320950508117676,
+      "n_seeds": 3,
+      "ci95_half_width": 2.557762997655491,
+      "ci95_low": 6.673125686935167,
+      "ci95_high": 11.78865168224615
+    }
+  }
+}

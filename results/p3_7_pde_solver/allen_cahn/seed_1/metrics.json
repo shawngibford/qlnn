@@ -1,0 +1,17 @@
+{
+  "pde": "allen_cahn",
+  "seed": 1,
+  "regime": "broadband_multiscale",
+  "steps": 600,
+  "lr": 0.02,
+  "n_t_qubits": 4,
+  "n_x_qubits": 4,
+  "num_layers": 5,
+  "n_t_colloc": 28,
+  "n_x_colloc": 28,
+  "pqc_params": 120,
+  "final_loss": 8.274995803833008,
+  "mae": 0.4659598267883706,
+  "rmse": 0.6330584518425016,
+  "relative_l2": 0.6507053653738322
+}

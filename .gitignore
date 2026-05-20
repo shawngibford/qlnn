@@ -60,4 +60,5 @@ results/*
 !results/master_comparison.csv
 !results/p3_solver_demo/
 !results/p3_6_multi_state/
+!results/p3_7_pde_solver/
 refs/

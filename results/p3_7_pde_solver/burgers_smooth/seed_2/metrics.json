@@ -1,0 +1,17 @@
+{
+  "pde": "burgers_smooth",
+  "seed": 2,
+  "regime": "smooth_periodic",
+  "steps": 600,
+  "lr": 0.02,
+  "n_t_qubits": 4,
+  "n_x_qubits": 4,
+  "num_layers": 5,
+  "n_t_colloc": 28,
+  "n_x_colloc": 28,
+  "pqc_params": 120,
+  "final_loss": 0.14460034668445587,
+  "mae": 0.20215869816783152,
+  "rmse": 0.24223614400371815,
+  "relative_l2": 0.395346953740064
+}

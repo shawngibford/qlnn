@@ -1,0 +1,17 @@
+{
+  "pde": "heat",
+  "seed": 1,
+  "regime": "smooth_periodic",
+  "steps": 600,
+  "lr": 0.02,
+  "n_t_qubits": 4,
+  "n_x_qubits": 4,
+  "num_layers": 5,
+  "n_t_colloc": 24,
+  "n_x_colloc": 24,
+  "pqc_params": 120,
+  "final_loss": 0.02382262796163559,
+  "mae": 0.03209663757011294,
+  "rmse": 0.04101118463295623,
+  "relative_l2": 0.060323196022863096
+}
