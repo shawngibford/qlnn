@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P3 strand-2
+### PIVOT pick-up order — ⏩ RESUME AT P4
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -66,55 +66,59 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   physics residual alone, recovers `e^{−t}` to interior MAE ≈0.003
   (seed0, deterministic), ≤0.0074 across seeds {0,1,2}. Full suite
   165 green; `verify_paper_integrity` exit-0.
-- ⏩ **P3 strand-2 — NEXT. Remaining literature circuits + cleanup.**
-  Implement the rest of the roster from `refs/CIRCUIT_SPECS.md` (the
-  dual-verified binding manifest — read IT, not the PDFs). Pattern =
-  `src/qlnn_/circuits/hardware_efficient.py` (Config / `_build_qnode`
-  / Circuit / `_factory` / `register`). Each ships: docstring citing
-  the exact source + the eq/fig numbers in CIRCUIT_SPECS.md; a unit
-  test asserting that family's "unit-test hook"; every
-  `[DECLARED DESIGN CHOICE]` resolved with a one-line cited rationale.
+- ✅ **P3 strand-2 DONE** (commits `4d28914` → `0bc44f7`, 5 atomic).
+  5 of 6 SOTA literature families implemented faithfully; 1 deferred
+  with rationale; 2 `reuploading.py` caveats cleaned. **Cumulative
+  strand-2 tests: 45 green** (8 reuploading + 7 rf_qrc + 15 te_qpinn
+  FNN+QNN + 15 qcpinn) on top of strand-1's 3 solver-gate tests.
+  Status table + per-family homing recorded in
+  `refs/CIRCUIT_SPECS.md` "Implementation binding (P3 STATUS)".
+  Highlights:
+  - **chebyshev_dqc** (solver) — already shipped in P3-1.
+  - **rf_qrc** (forecaster, fixed reservoir + closed-form Tikhonov
+    ridge) — its own train path, NOT a registry ansatz.
+  - **te_qpinn_fnn** (solver, Berger 2025 — classical-FNN trainable
+    embedding). Paper anchor 3·n·L=60 @ n=4,L=5 verified.
+  - **te_qpinn_qnn** (solver, **2605.13892** corroborated by 2602.*
+    — fully-quantum trainable embedding; P3a-corrected source
+    attribution). Linearity-in-N_q·L scaling asserted in both axes.
+  - **qcpinn** (solver, 4 topologies). Paper p.15 worked anchors
+    Cascade(n=5,L=1)→(15,5,7) and Cross-mesh(n=5,L=1)→(45,20,24)
+    both verified at the test level via pennylane tape inspection.
+  - **lubasch_multicopy DEFERRED** with cited rationale (schematic
+    source — would exceed what the PDF specifies, violating P3a).
+    Documented as "context/baseline only"; revisit only if a
+    P6 ablation explicitly requires it.
 
-  **ARCHITECTURE DECISION (made in strand-1, honor it):** the registry
-  `(inputs:(Q,)) → (Q,) PauliZ` contract is the **forecaster** encoder
-  interface. Several families are **solver-native** and must NOT be
-  forced into it (doing so manufactures the infidelity P3a exists to
-  prevent):
-  - `chebyshev_dqc` — DONE as a solver builder in
-    `physics_residual_loss.py` (scalar-coord → scalar field). Add a
-    thin registry adapter ONLY if a faithful forecaster form exists;
-    otherwise leave solver-native and note it in CIRCUIT_SPECS.md.
-  - `te_qpinn_fnn`, `te_qpinn_qnn`, `qcpinn` — **solver** families
-    (classical/quantum trainable embedding or pre/post nets → PQC →
-    physics residual). Implement as solver builders alongside
-    `chebyshev_dqc` (reuse the `physics_residual_loss.py` train loop /
-    `make_residual_loss`), NOT as forecaster registry ansätze.
-  - `rf_qrc` — **forecaster**-native but a *fixed random reservoir +
-    trained linear readout* (Tikhonov ridge, Eq.3), NOT a trainable
-    PQC. It needs its own train path (closed-form readout), not the
-    gradient ansatz contract. Implement as an `rf_qrc` module with its
-    documented QRC-C4 construction + a ridge-readout fit + unit-test
-    hook (trained params == readout only; reservoir invariant to the
-    fit).
-  - `lubasch_multicopy` — context/baseline; implement the multi-copy
-    Hadamard-test construction as a standalone faithful circuit +
-    unit-test hook (r=1 ⇒ plain overlap, ancilla ⟨σ_z⟩=1). Registry
-    membership only if a faithful forecaster mapping exists.
-  Update `refs/CIRCUIT_SPECS.md` "Implementation binding" with each
-  family's solver-vs-forecaster home + the registry-vs-solver-builder
-  decision, so P6's "families × {solver|forecaster} as applicable"
-  cross is unambiguous.
-
-  Also: clean the 2 logged `reuploading.py` caveats (add terminal
-  `W^(L+1)`; fix the Pérez-Salinas→architecture citation, keep Schuld
-  for the Fourier-expressivity claim) and regenerate any baseline lock
-  that touches. Keep `pytest` green + `verify_paper_integrity` exit-0.
-- **P4 → P5 → P6 → P7 → P8** per the plan. P4 retasks the forecaster to
-  long-horizon autoregressive rollout (kill 1-step MAE). P5 adds the
-  matched baselines incl. the MANDATORY non-liquid Neural-ODE. P6 is
-  the gated/system-grouped unified matrix v2 — `ODE_PDE_PRE_REG.md` is
-  already committed before any P6 run; no >30-min sweep without user
-  go-ahead. P7 = T3 triangulation; P8 = new dossier.
+  Architecture: registry contract reserved for forecaster encoders;
+  solver families live as solver-style builders (interchangeable
+  inside the strand-1 `make_residual_loss`/`train_solver` via the
+  shared `params["w"]` pytree convention).
+  Per-family commits + tests are visible in `refs/CIRCUIT_SPECS.md`
+  "Implementation binding (P3 STATUS)".
+- ⏩ **P4 — NEXT. Forecaster long-horizon autoregressive rollout.**
+  Retask the data-driven forecaster from the persistence-trivial
+  h-step MAE protocol to **autoregressive multi-step rollout on the
+  P2 PDE fields + the existing 5 ODE systems** (ODE_PDE_PRE_REG.md
+  §3.2 / §5). Reuse the existing Diffrax QLNN forecaster
+  (`src/qlnn_/forecaster.py`) for the forecaster-registry ansätze
+  (data_reuploading / hardware_efficient / strongly_entangling /
+  brickwall) and the new `rf_qrc` for the SOTA forecaster path.
+  Required:
+  - **Rollout-eval path** (not a destructive change to
+    `make_horizon_windows`): a new evaluation module that takes a
+    trained forecaster + an initial history + a rollout horizon, and
+    returns the field/state trajectory + the pre-registered metrics
+    (relative-L2 primary, VPT/Lyapunov for chaotic, spectral error,
+    invariant drift). **NO 1-step MAE as a headline** (banned in P1).
+  - **Task-dispatch wiring** in `train_qlnn.py` / `train_baseline.py`
+    so a config can pick {ODE forecaster, PDE field forecaster}.
+- **P5 → P6 → P7 → P8** per the plan. P5 adds the matched baselines
+  incl. the MANDATORY non-liquid Neural-ODE (the H1 contrast — see
+  ODE_PDE_PRE_REG.md §6). P6 is the gated/system-grouped unified
+  matrix v2 — `ODE_PDE_PRE_REG.md` is already committed before any
+  P6 run; no >30-min sweep without user go-ahead. P7 = T3
+  triangulation across all 9 implemented families. P8 = new dossier.
 
 ### 1. There is a DETACHED background training job — do NOT wait on it
 *(OLD Option-B program — now superseded by the pivot, but let it finish

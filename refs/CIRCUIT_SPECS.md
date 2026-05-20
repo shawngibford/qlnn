@@ -209,13 +209,65 @@ docstring + unit test.
 
 ---
 
-## Implementation binding (for P3)
+## Implementation binding (P3 STATUS)
 
-Every literature ansatz, when coded, must ship: (a) registry
-registration under its family name; (b) a docstring citing the exact
-source (PDF filename + arXiv id + the equation/figure numbers above);
-(c) a unit test asserting the "unit-test hook" property; (d) any
-**[DECLARED DESIGN CHOICE]** resolved with a one-line cited rationale
-in the docstring. The two `reuploading.py` caveats are P3 cleanup
-items, tracked here so they are not lost.
+Per the architecture decision recorded in HANDOFF.md (commit
+`7f29f03`), the registry `(inputs:(Q,)) → (Q,) PauliZ` contract is the
+**forecaster encoder** interface. Solver-native families do NOT live
+in the registry — forcing them in would manufacture the infidelity
+P3a guards. The unified search at P6 crosses families × {solver |
+forecaster} **as applicable** per the homing column below.
+
+| Family             | Status | Homing      | Module                              | Tests                              |
+|--------------------|--------|-------------|-------------------------------------|------------------------------------|
+| data_reuploading   | ✅ pre-existing + P3-2a cleanup | forecaster (registry) | `src/qlnn_/circuits/reuploading.py` | `tests/qlnn_/test_reuploading_circuit.py` (8) |
+| hardware_efficient | ✅ pre-existing | forecaster (registry) | `src/qlnn_/circuits/hardware_efficient.py` | existing |
+| strongly_entangling| ✅ pre-existing | forecaster (registry) | existing | existing |
+| brickwall          | ✅ pre-existing | forecaster (registry) | existing | existing |
+| **chebyshev_dqc**  | ✅ P3-1 (`77009ce`) | solver builder | `src/qlnn_/training/physics_residual_loss.py` | `tests/qlnn_/test_physics_residual_solver.py` (3) |
+| **rf_qrc**         | ✅ P3-2b (`5014eac`) | forecaster (own train path — fixed reservoir + closed-form ridge readout) | `src/qlnn_/circuits/rf_qrc.py` | `tests/qlnn_/test_rf_qrc.py` (7) |
+| **te_qpinn_fnn**   | ✅ P3-2c (`28ff61a`) | solver builder | `src/qlnn_/circuits/te_qpinn.py` | `tests/qlnn_/test_te_qpinn.py` (7) |
+| **te_qpinn_qnn**   | ✅ P3-2e (`0bc44f7`) | solver builder | `src/qlnn_/circuits/te_qpinn.py` | `tests/qlnn_/test_te_qpinn.py` (+8 = 15) |
+| **qcpinn**         | ✅ P3-2d (`a7db628`) | solver builder | `src/qlnn_/circuits/qcpinn.py` | `tests/qlnn_/test_qcpinn.py` (15) |
+| lubasch_multicopy  | ⏸ **DEFERRED (P3-2f)** — see rationale below | n/a | — | — |
+
+### Lubasch (`lubasch_multicopy`) — explicit deferral rationale
+
+Source (Lubasch et al., PRA 101 010301(R), 2020 / arXiv:1907.09032) is
+*explicitly* schematic at the gate level: §6 of this manifest records
+"the two-qubit gate decomposition is Fig. 1b schematic only" — i.e.
+the construction names but does not gate-specify the "generic two-qubit
+gate `Û(λ)`" that prepares the amplitude encoding, and the multi-copy
+QNPU layout (Fig. 1a/2a) is also figure-only at fine grain. Per the
+P3a discipline ("no family enters P6 until its spec is PDF-grounded
+and dual-cross-verified"), implementing lubasch now would necessarily
+exceed what the source specifies — manufacturing exactly the kind of
+infidelity P3a exists to prevent.
+
+This manifest's §6 already classifies lubasch as **"Context/baseline
+circuit"** (NOT a primary first-class family). The P6 regime map's
+scientific value sits on the SOTA-solver lineage
+(`chebyshev_dqc` → `te_qpinn_fnn` → `te_qpinn_qnn` → `qcpinn`) and the
+SOTA-forecaster path (`rf_qrc`); lubasch is bibliographic anchor.
+
+**Deferral condition:** revisit only if a P6 result-driven need
+emerges (e.g. an ablation explicitly requires lubasch's multi-copy
+nonlinearity for a comparison). If revisited, the implementation must
+either (a) be sourced from a less-schematic later paper, or (b)
+include the chosen `Û(λ)` decomposition + QNPU layout as explicit
+**[DECLARED DESIGN CHOICEs]** cited to Fig. 1b/2a, with a faithfulness
+unit test exercising the `r=1` plain-overlap reduction hook.
+
+### Strand-2 totals
+
+5 of 6 literature families implemented faithfully, ALL P3a-grounded
++ each shipped with a unit-test-hook faithfulness assertion + every
+`[DECLARED DESIGN CHOICE]` documented + cited inline. 1 deferred with
+rationale. The two `reuploading.py` caveats were cleaned in P3-2a
+(commit `4d28914`).
+
+Cumulative P3 strand-2 test coverage (faithfulness-only, not counting
+prior infra): 8 reuploading + 7 rf_qrc + 15 te_qpinn (FNN+QNN) + 15
+qcpinn = **45 P3-strand-2 tests, all green**, on top of the 3
+P3-strand-1 solver-gate tests.
 </content>
