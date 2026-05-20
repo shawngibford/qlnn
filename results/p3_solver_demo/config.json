@@ -1,0 +1,29 @@
+{
+  "families": [
+    "chebyshev_dqc",
+    "te_qpinn_fnn",
+    "te_qpinn_qnn",
+    "qcpinn"
+  ],
+  "odes": [
+    "expdecay",
+    "logistic"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "steps_override": null,
+  "per_family_default_steps": {
+    "chebyshev_dqc": 1200,
+    "te_qpinn_fnn": 1500,
+    "te_qpinn_qnn": 2000,
+    "qcpinn": 1500
+  },
+  "ode_descriptions": {
+    "expdecay": "u' = -u,  u(0)=1  on  t in [0, 2];  exact  u = e^{-t}",
+    "logistic": "u' = u(1-u),  u(0)=0.5  on  t in [0, 4];  exact  u = sigmoid(t)"
+  },
+  "scope_note": "P3.5 visible-first-results sprint; NOT a paper claim, NOT in verify_paper_integrity's contract; see plan at ~/.claude/plans/what-is-our-next-humming-octopus.md."
+}

@@ -1,0 +1,14 @@
+{
+  "family": "chebyshev_dqc",
+  "ode": "logistic",
+  "seed": 2,
+  "steps": 1200,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 60,
+  "classical_params": 0,
+  "config_str": "n=4, L=5",
+  "final_loss": 0.00027291051810607314,
+  "mae": 0.0058007691986858845,
+  "rmse": 0.00696335406973958
+}

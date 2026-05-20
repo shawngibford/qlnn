@@ -1,0 +1,14 @@
+{
+  "family": "qcpinn",
+  "ode": "logistic",
+  "seed": 0,
+  "steps": 1500,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 15,
+  "classical_params": 706,
+  "config_str": "n=5, L=1, Cascade",
+  "final_loss": 0.00010305616888217628,
+  "mae": 0.001140860258601606,
+  "rmse": 0.0014659734442830086
+}

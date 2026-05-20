@@ -1,0 +1,14 @@
+{
+  "family": "chebyshev_dqc",
+  "ode": "expdecay",
+  "seed": 2,
+  "steps": 1200,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 60,
+  "classical_params": 0,
+  "config_str": "n=4, L=5",
+  "final_loss": 0.0007467627292498946,
+  "mae": 0.007399114314466715,
+  "rmse": 0.008989504538476467
+}

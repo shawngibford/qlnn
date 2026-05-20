@@ -1,0 +1,14 @@
+{
+  "family": "te_qpinn_qnn",
+  "ode": "logistic",
+  "seed": 2,
+  "steps": 2000,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 84,
+  "classical_params": 0,
+  "config_str": "n=4, L_var=5, K_embed=3",
+  "final_loss": 0.0025705124717205763,
+  "mae": 0.035129472613334656,
+  "rmse": 0.04662202671170235
+}

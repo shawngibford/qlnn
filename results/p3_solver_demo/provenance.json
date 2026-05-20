@@ -1,0 +1,17 @@
+{
+  "git_commit": "a0f08d516de0791511385334e7bd7218e1c0a05d",
+  "git_branch": "claude/upbeat-elbakyan-68b56a",
+  "git_dirty": true,
+  "python_version": "3.11.14",
+  "platform": "macOS-26.0.1-arm64-arm-64bit",
+  "package_versions": {
+    "jax": "0.10.0",
+    "optax": "0.2.8",
+    "pennylane": "0.44.0",
+    "equinox": "0.13.8",
+    "diffrax": "0.7.2",
+    "numpy": "2.4.1"
+  },
+  "wall_clock_start_utc": "2026-05-20T15:32:53.280128Z",
+  "wall_clock_end_utc": "2026-05-20T15:38:23.708412Z"
+}

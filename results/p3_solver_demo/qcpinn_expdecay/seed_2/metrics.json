@@ -1,0 +1,14 @@
+{
+  "family": "qcpinn",
+  "ode": "expdecay",
+  "seed": 2,
+  "steps": 1500,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 15,
+  "classical_params": 706,
+  "config_str": "n=5, L=1, Cascade",
+  "final_loss": 5.309595508151688e-06,
+  "mae": 0.00019843055633828044,
+  "rmse": 0.00026056752540171146
+}

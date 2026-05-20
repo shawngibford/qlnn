@@ -1,0 +1,14 @@
+{
+  "family": "te_qpinn_fnn",
+  "ode": "expdecay",
+  "seed": 2,
+  "steps": 1500,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 60,
+  "classical_params": 100,
+  "config_str": "n=4, L=5, H_fnn=16",
+  "final_loss": 1.1412611456762534e-05,
+  "mae": 0.0002883551933337003,
+  "rmse": 0.00040863180765882134
+}
