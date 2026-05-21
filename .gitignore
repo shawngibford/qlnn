@@ -66,4 +66,5 @@ results/*
 !results/p4_forecaster_rollout/
 !results/p5_matched_baselines/
 !results/p5_h1_verdict/
+!results/p7_t3_mechanism/
 refs/

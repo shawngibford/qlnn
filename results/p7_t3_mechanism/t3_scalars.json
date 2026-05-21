@@ -1,0 +1,38 @@
+{
+  "data_reuploading": {
+    "family": "data_reuploading",
+    "n_qubits": 3,
+    "n_layers": 1,
+    "expressibility_kl": 0.19490234415356772,
+    "entangling_q": 0.7757292703425567,
+    "gradient_variance": 0.03821659808598722,
+    "fourier_bandwidth": 3
+  },
+  "hardware_efficient": {
+    "family": "hardware_efficient",
+    "n_qubits": 3,
+    "n_layers": 1,
+    "expressibility_kl": 0.21091079167569052,
+    "entangling_q": 0.7955359869359588,
+    "gradient_variance": 0.024520644063573575,
+    "fourier_bandwidth": 3
+  },
+  "strongly_entangling": {
+    "family": "strongly_entangling",
+    "n_qubits": 3,
+    "n_layers": 1,
+    "expressibility_kl": 0.19490234415356772,
+    "entangling_q": 0.7757292703425567,
+    "gradient_variance": 0.03821659808598722,
+    "fourier_bandwidth": 3
+  },
+  "brickwall": {
+    "family": "brickwall",
+    "n_qubits": 3,
+    "n_layers": 1,
+    "expressibility_kl": 0.21091079167569052,
+    "entangling_q": 0.30858745904292584,
+    "gradient_variance": 0.0457220912196288,
+    "fourier_bandwidth": 3
+  }
+}

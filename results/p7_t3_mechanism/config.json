@@ -1,0 +1,19 @@
+{
+  "families": [
+    "data_reuploading",
+    "hardware_efficient",
+    "strongly_entangling",
+    "brickwall"
+  ],
+  "n_qubits": 3,
+  "n_layers": 1,
+  "n_samples": 400,
+  "bp_qubit_scaling": [
+    2,
+    3,
+    4,
+    5
+  ],
+  "seed": 0,
+  "scope_note": "P7 H3 mechanism: 4 T3 scalars per forecaster family at the P4 config. Cross-tabulated against P5's per-cell \u0394 values to identify the circuit property that best predicts the inverted regime advantage gap. NOT yet H3 evidence; the cross-tab + correlation analysis lands in the next P7 sub-commit."
+}
