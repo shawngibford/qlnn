@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P3.9 (PDE multi-family port) → P4
+### PIVOT pick-up order — ⏩ RESUME AT P4 (forecaster autoregressive rollout)
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -257,32 +257,61 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   pre-reg defines H1 as the QLNN−NeuralODE gap (P5).
 
   Figure: `paper/figures/fig_p3_8_review_iteration.{png,pdf}`.
-- 🟢 **P3.9 — NEXT. PDE multi-family port.**
-  Close the audit gap raised at P3.8: PDE side currently has only
-  `chebyshev_dqc_2d` while ODE side has 4 quantum families. Port the
-  three remaining PINN-style families to 2D (t, x) coordinate
-  handling so the PDE matrix becomes **4 quantum × 3 PDEs × 3 seeds**
-  (parity with the ODE matrix shape).
+- ✅ **P3.9 DONE** — PDE multi-family port (commits `00c2d46` →
+  `d74cf42`, 8 atomic). The 3 PINN-style quantum families ported
+  to 2D (t, x) coordinate handling and run on all 3 PDEs at the
+  audit-corrected configs; the PDE matrix now matches the ODE
+  matrix shape (4 quantum × 3 PDEs × 3 seeds = 36 PDE runs total,
+  combining P3.8's chebyshev_dqc_2d data and P3.9's 27 new runs).
 
-  Detailed design at `.planning/P3_9_DESIGN.md` (committed `79defc9`):
-  - `qcpinn_2d` — trivial (input_dim=2 on existing pre-NN).
-  - `te_qpinn_fnn_2d` — split-qubit FNN-embedding (per-coordinate heads).
-  - `te_qpinn_qnn_2d` — split-qubit U_embed (declared design choice).
-  - Out of scope: rf_qrc (frozen-reservoir closed-form ridge —
-    architecturally different from PINN-style residual training;
-    deferred to P4 as a forecaster).
+  All 3 mechanism gates passed first try (`jacrev∘jacrev` through
+  the QNode composition was solid for every family). Per-family
+  test counts: qcpinn_2d 11/11, te_qpinn_fnn_2d 12/12,
+  te_qpinn_qnn_2d 12/12. Sweep wall-clock 16:33 on default.qubit.
 
-  Acceptance criteria per family: mechanism gate
-  (`jacrev(jacrev(QNode))` finite+nontrivial; same gate
-  chebyshev_dqc_2d cleared first try) + convergence-mini gate
-  (heat eq seed 0, MAE < 0.20 — looser than chebyshev_dqc_2d's 0.10
-  because non-Chebyshev families don't get the tower's spectral
-  advantage).
+  **PDE matrix headline numbers (re-run-friendly summary):**
 
-  Compute estimate: ~4-5 hr CPU for the 27 new runs (3 new families
-  × 3 PDEs × 3 seeds). 7-commit atomic sequence; CIRCUIT_SPECS.md
-  gets P3.9 2D-port design-choice amendments (§1, §2, §3 each).
-- ⏩ **P4 — after P3.9. Forecaster long-horizon autoregressive rollout.**
+  | PDE | best quantum (relL2) | classical PINN | verdict |
+  |---|---|---|---|
+  | heat | qcpinn_2d 0.0017 ± 0.0008 | 0.0045 | **quantum wins** (qcpinn_2d, te_qpinn_fnn_2d both beat classical) |
+  | burgers smooth | qcpinn_2d 0.016 ± 0.008 | 0.027 | **quantum wins** (passes the relL2<0.30 gate at corrected steps) |
+  | allen_cahn | **te_qpinn_qnn_2d 0.052 ± 0.003** | ~0.11 | **quantum wins** at zero classical params — the cleanest result |
+
+  **THE FINDING:** te_qpinn_qnn_2d shows the cleanest regime-
+  dependent advantage pattern observed in this codebase to date:
+
+  - **smooth PDEs (heat, Burgers):** stuck at the trainability
+    ceiling (relL2 ≈ 0.046 and 0.358 — replicates P3.8's Lorenz
+    T=5 finding for the same family);
+  - **broadband PDE (Allen-Cahn, sharp tanh fronts):** converges
+    to relL2 0.052 with tight ±0.003 seed variance, beating
+    classical PINN by ~2× at ZERO classical params (PURE quantum,
+    84 PQC scalars).
+
+  This is the first sign of a regime-dependent quantum-family
+  advantage on a PDE in this codebase. **CRUCIAL CAVEATS (the
+  pre-reg discipline):**
+
+  1. **NOT H1 evidence** — pre-reg §2 defines H1 as the
+     QLNN−NeuralODE advantage gap; the mandatory Neural-ODE
+     baseline awaits P5.
+  2. Same family stuck on smooth PDEs at trainability ceiling —
+     the regime split could be a property of trainability, not
+     expressivity. P7 T3 triangulation will adjudicate.
+  3. qcpinn_2d's heat/Burgers wins use 756 classical params (the
+     "classical-heavy capacity confound" disclosed in
+     CIRCUIT_SPECS.md §3 amendment).
+  4. AC results have high seed variance on 2 of the 3 new families
+     (qcpinn_2d, te_qpinn_fnn_2d) — only te_qpinn_qnn_2d's AC
+     result has tight ±0.003 CI.
+
+  Figure: `paper/figures/fig_p3_9_pde_matrix.{png,pdf}`.
+  Results: `results/p3_9_pde_matrix/{pde}_{family}/seed_N/`.
+  CIRCUIT_SPECS.md amendments: §1 (te_qpinn_fnn split-qubit FNN
+  heads), §2 (te_qpinn_qnn split-qubit U_embed), §3 (qcpinn
+  trivial input-dim widening). rf_qrc deferred to P4 as
+  forecaster (frozen-reservoir architecture).
+- ⏩ **P4 — NEXT. Forecaster long-horizon autoregressive rollout.**
   Retask the data-driven forecaster from the persistence-trivial
   h-step MAE protocol to **autoregressive multi-step rollout on the
   P2 PDE fields + the existing 5 ODE systems** (ODE_PDE_PRE_REG.md
