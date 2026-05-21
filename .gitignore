@@ -68,4 +68,6 @@ results/*
 !results/p5_h1_verdict/
 !results/p7_t3_mechanism/
 !results/p7_5_solver_h1/
+!results/p7_5_hpo_sensitivity/
+!results/p7_5_h3_loo/
 refs/
