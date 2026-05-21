@@ -1,0 +1,182 @@
+[
+  {
+    "system": "heat",
+    "seed": 0,
+    "qlnn_best_family": "qcpinn_2d",
+    "qlnn_relL2": 0.0010079837056780944,
+    "classical_pinn_relL2": 0.005395669283917357,
+    "delta": 0.004387685578239263,
+    "regime": "smooth_periodic",
+    "task": "pde_solver"
+  },
+  {
+    "system": "heat",
+    "seed": 1,
+    "qlnn_best_family": "qcpinn_2d",
+    "qlnn_relL2": 0.001984186352680363,
+    "classical_pinn_relL2": 0.004592825262612315,
+    "delta": 0.0026086389099319518,
+    "regime": "smooth_periodic",
+    "task": "pde_solver"
+  },
+  {
+    "system": "heat",
+    "seed": 2,
+    "qlnn_best_family": "te_qpinn_fnn_2d",
+    "qlnn_relL2": 0.0013433356135218201,
+    "classical_pinn_relL2": 0.0036056150410810504,
+    "delta": 0.00226227942755923,
+    "regime": "smooth_periodic",
+    "task": "pde_solver"
+  },
+  {
+    "system": "burgers_smooth",
+    "seed": 0,
+    "qlnn_best_family": "qcpinn_2d",
+    "qlnn_relL2": 0.011232574401583813,
+    "classical_pinn_relL2": 0.042844862795670846,
+    "delta": 0.03161228839408703,
+    "regime": "smooth_periodic",
+    "task": "pde_solver"
+  },
+  {
+    "system": "burgers_smooth",
+    "seed": 1,
+    "qlnn_best_family": "te_qpinn_fnn_2d",
+    "qlnn_relL2": 0.012554715224427089,
+    "classical_pinn_relL2": 0.019058282697091113,
+    "delta": 0.006503567472664024,
+    "regime": "smooth_periodic",
+    "task": "pde_solver"
+  },
+  {
+    "system": "burgers_smooth",
+    "seed": 2,
+    "qlnn_best_family": "qcpinn_2d",
+    "qlnn_relL2": 0.020618680486497218,
+    "classical_pinn_relL2": 0.01868758923594131,
+    "delta": -0.0019310912505559087,
+    "regime": "smooth_periodic",
+    "task": "pde_solver"
+  },
+  {
+    "system": "allen_cahn",
+    "seed": 0,
+    "qlnn_best_family": "te_qpinn_qnn_2d",
+    "qlnn_relL2": 0.05282267369782603,
+    "classical_pinn_relL2": 0.2018254176764147,
+    "delta": 0.14900274397858868,
+    "regime": "broadband_multiscale",
+    "task": "pde_solver"
+  },
+  {
+    "system": "allen_cahn",
+    "seed": 1,
+    "qlnn_best_family": "te_qpinn_qnn_2d",
+    "qlnn_relL2": 0.0488522870938424,
+    "classical_pinn_relL2": 0.06329821674435986,
+    "delta": 0.014445929650517456,
+    "regime": "broadband_multiscale",
+    "task": "pde_solver"
+  },
+  {
+    "system": "allen_cahn",
+    "seed": 2,
+    "qlnn_best_family": "te_qpinn_qnn_2d",
+    "qlnn_relL2": 0.05342501601508754,
+    "classical_pinn_relL2": 0.051389069696653834,
+    "delta": -0.0020359463184337068,
+    "regime": "broadband_multiscale",
+    "task": "pde_solver"
+  },
+  {
+    "system": "lotka_volterra",
+    "seed": 0,
+    "qlnn_best_family": "qcpinn",
+    "qlnn_relL2": 0.007431563261303369,
+    "classical_pinn_relL2": 0.01167583985934637,
+    "delta": 0.004244276598043001,
+    "regime": "smooth_periodic",
+    "task": "ode_solver"
+  },
+  {
+    "system": "lotka_volterra",
+    "seed": 1,
+    "qlnn_best_family": "qcpinn",
+    "qlnn_relL2": 0.00294084845578528,
+    "classical_pinn_relL2": 0.007814719987897848,
+    "delta": 0.004873871532112568,
+    "regime": "smooth_periodic",
+    "task": "ode_solver"
+  },
+  {
+    "system": "lotka_volterra",
+    "seed": 2,
+    "qlnn_best_family": "qcpinn",
+    "qlnn_relL2": 0.007031684790202037,
+    "classical_pinn_relL2": 0.007079134570156292,
+    "delta": 4.744977995425458e-05,
+    "regime": "smooth_periodic",
+    "task": "ode_solver"
+  },
+  {
+    "system": "van_der_pol",
+    "seed": 0,
+    "qlnn_best_family": "te_qpinn_fnn",
+    "qlnn_relL2": 0.8213402448263368,
+    "classical_pinn_relL2": 1.1569162462815592,
+    "delta": 0.3355760014552224,
+    "regime": "smooth_periodic",
+    "task": "ode_solver"
+  },
+  {
+    "system": "van_der_pol",
+    "seed": 1,
+    "qlnn_best_family": "te_qpinn_qnn",
+    "qlnn_relL2": 0.7622429372812118,
+    "classical_pinn_relL2": 0.943367722657931,
+    "delta": 0.18112478537671917,
+    "regime": "smooth_periodic",
+    "task": "ode_solver"
+  },
+  {
+    "system": "van_der_pol",
+    "seed": 2,
+    "qlnn_best_family": "te_qpinn_fnn",
+    "qlnn_relL2": 0.8176052896737609,
+    "classical_pinn_relL2": 1.0550124941807157,
+    "delta": 0.23740720450695485,
+    "regime": "smooth_periodic",
+    "task": "ode_solver"
+  },
+  {
+    "system": "lorenz",
+    "seed": 0,
+    "qlnn_best_family": "te_qpinn_qnn",
+    "qlnn_relL2": 0.9794284624300705,
+    "classical_pinn_relL2": 0.9958116340497172,
+    "delta": 0.01638317161964664,
+    "regime": "broadband_multiscale",
+    "task": "ode_solver"
+  },
+  {
+    "system": "lorenz",
+    "seed": 1,
+    "qlnn_best_family": "te_qpinn_qnn",
+    "qlnn_relL2": 0.9768661862856822,
+    "classical_pinn_relL2": 0.9956565538731516,
+    "delta": 0.018790367587469325,
+    "regime": "broadband_multiscale",
+    "task": "ode_solver"
+  },
+  {
+    "system": "lorenz",
+    "seed": 2,
+    "qlnn_best_family": "te_qpinn_qnn",
+    "qlnn_relL2": 0.9772641808795158,
+    "classical_pinn_relL2": 0.9956506928163498,
+    "delta": 0.018386511936833938,
+    "regime": "broadband_multiscale",
+    "task": "ode_solver"
+  }
+]
