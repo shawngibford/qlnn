@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P8 (paper draft) — P7 mechanism landed
+### PIVOT pick-up order — ⏩ RESUME AT P8 (paper draft) — P7.5 hardening complete
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -461,30 +461,109 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   diagnostic (per-cell Δ colored by best-ansatz; T3 scalars per
   family; barren-plateau scaling; correlation table).
 
-- ⏩ **P8 — NEXT. PRX Quantum paper draft.** All experimental work
-  for the paper is now complete:
-    - **H1 verdict (P5):** FALSIFIED with 95% CI [-0.79, -0.05]
-    - **H3 mechanism (P7):** KL-to-Haar trend ρ=+0.518 (tentative);
-      needs more cells (P6 scale-up) for confirmation
-    - **P3.9 finding:** te_qpinn_qnn_2d Allen-Cahn solver result
-      (relL² = 0.052 ± 0.003, 2× better than classical PINN at
-      ZERO classical params)
+- ✅ **P7.5 DONE — PRE-PUBLICATION HARDENING** (commits `5683716`
+  → `e39f374`, 7 atomic). Closes 3 RED + 6 YELLOW peer-review
+  audit concerns. The paper's empirical evidence is now
+  defensible at PRX-Quantum-grade rigor.
 
-  Paper structure (per the plan file's §P8 in the publication
-  roadmap section — 25 pages incl. SI):
+  P7.5 commit ledger:
+    `5683716` feat(P7.5-solver-h1-module):    11 tests
+    `61533b8` feat(P7.5-solver-h1-sweep):     9 baseline cells +
+                                              SOLVER-task H1 verdict
+    `fddc896` feat(P7.5-integrity):           verify_paper_integrity
+                                              gates H1/H3
+    `1c10d98` docs(P7.5-prereg-amend):        PRE_REG_AMENDMENT.md
+                                              (8 disclosures)
+    `c24fda3` feat(P7.5-hpo):                  HPO sensitivity (VdP
+                                              sign flip disclosed)
+    `ea78046` feat(P7.5-h3-loo):               KL-to-Haar trend
+                                              ROBUST across LOO
+    `e39f374` chore(reproduce_paper):         full pivot pipeline
+
+  **THE PAPER'S NEW HEADLINE EVIDENCE** (3 H1 outcomes):
+
+  1. **SOLVER-task H1 (PRE-REG GATING, default HPO)** =
+     **CONFIRMED** at raw bootstrap
+       - Δ_smooth − Δ_broad = +0.1094
+       - 95% CI = [+0.0145, +0.2204]  ← excludes 0 positive
+       - 9 of 9 per-cell Δ > 0 (QLNN beats classical PINN on every
+         system × seed)
+
+  2. **SOLVER-task H1 (HPO-best classical PINN at anchors)** =
+     **FALSIFIED**
+       - Δ_smooth − Δ_broad = +0.0647
+       - 95% CI = [-0.0468, +0.1927]  ← includes 0
+       - VdP s1 Δ flips sign (-0.097 at lr=1e-2 vs +0.181 at default)
+
+  3. **FORECASTER-task H1 (P5 corroborating)** = **FALSIFIED**
+       - Δ_smooth − Δ_broad = -0.4166
+       - 95% CI = [-0.7871, -0.0460]  ← excludes 0 negative
+       - Inverted regime pattern (Neural-ODE wins smooth; QLNN
+         narrowly wins broad)
+
+  **H3 mechanism (KL-to-Haar)**: ρ = +0.518 (full-sample),
+  LOO mean = +0.512 ± 0.113, ALL 9 LOO subsamples positive
+  → trend is ROBUST to single-cell removal but n=9 too small
+  for p<0.05 significance.
+
+  **PRE_REG_AMENDMENT.md** documents 8 methodological choices
+  (A1-A8) including skyline_threshold=0.5, sample size, HPO,
+  capacity matching, VdP boundary, underfit-guard scope,
+  strict-vs-raw verdict reporting, H3 trend not significant.
+
+  **Publication-grade reproducibility chain:**
+    - `scripts/reproduce_paper.sh` regenerates EVERY artifact
+      (~6-8 hr CPU end-to-end)
+    - `scripts/verify_paper_integrity.py` GATES all H1/H3
+      numbers + the archived OD claims
+
+  **Audit closure status:**
+    R1 solver gating         ✅ CLOSED (P7.5 commit 2)
+    R2 underfit guard        ✅ CLOSED for solver task (P7.5 commit 1+2)
+    R3 integrity script      ✅ CLOSED (P7.5 commit 3)
+    Y1 skyline threshold     ✅ DISCLOSED (PRE_REG_AMENDMENT A1)
+    Y2 sample size           ✅ DISCLOSED (A2)
+    Y3 HPO budget            ✅ HARDENED via sensitivity (P7.5 commit 6)
+    Y4 MLP capacity          ✅ DISCLOSED (A4)
+    Y5 VdP boundary          ✅ DISCLOSED + HPO-confirmed (A5 + commit 6)
+    Y6 te_qpinn_qnn AC       ✅ DISCLOSED (A6, paper framing)
+    Y8 H3 not significant    ✅ DISCLOSED + LOO-robust (A8 + commit 5)
+
+- ⏩ **P8 — NEXT. PRX Quantum paper draft.** All experimental work
+  for the paper is COMPLETE. The 3 H1 outcomes + H3 LOO + HPO
+  sensitivity + PRE_REG_AMENDMENT + reproducibility chain are
+  all committed.
+
+  **Paper headline structure (3 H1 verdicts side-by-side):**
+    §5.1 Solver-task H1 (pre-reg GATING task, default HPO): CONFIRMED
+    §5.2 Solver-task H1 (HPO-best classical PINN sensitivity): FALSIFIED
+    §5.3 Forecaster-task H1 (corroborating): FALSIFIED
+    §5.4 Discussion: the empirical pattern is TASK-DEPENDENT AND
+         HPO-SENSITIVE. The most rigorous reading is that QLNN shows
+         a regime-dependent advantage on the solver task at the
+         pre-registered config, but the advantage is fragile to
+         classical baseline HPO. This is exactly the rigor Bowles/
+         Schuld 2024 calls for. The paper's CONTRIBUTION is the
+         RIGOROUS BENCHMARK FRAMEWORK, not a unidirectional verdict.
+
+  Paper structure (~25 pages incl. SI):
     §1 Intro — Schuld-Fourier; PINN landscape; Bowles/Schuld 2024
-    §2 Methods — pre-reg verbatim, matched baselines, guards
-    §3 Solver task results — P3.9 PDE matrix, te_qpinn_qnn_2d AC win
-    §4 Forecaster task results — P4 rollout matrix
-    §5 **H1 verdict — FALSIFIED, inverted regime pattern**
-    §6 Mechanism — P7 T3 cross-tabulation, KL-Haar trend
-    §7 Discussion — limitations, follow-ups (DeepONet, hardware)
+    §2 Methods — pre-reg verbatim, matched baselines, guards,
+                  PRE_REG_AMENDMENT
+    §3 Solver task results — P3.6 multi-state + P3.9 PDE matrix +
+                              te_qpinn_qnn_2d AC win
+    §4 Forecaster task results — P4 rollout matrix + P5 baselines
+    §5 H1 verdict — 3 outcomes (solver default + HPO-best, forecaster);
+                     TASK-DEPENDENT + HPO-SENSITIVE
+    §6 Mechanism — P7 T3 + KL-to-Haar LOO-robust trend
+    §7 Discussion — limitations, full P6 scale-up future work,
+                     hardware execution future work
     §8 Conclusions
 
-  Submission artifacts (per the plan):
+  Submission artifacts (~ready to assemble):
     paper/main.tex (PRX Quantum LaTeX) + paper/supplement.tex
-    scripts/reproduce_paper.sh
-    verify_paper_integrity.py extended to verify §5/§6 cited numbers
+    scripts/reproduce_paper.sh (P7.5 commit 7 updated)
+    verify_paper_integrity.py extended (P7.5 commit 3)
     Zenodo DOI + arXiv preprint
 
   Dev estimate: 2-3 weeks writing.
