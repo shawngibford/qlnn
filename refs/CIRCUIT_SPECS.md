@@ -85,6 +85,39 @@ docstring + unit test.
   paper explicitly says it "varies in literature"; pick the
   nearest-neighbour chain and document it.
 
+#### P3.9 2D-port amendment — `te_qpinn_fnn_2d`
+
+Module: `src/qlnn_/circuits/pde_2d/te_qpinn_fnn_2d.py` (commit
+`64c320b`). Tests: `tests/qlnn_/test_te_qpinn_fnn_2d.py` (12 green).
+
+The PDE 2D coordinate extension is **split-qubit FNN-embedding**:
+
+- **Two FNN heads** (FNN_t, FNN_x), each takes the 2-vector input
+  `(t, x)` and produces per-half-qubit angle weights. FNN_t output
+  dim = `n_t_qubits`; FNN_x output dim = `n_x_qubits`. Hidden layer
+  per head matches the 1D paper's `fnn_hidden_dim` default (16).
+- **Split-qubit embedding:** qubits `0..n_t-1` carry
+  `R_y(φ_t,k · t̃)`; qubits `n_t..n_t+n_x-1` carry
+  `R_y(φ_x,k · x̃)`. Mirrors `chebyshev_dqc_2d`'s split-qubit feature
+  map convention.
+- **HEA + readout identical to the 1D paper:** `L` layers of
+  `{R_x, R_y, R_z}` + nn-CNOT chain over `n = n_t + n_x` qubits
+  (Eq. 12), then `⟨⊗_k Z_k⟩` readout (Eq. 13). Tensor-product Z
+  preserved verbatim.
+
+**Faithfulness hook preserved:** PQC rotation count `N_rot = 3·n·L`
+unchanged (depends on `n = n_t + n_x` and `L` only, NOT on input
+dim). Parameterized test asserts this across 4 `(n_t, n_x, L)`
+combinations.
+
+**Rationale (declared):**
+1. Symmetric with `chebyshev_dqc_2d`'s split-qubit layout —
+   apples-to-apples PDE comparison.
+2. Preserves the "FNN generates per-qubit angles" paper pattern
+   (just doubled per coordinate).
+3. Per-coordinate FNN heads each see BOTH coordinates as input
+   (FNN learns coupling implicitly).
+
 ### 2. `te_qpinn_qnn` — QPINN lid-driven cavity (`2605.13892v1.pdf`)
 - **Embedding (fully quantum, trainable):** affine-normalise coords to
   `[-1,1]`; trainable PQC `U_embed(θ_Q)` = alternating
@@ -106,6 +139,42 @@ docstring + unit test.
   `U_embed` and the exact rotations-per-layer multiplicity are
   schematic in *all three* sibling sources (Fig. 3 only) — fix a
   concrete schedule, document it, cite the schematic.
+
+#### P3.9 2D-port amendment — `te_qpinn_qnn_2d`
+
+Module: `src/qlnn_/circuits/pde_2d/te_qpinn_qnn_2d.py` (commit
+`2bca6d4`). Tests: `tests/qlnn_/test_te_qpinn_qnn_2d.py` (12 green).
+
+The PDE 2D coordinate extension is **split-qubit U_embed**:
+
+- `U_embed` operates on `n_total = n_t + n_x` qubits. Per embedding
+  layer:
+  - **t-qubits (0..n_t-1):** trainable `R_y(θ_emb_t,k,0)` +
+    input-modulated `R_z(θ_emb_t,k,1 · t̃)`.
+  - **x-qubits (n_t..n_t+n_x-1):** trainable `R_y(θ_emb_x,k,0)` +
+    input-modulated `R_z(θ_emb_x,k,1 · x̃)`.
+  - **nn-CNOT chain across ALL `n_total` qubits** — mixes t- and
+    x-encodings, "trainable embedding entangles the coordinates."
+- `α_k = π·⟨Z_k⟩` for all `k ∈ [n_total]`. Both halves contribute.
+- `U_var` operates on all `n_total` qubits, `L` layers, same
+  `{R_x, R_y, R_z}` + nn-CNOT chain as 1D code path.
+- **Readout: Σ_j ⟨Z_j⟩ over all `n_total` qubits** — paper Eq. 26
+  preserved verbatim. Bounded `[-n_total, n_total]`.
+
+**Faithfulness hook preserved:** trained-param count
+`2·n·K + 3·n·L` is **linear in `n·(K + L)`** by construction (the 1D
+paper's scaling hook from p. 6). Parameterized test asserts this
+across 4 `(n_t, n_x, K, L)` combinations.
+
+**Rationale (declared):**
+1. The source paper leaves `U_embed` gate schedule "schematic only"
+   for the 1D case already; the 1D code's decision was minimal-
+   faithful + linear-in-N_q·L scaling. Split-qubit preserves that
+   scaling property exactly.
+2. Symmetric with the other two P3.9 ports' split-qubit layouts.
+3. The trainable R_y stays independent per qubit; only the
+   input-modulated R_z differs between t- and x-encoded halves
+   (R_z(θ·t̃) on first half, R_z(θ·x̃) on second).
 
 ### 3. `qcpinn` — QCPINN (`2503.16678v6.pdf`)
 - **Pipeline:** classical preprocessor NN (50-neuron TanH) → angle (or
@@ -134,6 +203,32 @@ docstring + unit test.
   above; assert Cascade n=5,L=1 → (15, 5, 7); Cross-mesh → (45, 20, 24).
 - **[UNSPECIFIED IN SOURCE]** exact data→`RX(θ)` embedding-angle
   formula; exact Cross-mesh gate ordering.
+
+#### P3.9 2D-port amendment — `qcpinn_2d`
+
+Module: `src/qlnn_/circuits/pde_2d/qcpinn_2d.py` (commit `00c2d46`).
+Tests: `tests/qlnn_/test_qcpinn_2d.py` (11 green).
+
+The PDE 2D coordinate extension is **trivial input-dim widening**:
+the existing `QCPINNConfig` already has a configurable `input_dim`
+field (the pre-NN's input layer). The 2D port forces `input_dim=2`
+and is otherwise a thin wrapper. Everything downstream — the angle
+embedding, the per-topology PQC, the per-qubit ⟨Z⟩ readout, the
+post-NN — is gate-by-gate identical to the 1D code path.
+
+**Faithfulness hook preserved:** the paper's per-topology Table 2
+parameter-count formulas depend on `n` and `L` only, NOT on pre-NN
+input dim — so they hold unchanged. Parameterized test asserts this
+across all 4 topologies (Alternate, Cascade, Cross-mesh, Layered).
+
+**Note on classical-param accounting:** the classical pre-NN param
+count grows by `pre_hidden` (one extra row in `pre_W1`) under
+`input_dim=2`. Disclosed in per-cell `metrics.json`
+(`classical_params` field) so the figure can present quantum vs
+classical capacity transparently — qcpinn_2d at default config has
+~770 trainable scalars, of which ~755 are classical (pre/post-NN)
+and ~15 are PQC. This is a known confound for "quantum vs classical
+solver" comparisons and is documented in the figure caption.
 
 ### 4. `rf_qrc` — RF-QRC, Phys. Rev. Research 6, 043082 (2024) (`2405.03390v2.pdf`)
 - **Config:** QRC-C4, the row Table I labels "(RF-QRC)".
@@ -230,6 +325,33 @@ forecaster} **as applicable** per the homing column below.
 | **te_qpinn_qnn**   | ✅ P3-2e (`0bc44f7`) | solver builder | `src/qlnn_/circuits/te_qpinn.py` | `tests/qlnn_/test_te_qpinn.py` (+8 = 15) |
 | **qcpinn**         | ✅ P3-2d (`a7db628`) | solver builder | `src/qlnn_/circuits/qcpinn.py` | `tests/qlnn_/test_qcpinn.py` (15) |
 | lubasch_multicopy  | ⏸ **DEFERRED (P3-2f)** — see rationale below | n/a | — | — |
+
+### P3.9 PDE 2D-port modules (PINN-style multi-family coverage)
+
+| Family             | Status | Homing      | Module                                          | Tests                                  |
+|--------------------|--------|-------------|-------------------------------------------------|----------------------------------------|
+| **chebyshev_dqc_2d** | ✅ P3-7 (`77009ce` + `f460833`) | PDE solver (2D) | `src/qlnn_/training/pde_residual_loss.py` | `tests/qlnn_/test_pde_residual_solver.py` (7) |
+| **qcpinn_2d**      | ✅ P3.9 (`00c2d46`) | PDE solver (2D) | `src/qlnn_/circuits/pde_2d/qcpinn_2d.py` | `tests/qlnn_/test_qcpinn_2d.py` (11) |
+| **te_qpinn_fnn_2d** | ✅ P3.9 (`64c320b`) | PDE solver (2D) | `src/qlnn_/circuits/pde_2d/te_qpinn_fnn_2d.py` | `tests/qlnn_/test_te_qpinn_fnn_2d.py` (12) |
+| **te_qpinn_qnn_2d** | ✅ P3.9 (`2bca6d4`) | PDE solver (2D) | `src/qlnn_/circuits/pde_2d/te_qpinn_qnn_2d.py` | `tests/qlnn_/test_te_qpinn_qnn_2d.py` (12) |
+
+Each 2D-port preserves its 1D family's faithfulness hook (Table 2
+for qcpinn, `N_rot=3·n·L` for te_qpinn_fnn, linear-in-`n·(K+L)`
+for te_qpinn_qnn) and carries an explicit declared design-choice
+disclosure (per-section amendments above). The P3.9 dispatch module
+`src/qlnn_/training/p3_9_pde_matrix.py` consumes all four families
+through a single `QUANTUM_FAMILIES` registry. The 4-quantum × 3-PDE
+× 3-seed sweep is `scripts/run_p3_9_pde_matrix.py`.
+
+**rf_qrc is OUT of P3.9 scope** — its frozen-reservoir closed-form
+ridge readout architecture is fundamentally different from
+PINN-style residual training (no autodiff through the reservoir;
+the "training" is a linear solve against ground-truth windows). A
+faithful 2D port either reformulates rf_qrc as a forecaster (its
+intended use; that's P4 territory) or rebuilds it as a PINN-style
+trainable reservoir, which would no longer be the paper's family.
+Deferred to P4 as a forecaster; not represented in the P3.9 PDE
+matrix.
 
 ### Lubasch (`lubasch_multicopy`) — explicit deferral rationale
 
