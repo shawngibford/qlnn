@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P7 (T3 mechanism) — H1 FALSIFIED at P5
+### PIVOT pick-up order — ⏩ RESUME AT P8 (paper draft) — P7 mechanism landed
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -414,28 +414,86 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   across systems; the actual H1 number won't change qualitatively.
   Treated as optional rigor work, not paper-critical.
 
-- 🟢 **P7 — NEXT. T3 trainability/expressibility mechanism.**
-  The MECHANISTIC prong (H3 in the pre-reg). Now CRITICAL given
-  the FALSIFIED H1 outcome: the paper's "why" question shifts
-  from "why does QLNN win on smooth?" to "why does Neural-ODE win
-  on smooth and QLNN win on chaos — the inverted pattern?"
+- ✅ **P7 DONE — H3 mechanism partial signal** (commits `ac42612` →
+  `4fbbdf3`, 4 atomic incl. this HANDOFF advance). 4 T3 scalars
+  computed per forecaster family at the P4 config + barren-plateau
+  qubit-scaling study + per-cell cross-tabulation against P5's Δ values.
 
-  P7 runs `scripts/analyze_quantum_trainability.py` (committed
-  `707debb`) across all implemented families × systems to provide:
-    - Barren-plateau / gradient-variance scaling
-    - Fourier coefficient extraction per ansatz
-    - Expressibility curves
+  **Per-family T3 scalars at P4 config (n=3, L=1):**
 
-  Cross-tabulating these scalars with the per-cell Δ values gives
-  the paper's mechanism. The P3.9 te_qpinn_qnn_2d AC observation
-  (regime-dependent on the SOLVER task) ties in here as a
-  parallel positive finding.
+  | family | KL_to_Haar | Q_ent | Var(grad) | K_max |
+  |---|---|---|---|---|
+  | data_reuploading | 0.195 | 0.776 | 0.038 | 3 |
+  | hardware_efficient | 0.211 | 0.796 | 0.025 | 3 |
+  | strongly_entangling | 0.195 | 0.776 | 0.038 | 3 |
+  | **brickwall** | **0.211** | **0.309** | 0.046 | 3 |
 
-- ⏩ **P8 — paper draft.** PRX Quantum target. The headline is
-  now "H1 falsified — pre-registered null with inverted regime
-  pattern" rather than "H1 confirmed". Either way is publishable
-  per Bowles/Schuld 2024 (arXiv:2403.07059) and per pre-reg §7
-  explicit disposition.
+  Headline: **brickwall has dramatically LOWER entangling Q
+  (0.31) than the other 3 (~0.78-0.80)** — alternating-layer
+  CNOT vs ring CNOT. Also **most barren-plateau resistant** in
+  the qubit-scaling study (Var(grad) only drops 2× from n=2
+  to n=5, vs ~50× for hardware_efficient).
+
+  **Cross-tabulation against per-cell Δ (n=9 cells, scipy.stats
+  .spearmanr with tie handling):**
+
+  | T3 scalar | ρ | p-value | Interpretation |
+  |---|---|---|---|
+  | **KL to Haar** | **+0.518** | **0.154** | strongest trend; less-expressive circuits show larger QLNN advantage |
+  | Entangling Q | +0.179 | 0.644 | no signal |
+  | Var(grad) | -0.179 | 0.644 | no signal |
+  | Fourier K_max | undefined | — | constant across families at L=1 |
+
+  **No T3 scalar reaches statistical significance (p<0.05) at
+  n=9 cells.** The KL-to-Haar trend (ρ=+0.518) is the
+  strongest tentative mechanism: less-expressive ansätze
+  (further from Haar) show larger QLNN advantage. Consistent
+  with a "circuit-simplicity helps" reading, but requires P6's
+  unified-matrix scale-up for statistical confirmation.
+
+  P7 commit ledger:
+    `ac42612` feat(P7-t3-module):     T3 diagnostics module + 28 tests
+    `45efe36` feat(P7-t3-sweep):       sweep + barren-plateau scaling
+    `4fbbdf3` feat(P7-mechanism-fig):  cross-tabulation + figure
+    (this) docs(HANDOFF):              pickup advance
+
+  Figure: `paper/figures/fig_p7_mechanism.{png,pdf}` — 4-panel
+  diagnostic (per-cell Δ colored by best-ansatz; T3 scalars per
+  family; barren-plateau scaling; correlation table).
+
+- ⏩ **P8 — NEXT. PRX Quantum paper draft.** All experimental work
+  for the paper is now complete:
+    - **H1 verdict (P5):** FALSIFIED with 95% CI [-0.79, -0.05]
+    - **H3 mechanism (P7):** KL-to-Haar trend ρ=+0.518 (tentative);
+      needs more cells (P6 scale-up) for confirmation
+    - **P3.9 finding:** te_qpinn_qnn_2d Allen-Cahn solver result
+      (relL² = 0.052 ± 0.003, 2× better than classical PINN at
+      ZERO classical params)
+
+  Paper structure (per the plan file's §P8 in the publication
+  roadmap section — 25 pages incl. SI):
+    §1 Intro — Schuld-Fourier; PINN landscape; Bowles/Schuld 2024
+    §2 Methods — pre-reg verbatim, matched baselines, guards
+    §3 Solver task results — P3.9 PDE matrix, te_qpinn_qnn_2d AC win
+    §4 Forecaster task results — P4 rollout matrix
+    §5 **H1 verdict — FALSIFIED, inverted regime pattern**
+    §6 Mechanism — P7 T3 cross-tabulation, KL-Haar trend
+    §7 Discussion — limitations, follow-ups (DeepONet, hardware)
+    §8 Conclusions
+
+  Submission artifacts (per the plan):
+    paper/main.tex (PRX Quantum LaTeX) + paper/supplement.tex
+    scripts/reproduce_paper.sh
+    verify_paper_integrity.py extended to verify §5/§6 cited numbers
+    Zenodo DOI + arXiv preprint
+
+  Dev estimate: 2-3 weeks writing.
+
+- 🟡 **P6 — OPTIONAL/DEFERRED.** Unified matrix scale-up would
+  confirm the H1 falsification + might push the H3 KL-trend
+  toward statistical significance (n increases from 9 to ~45-90
+  cells). The H1 verdict won't change qualitatively (CI is
+  comfortably negative); P6 is enrichment, not paper-critical.
   [P5 DESCRIPTION — moved to ✅ DONE section above.
    See P5 commit ledger 29acb74 → bd4e3c5 and the
    FALSIFIED outcome.]
