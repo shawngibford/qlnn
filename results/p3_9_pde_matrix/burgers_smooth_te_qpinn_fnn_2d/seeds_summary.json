@@ -1,0 +1,58 @@
+{
+  "pde": "burgers_smooth",
+  "model": "te_qpinn_fnn_2d",
+  "regime": "smooth_periodic",
+  "n_seeds": 3,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "pqc_params": 60,
+  "classical_params": 164,
+  "config_str": "n_t=2, n_x=2 (n=4), L=5; two FNN heads (H=16); \u27e8\u2297 Z\u27e9 readout",
+  "steps": 1500,
+  "metrics": {
+    "mae": {
+      "mean": 0.006323043149607812,
+      "std": 0.0012102920984317172,
+      "min": 0.005125001343725599,
+      "max": 0.007545224414771287,
+      "n_seeds": 3,
+      "ci95_half_width": 0.0030067749033652873,
+      "ci95_low": 0.0033162682462425245,
+      "ci95_high": 0.009329818052973098
+    },
+    "relative_l2": {
+      "mean": 0.01723898654756935,
+      "std": 0.006436653701265801,
+      "min": 0.012554715224427089,
+      "max": 0.024578492767585093,
+      "n_seeds": 3,
+      "ci95_half_width": 0.01599082472379803,
+      "ci95_low": 0.0012481618237713196,
+      "ci95_high": 0.03322981127136738
+    },
+    "final_loss": {
+      "mean": 0.00036376517770501476,
+      "std": 8.100346660838135e-05,
+      "min": 0.0002937050012405962,
+      "max": 0.0004524631367530674,
+      "n_seeds": 3,
+      "ci95_half_width": 0.00020124000710181484,
+      "ci95_low": 0.00016252517060319992,
+      "ci95_high": 0.0005650051848068296
+    },
+    "bc_violation": {
+      "mean": 1.0714246940592427,
+      "std": 0.6024995866323054,
+      "min": 0.6090829634800314,
+      "max": 1.752802006454911,
+      "n_seeds": 3,
+      "ci95_half_width": 1.4968127435694254,
+      "ci95_low": -0.4253880495101827,
+      "ci95_high": 2.5682374376286683
+    }
+  },
+  "audit_reason": "uses PDE_BENCH's intended step count (P3.7 sweep ran at 600); tests whether relL2<0.30 gate was missed at 600 steps due to under-training"
+}

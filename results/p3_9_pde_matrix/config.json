@@ -1,0 +1,38 @@
+{
+  "pdes": [
+    "heat",
+    "burgers_smooth",
+    "allen_cahn"
+  ],
+  "families": [
+    "qcpinn_2d",
+    "te_qpinn_fnn_2d",
+    "te_qpinn_qnn_2d"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "corrected_pde_configs": {
+    "heat": {
+      "n_t_colloc": 24,
+      "n_x_colloc": 24,
+      "steps": 1200,
+      "audit_reason": "matches the convergence-gate config (P3.7's test_heat_equation_gate_recovers_analytic_at_seed_0); closes the gate-vs-sweep step-budget gap"
+    },
+    "burgers_smooth": {
+      "n_t_colloc": 28,
+      "n_x_colloc": 28,
+      "steps": 1500,
+      "audit_reason": "uses PDE_BENCH's intended step count (P3.7 sweep ran at 600); tests whether relL2<0.30 gate was missed at 600 steps due to under-training"
+    },
+    "allen_cahn": {
+      "n_t_colloc": 32,
+      "n_x_colloc": 64,
+      "steps": 1800,
+      "audit_reason": "\u0394x = 2\u03c0/64 \u2248 0.098 ~ 1.2\u00d7 the equilibrium front width \u221a2\u00b7\u03b5 \u2248 0.085; >10\u00d7 the 28\u00d728 resolution that P3.7 used. Tests whether 'broadband failure' was sub-Nyquist aliasing vs a real regime property"
+    }
+  },
+  "scope_note": "P3.9 PDE multi-family matrix. Adds the 3 PINN-style quantum-family 2D ports to the PDE side so the matrix matches the ODE matrix shape (4 quantum \u00d7 3 PDEs \u00d7 3 seeds). NOT a paper claim; the H1 verdict still requires P5's Neural-ODE."
+}

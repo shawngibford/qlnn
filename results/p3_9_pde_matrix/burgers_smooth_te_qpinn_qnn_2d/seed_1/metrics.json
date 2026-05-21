@@ -1,0 +1,17 @@
+{
+  "pde": "burgers_smooth",
+  "model": "te_qpinn_qnn_2d",
+  "seed": 1,
+  "regime": "smooth_periodic",
+  "steps": 1500,
+  "n_t_colloc": 28,
+  "n_x_colloc": 28,
+  "pqc_params": 84,
+  "classical_params": 0,
+  "config_str": "n_t=2, n_x=2 (n=4), L=5, K=3; split-qubit U_embed + \u03a3 Z readout",
+  "audit_reason": "uses PDE_BENCH's intended step count (P3.7 sweep ran at 600); tests whether relL2<0.30 gate was missed at 600 steps due to under-training",
+  "final_loss": 0.0829111859202385,
+  "mae": 0.18679843066253032,
+  "relative_l2": 0.3543005589523667,
+  "bc_violation": 1.6048392884028462
+}

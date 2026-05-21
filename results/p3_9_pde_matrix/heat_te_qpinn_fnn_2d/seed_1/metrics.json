@@ -1,0 +1,17 @@
+{
+  "pde": "heat",
+  "model": "te_qpinn_fnn_2d",
+  "seed": 1,
+  "regime": "smooth_periodic",
+  "steps": 1200,
+  "n_t_colloc": 24,
+  "n_x_colloc": 24,
+  "pqc_params": 60,
+  "classical_params": 164,
+  "config_str": "n_t=2, n_x=2 (n=4), L=5; two FNN heads (H=16); \u27e8\u2297 Z\u27e9 readout",
+  "audit_reason": "matches the convergence-gate config (P3.7's test_heat_equation_gate_recovers_analytic_at_seed_0); closes the gate-vs-sweep step-budget gap",
+  "final_loss": 1.7561944332555868e-05,
+  "mae": 0.001625471332669258,
+  "relative_l2": 0.0031088684611728905,
+  "bc_violation": 1.5722789022235821
+}

@@ -1,0 +1,17 @@
+{
+  "pde": "allen_cahn",
+  "model": "te_qpinn_qnn_2d",
+  "seed": 2,
+  "regime": "broadband_multiscale",
+  "steps": 1800,
+  "n_t_colloc": 32,
+  "n_x_colloc": 64,
+  "pqc_params": 84,
+  "classical_params": 0,
+  "config_str": "n_t=2, n_x=2 (n=4), L=5, K=3; split-qubit U_embed + \u03a3 Z readout",
+  "audit_reason": "\u0394x = 2\u03c0/64 \u2248 0.098 ~ 1.2\u00d7 the equilibrium front width \u221a2\u00b7\u03b5 \u2248 0.085; >10\u00d7 the 28\u00d728 resolution that P3.7 used. Tests whether 'broadband failure' was sub-Nyquist aliasing vs a real regime property",
+  "final_loss": 0.01798054575920105,
+  "mae": 0.030312779077003853,
+  "relative_l2": 0.05342501601508754,
+  "bc_violation": 0.08418326322798851
+}

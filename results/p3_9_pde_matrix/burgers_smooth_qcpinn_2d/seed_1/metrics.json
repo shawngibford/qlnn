@@ -1,0 +1,17 @@
+{
+  "pde": "burgers_smooth",
+  "model": "qcpinn_2d",
+  "seed": 1,
+  "regime": "smooth_periodic",
+  "steps": 1500,
+  "n_t_colloc": 28,
+  "n_x_colloc": 28,
+  "pqc_params": 15,
+  "classical_params": 756,
+  "config_str": "n=5, L=1, Cascade topology; pre_hidden=50 + post_hidden=50; per-qubit \u27e8Z\u27e9 readout + post-NN scalar",
+  "audit_reason": "uses PDE_BENCH's intended step count (P3.7 sweep ran at 600); tests whether relL2<0.30 gate was missed at 600 steps due to under-training",
+  "final_loss": 0.00015679519856348634,
+  "mae": 0.004875930399831183,
+  "relative_l2": 0.015988674906587605,
+  "bc_violation": 1.264745945224852
+}

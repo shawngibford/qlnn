@@ -1,0 +1,58 @@
+{
+  "pde": "heat",
+  "model": "qcpinn_2d",
+  "regime": "smooth_periodic",
+  "n_seeds": 3,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "pqc_params": 15,
+  "classical_params": 756,
+  "config_str": "n=5, L=1, Cascade topology; pre_hidden=50 + post_hidden=50; per-qubit \u27e8Z\u27e9 readout + post-NN scalar",
+  "steps": 1200,
+  "metrics": {
+    "mae": {
+      "mean": 0.0007483423391977947,
+      "std": 0.0002859448585154629,
+      "min": 0.0004460675060749054,
+      "max": 0.001014531509578228,
+      "n_seeds": 3,
+      "ci95_half_width": 0.0007103837374834673,
+      "ci95_low": 3.795860171432739e-05,
+      "ci95_high": 0.001458726076681262
+    },
+    "relative_l2": {
+      "mean": 0.0016523008133898075,
+      "std": 0.0005580797574837646,
+      "min": 0.0010079837056780944,
+      "max": 0.001984186352680363,
+      "n_seeds": 3,
+      "ci95_half_width": 0.0013864588648085274,
+      "ci95_low": 0.0002658419485812801,
+      "ci95_high": 0.003038759678198335
+    },
+    "final_loss": {
+      "mean": 6.147415282005871e-06,
+      "std": 2.7122026328809256e-06,
+      "min": 3.6901167277392233e-06,
+      "max": 9.057524039235432e-06,
+      "n_seeds": 3,
+      "ci95_half_width": 6.7380286295802134e-06,
+      "ci95_low": -5.906133475743427e-07,
+      "ci95_high": 1.2885443911586085e-05
+    },
+    "bc_violation": {
+      "mean": 1.6156317675131264,
+      "std": 0.4967263675945494,
+      "min": 1.0523982157660958,
+      "max": 1.991126436969179,
+      "n_seeds": 3,
+      "ci95_half_width": 1.2340362940966147,
+      "ci95_low": 0.3815954734165117,
+      "ci95_high": 2.849668061609741
+    }
+  },
+  "audit_reason": "matches the convergence-gate config (P3.7's test_heat_equation_gate_recovers_analytic_at_seed_0); closes the gate-vs-sweep step-budget gap"
+}

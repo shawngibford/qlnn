@@ -1,0 +1,58 @@
+{
+  "pde": "burgers_smooth",
+  "model": "qcpinn_2d",
+  "regime": "smooth_periodic",
+  "n_seeds": 3,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "pqc_params": 15,
+  "classical_params": 756,
+  "config_str": "n=5, L=1, Cascade topology; pre_hidden=50 + post_hidden=50; per-qubit \u27e8Z\u27e9 readout + post-NN scalar",
+  "steps": 1500,
+  "metrics": {
+    "mae": {
+      "mean": 0.005264711540434827,
+      "std": 0.0013501460355695685,
+      "min": 0.004151611676394043,
+      "max": 0.006766592545079257,
+      "n_seeds": 3,
+      "ci95_half_width": 0.003354219382981249,
+      "ci95_low": 0.0019104921574535781,
+      "ci95_high": 0.008618930923416077
+    },
+    "relative_l2": {
+      "mean": 0.015946643264889548,
+      "std": 0.004693194205814414,
+      "min": 0.011232574401583813,
+      "max": 0.020618680486497218,
+      "n_seeds": 3,
+      "ci95_half_width": 0.011659481684584675,
+      "ci95_low": 0.004287161580304873,
+      "ci95_high": 0.027606124949474224
+    },
+    "final_loss": {
+      "mean": 0.00014771564262143025,
+      "std": 2.4963671393565897e-05,
+      "min": 0.00011948290921282023,
+      "max": 0.0001668688200879842,
+      "n_seeds": 3,
+      "ci95_half_width": 6.201820266305463e-05,
+      "ci95_low": 8.569743995837562e-05,
+      "ci95_high": 0.00020973384528448488
+    },
+    "bc_violation": {
+      "mean": 1.3366398212762463,
+      "std": 0.06261024891957803,
+      "min": 1.264745945224852,
+      "max": 1.3791819249178756,
+      "n_seeds": 3,
+      "ci95_half_width": 0.155545033623519,
+      "ci95_low": 1.1810947876527274,
+      "ci95_high": 1.4921848548997652
+    }
+  },
+  "audit_reason": "uses PDE_BENCH's intended step count (P3.7 sweep ran at 600); tests whether relL2<0.30 gate was missed at 600 steps due to under-training"
+}

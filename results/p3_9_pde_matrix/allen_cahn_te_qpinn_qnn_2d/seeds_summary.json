@@ -1,0 +1,58 @@
+{
+  "pde": "allen_cahn",
+  "model": "te_qpinn_qnn_2d",
+  "regime": "broadband_multiscale",
+  "n_seeds": 3,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "pqc_params": 84,
+  "classical_params": 0,
+  "config_str": "n_t=2, n_x=2 (n=4), L=5, K=3; split-qubit U_embed + \u03a3 Z readout",
+  "steps": 1800,
+  "metrics": {
+    "mae": {
+      "mean": 0.024846622071901515,
+      "std": 0.006769641609358655,
+      "min": 0.017274236468551925,
+      "max": 0.030312779077003853,
+      "n_seeds": 3,
+      "ci95_half_width": 0.01681807930678264,
+      "ci95_low": 0.008028542765118874,
+      "ci95_high": 0.04166470137868415
+    },
+    "relative_l2": {
+      "mean": 0.05169999226891866,
+      "std": 0.002484506518387114,
+      "min": 0.0488522870938424,
+      "max": 0.05342501601508754,
+      "n_seeds": 3,
+      "ci95_half_width": 0.006172354472456558,
+      "ci95_low": 0.0455276377964621,
+      "ci95_high": 0.057872346741375216
+    },
+    "final_loss": {
+      "mean": 0.017281635974844296,
+      "std": 0.0011815040365423279,
+      "min": 0.015917491167783737,
+      "max": 0.01798054575920105,
+      "n_seeds": 3,
+      "ci95_half_width": 0.0029352556212699113,
+      "ci95_low": 0.014346380353574384,
+      "ci95_high": 0.020216891596114207
+    },
+    "bc_violation": {
+      "mean": 0.08073176649662835,
+      "std": 0.07767854914579872,
+      "min": 0.0013850005188908766,
+      "max": 0.15662703574300568,
+      "n_seeds": 3,
+      "ci95_half_width": 0.19297978761000056,
+      "ci95_low": -0.11224802111337222,
+      "ci95_high": 0.2737115541066289
+    }
+  },
+  "audit_reason": "\u0394x = 2\u03c0/64 \u2248 0.098 ~ 1.2\u00d7 the equilibrium front width \u221a2\u00b7\u03b5 \u2248 0.085; >10\u00d7 the 28\u00d728 resolution that P3.7 used. Tests whether 'broadband failure' was sub-Nyquist aliasing vs a real regime property"
+}
