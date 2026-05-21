@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P8 (paper draft) — P7.5 hardening complete
+### PIVOT pick-up order — ⏩ RESUME AT P7.7 (QLNN performance optimization) — P7.6 complete
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -529,10 +529,93 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
     Y6 te_qpinn_qnn AC       ✅ DISCLOSED (A6, paper framing)
     Y8 H3 not significant    ✅ DISCLOSED + LOO-robust (A8 + commit 5)
 
-- ⏩ **P8 — NEXT. PRX Quantum paper draft.** All experimental work
-  for the paper is COMPLETE. The 3 H1 outcomes + H3 LOO + HPO
-  sensitivity + PRE_REG_AMENDMENT + reproducibility chain are
-  all committed.
+- ✅ **P7.6 DONE — HPO SYMMETRY + n=18 H1 (SAMPLE SIZE DOUBLED)**
+  (commits `c03aabb` → `4892ed5`, 5 atomic). Closes the asymmetric-
+  HPO peer-review concern + doubles the H1 bootstrap sample via
+  zero-new-compute combination of P3.7-3.9 PDE data.
+
+  P7.6 commit ledger:
+    `c03aabb` feat(P7.6-pde-solver-h1):    PDE + combined n=18 H1
+    `39f3f6c` feat(P7.6-qlnn-hpo):         symmetric QLNN HPO (72 retrains)
+    `e40362c` feat(P7.6-integrity):        verify gates n=18 + HPO-best
+    `2f2c229` docs(P7.6-amend):            PRE_REG_AMENDMENT A9 + A10
+    `4892ed5` chore(reproduce_paper):      P7.6 commands added
+
+  **THE PAPER'S UPDATED HEADLINE EVIDENCE** (5 H1 outcomes total):
+
+  1. **SOLVER-task H1 (default Adam, n=9)** = CONFIRMED raw, but
+     INCONCLUSIVE at strict guards (P7.5 / A7). Sample-size and
+     HPO-fragile.
+
+  2. **SOLVER-task H1 (HPO-best classical PINN, n=9, P7.5)** =
+     **FALSIFIED**, CI [-0.05, +0.19].
+
+  3. **SOLVER-task H1 (PDE-only, n=9, P7.6 c2)** = **FALSIFIED**.
+
+  4. **SOLVER-task H1 (combined ODE+PDE, n=18, P7.6 c2)** =
+     **FALSIFIED**, Δ_diff=+0.0316, CI [-0.0400, +0.1088].
+     ★ THE PAPER'S PRIMARY VERDICT (largest sample, default-Adam
+       baseline on both sides, paired bootstrap, no HPO confound).
+
+  5. **SOLVER-task H1 (full HPO-best both sides, n=9, P7.6 c1)** =
+     **FALSIFIED**, Δ_diff=+0.0588, CI [-0.0575, +0.1913].
+     ★ THE METHODOLOGICALLY STRONGEST SENSITIVITY POINT (the
+       Bowles/Schuld 2024 "tune both sides" doctrine).
+
+  6. **FORECASTER-task H1 (P5 corroborating)** = **FALSIFIED**,
+     CI [-0.79, -0.05] excludes 0 NEGATIVE (inverted regime).
+
+  **Empirical findings worth paper text:**
+    - te_qpinn_fnn on LV s2 dramatically improves with QLNN HPO
+      (default 0.524 → HPO-best 0.0988 at lr=1e-2, steps=3000)
+    - qcpinn on LV s2 reaches 0.0057 (~90× better than default)
+    - te_qpinn_qnn LV s2 structural ceiling confirmed HPO-invariant
+      (all 6 HPO combos cluster at 0.524)
+    - All Lorenz s2 cells stay at predict-zero floor (~0.99) across
+      all 24 HPO combos: chaotic-regime failure HPO-invariant
+    - te_qpinn_qnn_2d on Allen-Cahn s0: Δ=+0.149 (biggest per-cell
+      quantum advantage on any system in the matrix)
+
+  **PRE_REG_AMENDMENT.md** now contains A1-A10 (added A9 HPO
+  symmetry + A10 n=18 combination). Headline verdict updated to
+  FALSIFIED at the methodologically-strongest sensitivity points.
+
+  **Updated audit closure:**
+    Y3 HPO budget (BOTH SIDES)  ✅ HARDENED (P7.6 c1 — symmetric QLNN HPO)
+    Y2 sample size (n=9 → n=18) ✅ HARDENED (P7.6 c2 — combined verdict)
+
+- ⏩ **P7.7 — NEXT. QLNN performance optimization.** 7-commit
+  sprint adding three literature-best techniques to potentially
+  improve the QLNN side and re-run the n=18 H1 verdict:
+
+  1. **Quantum Natural Gradient optimizer** (Stokes 2020 + recent
+     2025 papers): replace optax Adam with PennyLane's QNG. Drop-in.
+  2. **Causal training weighting** (Wang et al. arXiv:2203.07404):
+     weight collocation points by inverse time-order. Directly
+     targets the VdP stiff failure.
+  3. **Higher data-reuploading depth L=5** (Schuld 2021):
+     widen Fourier K_max ceiling. Targets the H3 KL trend
+     mechanism.
+
+  After P7.7, the paper has BOTH "default Adam" and "literature-best
+  optimization" verdicts side-by-side. Either:
+    - New CI excludes 0 positive → CONFIRMED. Headline upgrades
+      to "intrinsic QLNN advantage emerges with QNG + causal
+      training; default Adam underestimated quantum potential."
+    - New CI still includes 0 → FALSIFIED. Headline becomes "even
+      with literature-best optimization techniques, QLNN advantage
+      is statistically indistinguishable from classical at matched-
+      capacity scale" — the strongest possible Bowles/Schuld 2024
+      "tune everything" null.
+
+  Either outcome is publishable. P7.7 estimate: ~3-4 days dev +
+  ~2 hr compute.
+
+  See plan file at `~/.claude/plans/what-is-our-next-humming-octopus.md`
+  for the full P7.7 sprint design (atomic commit ledger, acceptance,
+  risk register, sources).
+
+- ⏭️ **P8 — AFTER P7.7. PRX Quantum paper draft.**
 
   **Paper headline structure (3 H1 verdicts side-by-side):**
     §5.1 Solver-task H1 (pre-reg GATING task, default HPO): CONFIRMED
