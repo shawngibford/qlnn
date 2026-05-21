@@ -63,4 +63,5 @@ results/*
 !results/p3_7_pde_solver/
 !results/p3_8_review/
 !results/p3_9_pde_matrix/
+!results/p4_forecaster_rollout/
 refs/
