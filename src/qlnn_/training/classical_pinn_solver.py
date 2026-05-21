@@ -66,6 +66,10 @@ class MLPConfig:
     target_param_count: int = 60
     hidden_layers: int = 2
     activation: str = "tanh"
+    # P5 commit 4: output_dim > 1 supports vector ODE PINN
+    # (classical PINN for the H1 verdict's solver-task contrast).
+    # Default 1 preserves the P3.8 scalar-output behavior verbatim.
+    output_dim: int = 1
 
     def __post_init__(self) -> None:
         if self.input_dim < 1:
@@ -79,6 +83,9 @@ class MLPConfig:
         if self.activation not in ("tanh", "sin"):
             raise ValueError(
                 f"activation must be tanh or sin, got {self.activation!r}")
+        if self.output_dim < 1:
+            raise ValueError(
+                f"output_dim must be >= 1, got {self.output_dim}")
 
     @property
     def hidden_width(self) -> int:
@@ -112,8 +119,8 @@ class MLPConfig:
         for _ in range(L - 1):
             shapes.append((H, H))        # W_l hidden_l → hidden_{l+1}
             shapes.append((H,))          # b_l
-        shapes.append((H, 1))            # W_out hidden_L → output
-        shapes.append((1,))              # b_out
+        shapes.append((H, self.output_dim))   # W_out hidden_L → output
+        shapes.append((self.output_dim,))      # b_out
         return shapes
 
     def total_params(self) -> int:
@@ -150,7 +157,7 @@ def _mlp_init(cfg: MLPConfig, *, seed: int) -> dict:
 
 
 def _mlp_apply(x: jnp.ndarray, weights: dict, cfg: MLPConfig) -> jnp.ndarray:
-    """Forward pass through the MLP. Returns a SCALAR for the solver.
+    """Forward pass through the MLP. Returns SCALAR for output_dim=1.
 
     Inputs:
       x : shape `(input_dim,)` — the coordinate (scalar t, or (t, x)
@@ -158,8 +165,15 @@ def _mlp_apply(x: jnp.ndarray, weights: dict, cfg: MLPConfig) -> jnp.ndarray:
       weights : pytree with keys w0/b0, w1/b1, ..., w_{L}/b_{L}.
 
     Output:
-      scalar (squeezed from the (1,) output).
+      scalar (squeezed from the (1,) output) when cfg.output_dim == 1
+      — the P3.8 backward-compatibility path. For vector output use
+      `_mlp_apply_vector` (P5 commit 4 extension).
     """
+    if cfg.output_dim != 1:
+        raise ValueError(
+            f"_mlp_apply returns SCALAR; cfg.output_dim must be 1, "
+            f"got {cfg.output_dim}. Use _mlp_apply_vector for "
+            f"vector output.")
     L = cfg.hidden_layers
     h = jnp.atleast_1d(x).reshape(cfg.input_dim)
     act = jnp.tanh if cfg.activation == "tanh" else jnp.sin
@@ -167,6 +181,30 @@ def _mlp_apply(x: jnp.ndarray, weights: dict, cfg: MLPConfig) -> jnp.ndarray:
         h = act(h @ weights[f"w{layer}"] + weights[f"b{layer}"])
     out = h @ weights[f"w{L}"] + weights[f"b{L}"]
     return out[0]
+
+
+def _mlp_apply_vector(
+    x: jnp.ndarray, weights: dict, cfg: MLPConfig,
+) -> jnp.ndarray:
+    """Vector-output MLP forward pass (P5 commit 4).
+
+    Same architecture as `_mlp_apply` but returns the full output
+    vector instead of squeezing to scalar. Used by the vector-ODE
+    PINN baseline for the H1 verdict's solver-task contrast.
+
+    Inputs:
+      x : shape `(input_dim,)`.
+      weights : pytree with keys w0/b0 ... w_L/b_L.
+
+    Output:
+      shape `(output_dim,)`.
+    """
+    L = cfg.hidden_layers
+    h = jnp.atleast_1d(x).reshape(cfg.input_dim)
+    act = jnp.tanh if cfg.activation == "tanh" else jnp.sin
+    for layer in range(L):
+        h = act(h @ weights[f"w{layer}"] + weights[f"b{layer}"])
+    return h @ weights[f"w{L}"] + weights[f"b{L}"]    # (output_dim,)
 
 
 # ---------------------------------------------------------------------------
@@ -257,4 +295,109 @@ def matched_mlp_config(
         if target_param_count / 2.0 <= ac <= 2.0 * target_param_count:
             return c
     # Last resort: return the closest one we have.
+    return cfg
+
+
+# ---------------------------------------------------------------------------
+# P5 commit 4: Vector-ODE PINN — for the H1 verdict's solver-task contrast
+# ---------------------------------------------------------------------------
+
+
+def build_classical_pinn_vector_ode(
+    cfg: MLPConfig | None = None,
+) -> Callable:
+    """Return a vector-ODE PINN forward callable.
+
+    Signature: `f(t_scalar, weights) → (output_dim,)`.
+
+    For a d-dimensional ODE state (e.g. Lotka-Volterra d=2,
+    Lorenz d=3), the PINN's MLP outputs the full state vector at
+    coordinate t. Combined with the Lagaris hard-IC trial solution
+    `u(t) = u₀ + (t − t₀) · MLP(t)` (see `vector_ode_pinn_trial`),
+    this gives a structurally-IC-satisfied vector solution that's
+    trained via physics-residual loss.
+
+    Args:
+      cfg : MLPConfig. Must have `input_dim=1` (scalar coordinate)
+            and `output_dim = d` (state dim). Use
+            `matched_mlp_config_vector_ode(target_params, d)` to
+            pick `hidden_width` matching a QLNN's capacity.
+
+    Returns: callable `(t_scalar, weights) → (output_dim,)`.
+
+    Drop-in for a residual-loss closure analogous to the 1D
+    `make_residual_loss` but evaluated per-component.
+    """
+    cfg = cfg or MLPConfig(input_dim=1, output_dim=2)
+    if cfg.input_dim != 1:
+        raise ValueError(
+            f"vector-ODE PINN requires input_dim=1 (scalar t), "
+            f"got {cfg.input_dim}")
+    if cfg.output_dim < 1:
+        raise ValueError(
+            f"vector-ODE PINN requires output_dim>=1, got {cfg.output_dim}")
+
+    def forward(t_scalar, weights):
+        t = jnp.atleast_1d(t_scalar).reshape(1)
+        return _mlp_apply_vector(t, weights, cfg)
+
+    return forward
+
+
+def vector_ode_pinn_trial(
+    forward: Callable, u0: jnp.ndarray, t0: float = 0.0,
+) -> Callable:
+    """Lagaris hard-IC trial solution for vector ODE.
+
+    `u(t) = u₀ + (t − t₀) · MLP(t)` — at t=t0 the second term is
+    zero so u(t0) = u₀ EXACTLY (no soft IC penalty needed).
+
+    Args:
+      forward : callable `(t, weights) → (d,)` returned by
+                `build_classical_pinn_vector_ode`.
+      u0      : (d,) initial state.
+      t0      : initial time (default 0.0).
+
+    Returns: callable `u(t, weights) → (d,)`.
+    """
+    u0_arr = jnp.asarray(u0)
+
+    def u_of_t(t, weights):
+        n_out = forward(t, weights)               # (d,)
+        return u0_arr + (t - t0) * n_out
+
+    return u_of_t
+
+
+def matched_mlp_config_vector_ode(
+    target_param_count: int, *, output_dim: int,
+    hidden_layers: int = 2, activation: str = "tanh",
+) -> MLPConfig:
+    """Pick a vector-ODE MLP config whose param count is within
+    factor of 2 of `target_param_count` (pre-reg §6 binding).
+
+    Args:
+      target_param_count : the QLNN's PQC param count to match.
+      output_dim         : d — state vector dimension.
+      hidden_layers      : default 2.
+      activation         : 'tanh' (default) or 'sin'.
+
+    Returns: MLPConfig with `input_dim=1, output_dim=d` and a
+             `hidden_width` chosen to match the target.
+    """
+    cfg = MLPConfig(
+        input_dim=1, output_dim=output_dim,
+        target_param_count=target_param_count,
+        hidden_layers=hidden_layers, activation=activation)
+    actual = cfg.total_params()
+    if target_param_count / 2.0 <= actual <= 2.0 * target_param_count:
+        return cfg
+    for L_try in (1, 2, 3):
+        c = MLPConfig(
+            input_dim=1, output_dim=output_dim,
+            target_param_count=target_param_count,
+            hidden_layers=L_try, activation=activation)
+        ac = c.total_params()
+        if target_param_count / 2.0 <= ac <= 2.0 * target_param_count:
+            return c
     return cfg
