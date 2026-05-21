@@ -172,6 +172,46 @@ def autoregressive_rollout(
     return trajectory                              # (n_steps, d)
 
 
+def autoregressive_rollout_python_loop(
+    model: Callable[[jnp.ndarray, jnp.ndarray], jnp.ndarray],
+    history0: jnp.ndarray,
+    n_steps: int,
+    dt: float,
+) -> jnp.ndarray:
+    """Plain-Python rollout (no jax.lax.scan).
+
+    Same semantics as `autoregressive_rollout` but uses a Python for-
+    loop instead of `jax.lax.scan`. Required for adapters that touch
+    non-JAX state (numpy buffers, file I/O, etc.) — e.g. the rf_qrc
+    adapter's `RFQRCForecaster.predict(X)` call returns a numpy array
+    that can't be traced by scan.
+
+    Trade-off vs `autoregressive_rollout`:
+      - PRO: works with any callable (JAX-pure OR numpy-based).
+      - CON: no JIT — slower for pure-JAX models. For pure-JAX models
+        prefer `autoregressive_rollout` (the scan version).
+
+    Returns: `(n_steps, d)` predicted trajectory.
+    """
+    if history0.ndim != 2:
+        raise ValueError(
+            f"history0 must be 2-D (T, d), got shape {history0.shape}")
+    if n_steps < 1:
+        raise ValueError(f"n_steps must be >= 1, got {n_steps}")
+    if dt <= 0:
+        raise ValueError(f"dt must be > 0, got {dt}")
+
+    dt_arr = jnp.asarray(dt)
+    history = history0
+    predictions = []
+    for _ in range(n_steps):
+        next_state = model(history, dt_arr)
+        predictions.append(next_state)
+        history = jnp.concatenate(
+            [history[1:], jnp.asarray(next_state)[None, :]], axis=0)
+    return jnp.stack(predictions)
+
+
 def autoregressive_rollout_with_history(
     model: Callable[[jnp.ndarray, jnp.ndarray], jnp.ndarray],
     history0: jnp.ndarray,

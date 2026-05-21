@@ -19,6 +19,7 @@ Permitted only as a sanity diagnostic, never as a paper claim.
 from qlnn_.evaluation.rollout import (
     OneStepForecaster,
     autoregressive_rollout,
+    autoregressive_rollout_python_loop,
     autoregressive_rollout_with_history,
     make_history_slider,
 )
@@ -41,6 +42,7 @@ __all__ = [
     # rollout
     "OneStepForecaster",
     "autoregressive_rollout",
+    "autoregressive_rollout_python_loop",
     "autoregressive_rollout_with_history",
     "make_history_slider",
     # metrics

@@ -26,6 +26,7 @@ import pytest
 from qlnn_.evaluation.rollout import (
     OneStepForecaster,
     autoregressive_rollout,
+    autoregressive_rollout_python_loop,
     autoregressive_rollout_with_history,
     make_history_slider,
 )
@@ -196,6 +197,42 @@ def test_rejects_non_positive_dt():
 
 
 # ---------- physical-time sanity (a tiny Euler-step ODE rollout) -----------
+
+def test_python_loop_rollout_matches_scan_on_pure_jax_model():
+    """The python-loop variant must produce IDENTICAL results to the
+    scan variant for pure-JAX models. Locks the equivalence so we can
+    use either path interchangeably depending on model JAX-purity."""
+    def model(history, dt):
+        return 0.6 * history[-1] + 0.2 * history[-2] + 0.1 * dt
+    hist0 = jnp.array([[1.0, -0.3], [0.5, 0.1]])
+
+    traj_scan = autoregressive_rollout(model, hist0, n_steps=10, dt=0.05)
+    traj_loop = autoregressive_rollout_python_loop(
+        model, hist0, n_steps=10, dt=0.05)
+    assert jnp.allclose(traj_scan, traj_loop, atol=1e-6)
+
+
+def test_python_loop_rollout_handles_numpy_model():
+    """The python-loop variant supports adapters that return numpy
+    arrays (rf_qrc's predict returns np.ndarray) — the scan variant
+    would fail with a TracerArrayConversionError. The python-loop
+    variant accepts the numpy and converts back to JAX inside."""
+    def numpy_model(history, dt):
+        # Returns a numpy array, NOT a JAX array.
+        h_np = np.asarray(history)
+        return np.asarray(h_np[-1] * 0.9, dtype=np.float64)
+
+    hist0 = jnp.array([[1.0], [2.0]])
+    # The scan variant would raise here — confirms our adapter design.
+    traj = autoregressive_rollout_python_loop(
+        numpy_model, hist0, n_steps=4, dt=0.1)
+    assert traj.shape == (4, 1)
+    expected = np.array([[2.0 * 0.9],
+                         [2.0 * 0.9 ** 2],
+                         [2.0 * 0.9 ** 3],
+                         [2.0 * 0.9 ** 4]])
+    assert jnp.allclose(traj, jnp.asarray(expected), atol=1e-6)
+
 
 def test_euler_step_rollout_recovers_linear_ode():
     """Forward-Euler step y_{n+1} = y_n + dt · f(y_n), with f(y) = -y
