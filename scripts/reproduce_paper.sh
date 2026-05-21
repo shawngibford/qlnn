@@ -85,6 +85,59 @@ echo "[final] Aggregating paper tables..."
 .venv/bin/python scripts/make_paper_figures.py
 
 echo ""
-echo "Done. Numbers in PAPER_SUMMARY.md are reproduced under the current"
-echo "code in results/. Verify integrity with:"
+echo "======================================================================"
+echo "Old OD program reproduced. Now the pivot program (P3.5 → P7.5)."
+echo "======================================================================"
+echo ""
+echo "[P3.5/P3.6] Multi-state ODE solver matrix (4 quantum families × 3 ODE)"
+echo "  → results/p3_6_multi_state/"
+PYTHONPATH=src .venv/bin/python scripts/run_multi_state_demo.py
+PYTHONPATH=src .venv/bin/python scripts/make_multi_state_figure.py
+
+echo ""
+echo "[P3.7/P3.8] PDE solver scaffolding + peer-review iteration"
+echo "  → results/p3_7_pde_solver/, results/p3_8_review/"
+PYTHONPATH=src .venv/bin/python scripts/run_pde_solver_demo.py
+PYTHONPATH=src .venv/bin/python scripts/make_pde_solver_figure.py
+PYTHONPATH=src .venv/bin/python scripts/run_p3_8_review_iteration.py
+PYTHONPATH=src .venv/bin/python scripts/make_p3_8_review_figure.py
+
+echo ""
+echo "[P3.9] PDE multi-family port matrix (4 quantum × 3 PDEs)"
+echo "  → results/p3_9_pde_matrix/"
+PYTHONPATH=src .venv/bin/python scripts/run_p3_9_pde_matrix.py
+PYTHONPATH=src .venv/bin/python scripts/make_p3_9_pde_matrix_figure.py
+
+echo ""
+echo "[P4] Forecaster autoregressive rollout (5 quantum families × 3 ODE)"
+echo "  → results/p4_forecaster_rollout/"
+PYTHONPATH=src .venv/bin/python scripts/run_p4_forecaster_rollout.py
+PYTHONPATH=src .venv/bin/python scripts/make_p4_forecaster_rollout_figure.py
+
+echo ""
+echo "[P5] Mandatory baselines + FORECASTER-task H1 verdict"
+echo "  → results/p5_matched_baselines/, results/p5_h1_verdict/"
+PYTHONPATH=src .venv/bin/python scripts/run_p5_matched_baselines.py
+PYTHONPATH=src .venv/bin/python scripts/make_p5_h1_verdict_figure.py
+
+echo ""
+echo "[P7] T3 mechanism diagnostics"
+echo "  → results/p7_t3_mechanism/"
+PYTHONPATH=src .venv/bin/python scripts/run_p7_t3_mechanism.py
+PYTHONPATH=src .venv/bin/python scripts/make_p7_mechanism_figure.py
+
+echo ""
+echo "[P7.5] PRIMARY SOLVER-TASK H1 VERDICT + HPO sensitivity + H3 LOO"
+echo "  → results/p7_5_solver_h1/, results/p7_5_hpo_sensitivity/,"
+echo "    results/p7_5_h3_loo/"
+PYTHONPATH=src .venv/bin/python scripts/run_p7_5_solver_h1.py
+PYTHONPATH=src .venv/bin/python scripts/make_p7_5_solver_h1_figure.py
+PYTHONPATH=src .venv/bin/python scripts/run_p7_5_hpo_sensitivity.py
+PYTHONPATH=src .venv/bin/python scripts/run_p7_5_h3_loo.py
+
+echo ""
+echo "======================================================================"
+echo "ALL DONE. Both the OD program AND the pivot program (P3.5 → P7.5)"
+echo "are reproduced. Verify integrity end-to-end with:"
 echo "  .venv/bin/python scripts/verify_paper_integrity.py"
+echo "======================================================================"
