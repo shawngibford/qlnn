@@ -1,0 +1,25 @@
+{
+  "system": "lorenz",
+  "family": "brickwall",
+  "seed": 2,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 49,
+  "sampled_dt": 0.05,
+  "rollout_steps": 200,
+  "dt_step": 0.05,
+  "relative_l2": 1.6138853287860981,
+  "vpt_step": 2,
+  "vpt_time": 0.1,
+  "vpt_lyapunov": 0.09060000000000001,
+  "spectral_error": 5.0531951038094345,
+  "invariant_drift_final": null,
+  "persistence_floor_relative_l2": 0.45480979577386477,
+  "train_loss_history": [
+    10.278868675231934,
+    10.129419326782227,
+    9.943302154541016,
+    9.73273754119873,
+    9.430296897888184
+  ]
+}

@@ -1,0 +1,32 @@
+{
+  "systems": [
+    "lotka_volterra",
+    "van_der_pol",
+    "lorenz"
+  ],
+  "families": [
+    "data_reuploading",
+    "hardware_efficient",
+    "strongly_entangling",
+    "brickwall",
+    "rf_qrc"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "n_points": 800,
+  "train_frac": 0.7,
+  "window_length": 8,
+  "num_qubits": 3,
+  "num_layers": 1,
+  "train_steps": 200,
+  "learning_rate": 0.005,
+  "rollout_steps": 200,
+  "vpt_threshold": 0.3,
+  "rfqrc_num_qubits": 4,
+  "rfqrc_leak_rate": 0.5,
+  "rfqrc_beta": 0.0001,
+  "scope_note": "P4 forecaster autoregressive rollout. Adds the data-driven track that the pre-reg \u00a73.2 requires. NOT yet H1 evidence \u2014 H1 is defined as the QLNN\u2212NeuralODE gap; the mandatory baseline awaits P5."
+}

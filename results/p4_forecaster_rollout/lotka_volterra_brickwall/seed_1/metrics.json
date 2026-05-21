@@ -1,0 +1,25 @@
+{
+  "system": "lotka_volterra",
+  "family": "brickwall",
+  "seed": 1,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 39,
+  "sampled_dt": 0.1,
+  "rollout_steps": 200,
+  "dt_step": 0.1,
+  "relative_l2": 0.7513803165058268,
+  "vpt_step": 17,
+  "vpt_time": 1.7000000000000002,
+  "vpt_lyapunov": null,
+  "spectral_error": 0.24170941102298754,
+  "invariant_drift_final": 0.2586256036918835,
+  "persistence_floor_relative_l2": 0.8837616584035011,
+  "train_loss_history": [
+    0.059977658092975616,
+    0.04392817243933678,
+    0.03157913684844971,
+    0.02379016764461994,
+    0.01694492995738983
+  ]
+}

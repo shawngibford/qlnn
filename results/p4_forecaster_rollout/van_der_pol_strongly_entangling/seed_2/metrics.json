@@ -1,0 +1,25 @@
+{
+  "system": "van_der_pol",
+  "family": "strongly_entangling",
+  "seed": 2,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 42,
+  "sampled_dt": 0.1,
+  "rollout_steps": 200,
+  "dt_step": 0.1,
+  "relative_l2": 1.1920163706353943,
+  "vpt_step": 11,
+  "vpt_time": 1.1,
+  "vpt_lyapunov": null,
+  "spectral_error": 1.0721583656764504,
+  "invariant_drift_final": null,
+  "persistence_floor_relative_l2": 1.34648773242043,
+  "train_loss_history": [
+    0.3008592426776886,
+    0.292353093624115,
+    0.2803296148777008,
+    0.2623049318790436,
+    0.24323460459709167
+  ]
+}

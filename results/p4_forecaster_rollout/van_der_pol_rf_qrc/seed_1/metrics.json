@@ -1,0 +1,19 @@
+{
+  "system": "van_der_pol",
+  "family": "rf_qrc",
+  "seed": 1,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 34,
+  "sampled_dt": 0.1,
+  "rollout_steps": 200,
+  "dt_step": 0.1,
+  "relative_l2": 1.6264795278419086,
+  "vpt_step": 2,
+  "vpt_time": 0.2,
+  "vpt_lyapunov": null,
+  "spectral_error": 0.9766595841387711,
+  "invariant_drift_final": null,
+  "persistence_floor_relative_l2": 1.34648773242043,
+  "train_loss_history": []
+}

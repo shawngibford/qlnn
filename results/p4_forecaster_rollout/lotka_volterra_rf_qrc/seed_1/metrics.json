@@ -1,0 +1,19 @@
+{
+  "system": "lotka_volterra",
+  "family": "rf_qrc",
+  "seed": 1,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 34,
+  "sampled_dt": 0.1,
+  "rollout_steps": 200,
+  "dt_step": 0.1,
+  "relative_l2": 0.8933440857802896,
+  "vpt_step": 0,
+  "vpt_time": 0.0,
+  "vpt_lyapunov": null,
+  "spectral_error": 0.8409627352670748,
+  "invariant_drift_final": Infinity,
+  "persistence_floor_relative_l2": 0.8837616584035011,
+  "train_loss_history": []
+}
