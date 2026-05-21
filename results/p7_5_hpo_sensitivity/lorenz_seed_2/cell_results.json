@@ -1,0 +1,78 @@
+{
+  "system": "lorenz",
+  "seed": 2,
+  "qlnn_best_relL2": 0.9772641808795158,
+  "qlnn_best_family": "te_qpinn_qnn",
+  "runs": [
+    {
+      "system": "lorenz",
+      "seed": 2,
+      "qlnn_best_relL2": 0.9772641808795158,
+      "qlnn_best_family": "te_qpinn_qnn",
+      "lr": 0.001,
+      "train_steps": 1500,
+      "cpinn_relL2": 0.9906443755747067,
+      "cpinn_train_relL2": 0.9906206122583453,
+      "delta": 0.013380194695190917
+    },
+    {
+      "system": "lorenz",
+      "seed": 2,
+      "qlnn_best_relL2": 0.9772641808795158,
+      "qlnn_best_family": "te_qpinn_qnn",
+      "lr": 0.001,
+      "train_steps": 3000,
+      "cpinn_relL2": 0.994412848545058,
+      "cpinn_train_relL2": 0.9943979087803357,
+      "delta": 0.017148667665542128
+    },
+    {
+      "system": "lorenz",
+      "seed": 2,
+      "qlnn_best_relL2": 0.9772641808795158,
+      "qlnn_best_family": "te_qpinn_qnn",
+      "lr": 0.005,
+      "train_steps": 1500,
+      "cpinn_relL2": 0.9954033891317258,
+      "cpinn_train_relL2": 0.9953952390767773,
+      "delta": 0.018139208252209937
+    },
+    {
+      "system": "lorenz",
+      "seed": 2,
+      "qlnn_best_relL2": 0.9772641808795158,
+      "qlnn_best_family": "te_qpinn_qnn",
+      "lr": 0.005,
+      "train_steps": 3000,
+      "cpinn_relL2": 0.9957234215723745,
+      "cpinn_train_relL2": 0.995721607597437,
+      "delta": 0.018459240692858647
+    },
+    {
+      "system": "lorenz",
+      "seed": 2,
+      "qlnn_best_relL2": 0.9772641808795158,
+      "qlnn_best_family": "te_qpinn_qnn",
+      "lr": 0.01,
+      "train_steps": 1500,
+      "cpinn_relL2": 0.9955972908157684,
+      "cpinn_train_relL2": 0.9955950739779648,
+      "delta": 0.01833310993625259
+    },
+    {
+      "system": "lorenz",
+      "seed": 2,
+      "qlnn_best_relL2": 0.9772641808795158,
+      "qlnn_best_family": "te_qpinn_qnn",
+      "lr": 0.01,
+      "train_steps": 3000,
+      "cpinn_relL2": 0.9958440637664686,
+      "cpinn_train_relL2": 0.9958402821083432,
+      "delta": 0.01857988288695278
+    }
+  ],
+  "delta_min": 0.013380194695190917,
+  "delta_max": 0.01857988288695278,
+  "delta_mean": 0.017340050688167834,
+  "sign_stability": "all_positive"
+}

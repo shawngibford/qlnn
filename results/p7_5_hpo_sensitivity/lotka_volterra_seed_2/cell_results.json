@@ -1,0 +1,78 @@
+{
+  "system": "lotka_volterra",
+  "seed": 2,
+  "qlnn_best_relL2": 0.007031684790202037,
+  "qlnn_best_family": "qcpinn",
+  "runs": [
+    {
+      "system": "lotka_volterra",
+      "seed": 2,
+      "qlnn_best_relL2": 0.007031684790202037,
+      "qlnn_best_family": "qcpinn",
+      "lr": 0.001,
+      "train_steps": 1500,
+      "cpinn_relL2": 0.19137095141358396,
+      "cpinn_train_relL2": 0.19277320447895344,
+      "delta": 0.18433926662338193
+    },
+    {
+      "system": "lotka_volterra",
+      "seed": 2,
+      "qlnn_best_relL2": 0.007031684790202037,
+      "qlnn_best_family": "qcpinn",
+      "lr": 0.001,
+      "train_steps": 3000,
+      "cpinn_relL2": 0.03430242917398232,
+      "cpinn_train_relL2": 0.03456151612278828,
+      "delta": 0.027270744383780278
+    },
+    {
+      "system": "lotka_volterra",
+      "seed": 2,
+      "qlnn_best_relL2": 0.007031684790202037,
+      "qlnn_best_family": "qcpinn",
+      "lr": 0.005,
+      "train_steps": 1500,
+      "cpinn_relL2": 0.01104299804666572,
+      "cpinn_train_relL2": 0.011126343640807865,
+      "delta": 0.004011313256463683
+    },
+    {
+      "system": "lotka_volterra",
+      "seed": 2,
+      "qlnn_best_relL2": 0.007031684790202037,
+      "qlnn_best_family": "qcpinn",
+      "lr": 0.005,
+      "train_steps": 3000,
+      "cpinn_relL2": 0.00755810300782353,
+      "cpinn_train_relL2": 0.007613101997148167,
+      "delta": 0.0005264182176214927
+    },
+    {
+      "system": "lotka_volterra",
+      "seed": 2,
+      "qlnn_best_relL2": 0.007031684790202037,
+      "qlnn_best_family": "qcpinn",
+      "lr": 0.01,
+      "train_steps": 1500,
+      "cpinn_relL2": 0.007955772145950881,
+      "cpinn_train_relL2": 0.008013580339614182,
+      "delta": 0.0009240873557488441
+    },
+    {
+      "system": "lotka_volterra",
+      "seed": 2,
+      "qlnn_best_relL2": 0.007031684790202037,
+      "qlnn_best_family": "qcpinn",
+      "lr": 0.01,
+      "train_steps": 3000,
+      "cpinn_relL2": 0.007241970431246685,
+      "cpinn_train_relL2": 0.00729396241414209,
+      "delta": 0.00021028564104464808
+    }
+  ],
+  "delta_min": 0.00021028564104464808,
+  "delta_max": 0.18433926662338193,
+  "delta_mean": 0.03621368591300681,
+  "sign_stability": "all_positive"
+}

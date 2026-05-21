@@ -1,0 +1,78 @@
+{
+  "system": "van_der_pol",
+  "seed": 1,
+  "qlnn_best_relL2": 0.7622429372812118,
+  "qlnn_best_family": "te_qpinn_qnn",
+  "runs": [
+    {
+      "system": "van_der_pol",
+      "seed": 1,
+      "qlnn_best_relL2": 0.7622429372812118,
+      "qlnn_best_family": "te_qpinn_qnn",
+      "lr": 0.001,
+      "train_steps": 1500,
+      "cpinn_relL2": 1.159134148476059,
+      "cpinn_train_relL2": 1.1600307729369963,
+      "delta": 0.39689121119484705
+    },
+    {
+      "system": "van_der_pol",
+      "seed": 1,
+      "qlnn_best_relL2": 0.7622429372812118,
+      "qlnn_best_family": "te_qpinn_qnn",
+      "lr": 0.001,
+      "train_steps": 3000,
+      "cpinn_relL2": 1.1697783655442688,
+      "cpinn_train_relL2": 1.1707857036773368,
+      "delta": 0.407535428263057
+    },
+    {
+      "system": "van_der_pol",
+      "seed": 1,
+      "qlnn_best_relL2": 0.7622429372812118,
+      "qlnn_best_family": "te_qpinn_qnn",
+      "lr": 0.005,
+      "train_steps": 1500,
+      "cpinn_relL2": 0.6846878451406675,
+      "cpinn_train_relL2": 0.6836895660882377,
+      "delta": -0.07755509214054435
+    },
+    {
+      "system": "van_der_pol",
+      "seed": 1,
+      "qlnn_best_relL2": 0.7622429372812118,
+      "qlnn_best_family": "te_qpinn_qnn",
+      "lr": 0.005,
+      "train_steps": 3000,
+      "cpinn_relL2": 0.6681060140239246,
+      "cpinn_train_relL2": 0.6669401265270996,
+      "delta": -0.09413692325728729
+    },
+    {
+      "system": "van_der_pol",
+      "seed": 1,
+      "qlnn_best_relL2": 0.7622429372812118,
+      "qlnn_best_family": "te_qpinn_qnn",
+      "lr": 0.01,
+      "train_steps": 1500,
+      "cpinn_relL2": 0.6874033891009591,
+      "cpinn_train_relL2": 0.6865127143662879,
+      "delta": -0.07483954818025274
+    },
+    {
+      "system": "van_der_pol",
+      "seed": 1,
+      "qlnn_best_relL2": 0.7622429372812118,
+      "qlnn_best_family": "te_qpinn_qnn",
+      "lr": 0.01,
+      "train_steps": 3000,
+      "cpinn_relL2": 0.6654138848506164,
+      "cpinn_train_relL2": 0.6641950553449085,
+      "delta": -0.09682905243059547
+    }
+  ],
+  "delta_min": -0.09682905243059547,
+  "delta_max": 0.407535428263057,
+  "delta_mean": 0.07684433724153737,
+  "sign_stability": "mixed"
+}

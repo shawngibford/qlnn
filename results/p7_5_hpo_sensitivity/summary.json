@@ -1,0 +1,43 @@
+{
+  "anchor_cells": [
+    "lotka_volterra_seed2",
+    "van_der_pol_seed1",
+    "lorenz_seed2"
+  ],
+  "lrs": [
+    0.001,
+    0.005,
+    0.01
+  ],
+  "train_steps_list": [
+    1500,
+    3000
+  ],
+  "per_cell": [
+    {
+      "system": "lotka_volterra",
+      "seed": 2,
+      "qlnn_relL2": 0.007031684790202037,
+      "delta_min": 0.00021028564104464808,
+      "delta_max": 0.18433926662338193,
+      "sign_stability": "all_positive"
+    },
+    {
+      "system": "van_der_pol",
+      "seed": 1,
+      "qlnn_relL2": 0.7622429372812118,
+      "delta_min": -0.09682905243059547,
+      "delta_max": 0.407535428263057,
+      "sign_stability": "mixed"
+    },
+    {
+      "system": "lorenz",
+      "seed": 2,
+      "qlnn_relL2": 0.9772641808795158,
+      "delta_min": 0.013380194695190917,
+      "delta_max": 0.01857988288695278,
+      "sign_stability": "all_positive"
+    }
+  ],
+  "overall_sign_stability": "mixed_or_negative_in_some_cell"
+}
