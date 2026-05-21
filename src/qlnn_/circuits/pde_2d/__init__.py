@@ -21,9 +21,17 @@ from qlnn_.circuits.pde_2d.qcpinn_2d import (
     build_qcpinn_2d,
     init_qcpinn_2d_solver_params,
 )
+from qlnn_.circuits.pde_2d.te_qpinn_fnn_2d import (
+    TEQPINNFnn2DConfig,
+    build_te_qpinn_fnn_2d,
+    init_te_qpinn_fnn_2d_solver_params,
+)
 
 __all__ = [
     "QCPINN2DConfig",
     "build_qcpinn_2d",
     "init_qcpinn_2d_solver_params",
+    "TEQPINNFnn2DConfig",
+    "build_te_qpinn_fnn_2d",
+    "init_te_qpinn_fnn_2d_solver_params",
 ]
