@@ -86,7 +86,7 @@ echo "[final] Aggregating paper tables..."
 
 echo ""
 echo "======================================================================"
-echo "Old OD program reproduced. Now the pivot program (P3.5 → P7.5)."
+echo "Old OD program reproduced. Now the pivot program (P3.5 → P7.6)."
 echo "======================================================================"
 echo ""
 echo "[P3.5/P3.6] Multi-state ODE solver matrix (4 quantum families × 3 ODE)"
@@ -136,8 +136,25 @@ PYTHONPATH=src .venv/bin/python scripts/run_p7_5_hpo_sensitivity.py
 PYTHONPATH=src .venv/bin/python scripts/run_p7_5_h3_loo.py
 
 echo ""
+echo "[P7.6] SYMMETRIC QLNN HPO + PDE solver-task H1 + n=18 combined"
+echo "  → results/p7_6_qlnn_hpo/, results/p7_6_pde_solver_h1/"
+echo ""
+echo "  Phase A — symmetric QLNN HPO (72 retrains, ~40 min CPU):"
+echo "    The single most rigorous Bowles/Schuld 2024 sensitivity:"
+echo "    BOTH sides at HPO-best. Outcome: n=9 H1 = FALSIFIED,"
+echo "    CI [-0.0575, +0.1913]."
+PYTHONPATH=src .venv/bin/python scripts/run_p7_6_qlnn_hpo.py
+PYTHONPATH=src .venv/bin/python scripts/make_p7_6_qlnn_hpo_figure.py
+
+echo ""
+echo "  Phase B — PDE solver-task H1 + n=18 combined (zero new compute):"
+echo "    Reuses on-disk P3.7-3.9 PDE data + P7.5 ODE data."
+echo "    n=18 H1 = FALSIFIED, CI [-0.0400, +0.1088] — paper headline."
+PYTHONPATH=src .venv/bin/python scripts/run_p7_6_pde_solver_h1.py
+
+echo ""
 echo "======================================================================"
-echo "ALL DONE. Both the OD program AND the pivot program (P3.5 → P7.5)"
+echo "ALL DONE. Both the OD program AND the pivot program (P3.5 → P7.6)"
 echo "are reproduced. Verify integrity end-to-end with:"
 echo "  .venv/bin/python scripts/verify_paper_integrity.py"
 echo "======================================================================"
