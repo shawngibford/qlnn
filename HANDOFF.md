@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P5 (mandatory baselines + H1 verdict)
+### PIVOT pick-up order — ⏩ RESUME AT P7 (T3 mechanism) — H1 FALSIFIED at P5
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -353,32 +353,92 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   advantage gap, and the mandatory Neural-ODE baseline still
   doesn't exist (P5).
 
-- 🟢 **P5 — NEXT. Mandatory baselines + H1 verdict.**
-  The critical sprint. Pre-reg §6 binding requirement: a
-  non-liquid Neural-ODE baseline. Without it the H1 verdict cannot
-  be computed; with it, pre-reg §7's mechanical decision rule
-  applies and the paper has its headline number.
+- ✅ **P5 DONE — H1 OUTCOME: FALSIFIED** (commits `29acb74` →
+  `bd4e3c5`, 5 atomic). The pre-reg's mandatory matched baselines
+  landed (plain Neural-ODE, plain MLP, skyline, classical PINN
+  extended to vector ODE) + the H1 verdict module + the headline
+  figure.
 
-  6 atomic commits (per appendix A.1 commit ledger):
-    1. `feat(P5-neuralode)` — plain non-liquid Neural-ODE baseline
-       (Diffrax MLP cell, no quantum, no learnable τ; matches QLNN
-       forecaster pipeline so the comparison is apples-to-apples)
-    2. `feat(P5-mlp)` — plain MLP forecaster baseline (capacity-
-       matched classical control)
-    3. `feat(P5-skyline)` — known-structure skyline baseline
-       (fits the true RHS coefficients; the upper bound used to
-       exclude out-of-reach systems from H1)
-    4. `feat(P5-pinn-ode)` — extend the existing classical PINN
-       solver (P3.8 commit `29f097e`) to vector ODE systems
-    5. `feat(P5-verdict)` — H1 verdict module + sweep + figure:
-       Δ_smooth − Δ_broad, paired-bootstrap 95% CI (reusing the
-       existing `bootstrap.py`), mechanical CONFIRMED / FALSIFIED
-       / INCONCLUSIVE per pre-reg §7
-    6. `docs(HANDOFF): P5 DONE`
+  **Headline numbers (`results/p5_h1_verdict/h1_analysis.json`):**
 
-  Compute estimate: ~2 hr CPU (90+ matched-baseline cells across
-  6 systems × 5 model classes × 3 seeds, plus the verdict
-  bootstrap). Dev estimate: ~1 week.
+  Δ_smooth − Δ_broad = **−0.4166**
+  95% paired-bootstrap CI = **[−0.7871, −0.0460]**
+
+  CI is entirely NEGATIVE → **H1 FALSIFIED per pre-reg §7**.
+  "Published as a rigorous mechanistic null." The paper has its
+  headline.
+
+  **The empirical inversion** — per-cell Δ = NeuralODE − QLNN
+  (positive ⇒ QLNN better):
+
+  | Cell | Δ | Regime | Verdict |
+  |---|---|---|---|
+  | LV s0 | -0.289 | smooth | Neural-ODE wins |
+  | LV s1 | -0.238 | smooth | Neural-ODE wins |
+  | LV s2 | +0.143 | smooth | QLNN wins |
+  | VdP s0 | +0.115 | smooth | QLNN marginally wins (both ~1.2 failing) |
+  | VdP s1 | +0.034 | smooth | tie |
+  | VdP s2 | +0.025 | smooth | tie |
+  | **Δ_smooth_mean** | **-0.128** | (anti-H1) | |
+  | Lorenz s0 | -0.043 | broad | tie at chaos ceiling |
+  | Lorenz s1 | +0.272 | broad | QLNN wins |
+  | Lorenz s2 | +0.636 | broad | QLNN strongly wins |
+  | **Δ_broad_mean** | **+0.289** | (pro-QLNN!) | |
+
+  **Inverted pattern:** Neural-ODE beats QLNN on smooth/periodic
+  (where H1 predicted QLNN advantage); QLNN modestly beats
+  Neural-ODE on chaotic Lorenz (where H1 predicted no advantage).
+  Exactly the opposite of the Schuld-Fourier prediction.
+
+  Sensitivity: at strict skyline threshold (0.5) the verdict is
+  INCONCLUSIVE (Lorenz skyline relL² = 0.708 excludes the
+  broadband regime). Recorded as
+  `results/p5_h1_verdict/h1_analysis_strict_threshold.json`.
+
+  P5 commit ledger:
+    `29acb74` plain non-liquid Neural-ODE + 16 tests (H1 contrast)
+    `e475a80` plain MLP forecaster + 10 tests (capacity control)
+    `43b2826` known-structure skyline + 12 tests (upper bound)
+    `f2932e9` classical PINN extended to vector ODE + 20 tests
+    `8421d5c` H1 verdict module + 17 tests
+    `bd4e3c5` P5 sweep + figure + **H1 FALSIFIED**
+
+  Figure: `paper/figures/fig_p5_h1_verdict.{png,pdf}` — 3-panel
+  (relL² bars, per-cell Δ scatter colored by regime, verdict bar
+  with CI error bar).
+
+- 🟡 **P6 — DEFERRED OR REDIRECTED.** With H1 already falsified,
+  the original P6 plan ("scale the unified matrix") changes
+  character. The remaining marginal value of a 5-ODE × 4-PDE
+  full matrix is mostly to confirm the falsification is robust
+  across systems; the actual H1 number won't change qualitatively.
+  Treated as optional rigor work, not paper-critical.
+
+- 🟢 **P7 — NEXT. T3 trainability/expressibility mechanism.**
+  The MECHANISTIC prong (H3 in the pre-reg). Now CRITICAL given
+  the FALSIFIED H1 outcome: the paper's "why" question shifts
+  from "why does QLNN win on smooth?" to "why does Neural-ODE win
+  on smooth and QLNN win on chaos — the inverted pattern?"
+
+  P7 runs `scripts/analyze_quantum_trainability.py` (committed
+  `707debb`) across all implemented families × systems to provide:
+    - Barren-plateau / gradient-variance scaling
+    - Fourier coefficient extraction per ansatz
+    - Expressibility curves
+
+  Cross-tabulating these scalars with the per-cell Δ values gives
+  the paper's mechanism. The P3.9 te_qpinn_qnn_2d AC observation
+  (regime-dependent on the SOLVER task) ties in here as a
+  parallel positive finding.
+
+- ⏩ **P8 — paper draft.** PRX Quantum target. The headline is
+  now "H1 falsified — pre-registered null with inverted regime
+  pattern" rather than "H1 confirmed". Either way is publishable
+  per Bowles/Schuld 2024 (arXiv:2403.07059) and per pre-reg §7
+  explicit disposition.
+  [P5 DESCRIPTION — moved to ✅ DONE section above.
+   See P5 commit ledger 29acb74 → bd4e3c5 and the
+   FALSIFIED outcome.]
 
 - **P6 → P7 → P8** per the plan. P6 is the gated/system-grouped
   unified matrix v2 — `ODE_PDE_PRE_REG.md` is already committed
