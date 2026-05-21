@@ -138,6 +138,52 @@ def main() -> int:
             "Solver Δ_broad_mean (paper: +0.0179)",
             b["delta_broad_mean"], 0.0179, tol=0.005)
 
+    print("  --- Combined ODE+PDE solver-task H1 (P7.6, n=18) ---")
+    h1_cb = _load("results/p7_6_pde_solver_h1/h1_analysis_combined_solver.json")
+    all_ok &= _check_str(
+        "Combined ODE+PDE H1 outcome at n=18 (paper: FALSIFIED)",
+        h1_cb["outcome"], "FALSIFIED")
+    if h1_cb["bootstrap"] is not None:
+        b = h1_cb["bootstrap"]
+        all_ok &= _check(
+            "Combined Δ_diff_mean (paper: +0.0316)",
+            b["delta_diff_mean"], 0.0316, tol=0.005)
+        all_ok &= _check(
+            "Combined CI low (paper: -0.0400)",
+            b["ci_low"], -0.0400, tol=0.05)
+        all_ok &= _check(
+            "Combined CI high (paper: +0.1088)",
+            b["ci_high"], 0.1088, tol=0.05)
+        all_ok &= _check(
+            "Combined n_smooth (paper: 12)",
+            b["n_smooth"], 12, tol=0)
+        all_ok &= _check(
+            "Combined n_broad (paper: 6)",
+            b["n_broad"], 6, tol=0)
+
+    print("  --- PDE-only solver-task H1 (P7.6, n=9) ---")
+    h1_pde = _load("results/p7_6_pde_solver_h1/h1_analysis_pde_solver.json")
+    all_ok &= _check_str(
+        "PDE-only H1 outcome at n=9 (paper: FALSIFIED)",
+        h1_pde["outcome"], "FALSIFIED")
+
+    print("  --- Symmetric QLNN HPO H1 (P7.6, n=9, both sides HPO-best) ---")
+    h1_hpo = _load("results/p7_6_qlnn_hpo/h1_verdict_full_hpo_best.json")
+    all_ok &= _check_str(
+        "Full-HPO-best H1 outcome (paper: FALSIFIED)",
+        h1_hpo["outcome"], "FALSIFIED")
+    if h1_hpo["bootstrap"] is not None:
+        b = h1_hpo["bootstrap"]
+        all_ok &= _check(
+            "HPO-best Δ_diff_mean (paper: +0.0588)",
+            b["delta_diff_mean"], 0.0588, tol=0.005)
+        all_ok &= _check(
+            "HPO-best CI low (paper: -0.0575)",
+            b["ci_low"], -0.0575, tol=0.05)
+        all_ok &= _check(
+            "HPO-best CI high (paper: +0.1913)",
+            b["ci_high"], 0.1913, tol=0.05)
+
     print("\n=== PIVOT H3 mechanism (P7, tentative trend) ===")
     t3 = _load("results/p7_t3_mechanism/t3_scalars.json")
     # Lock the per-family T3 scalars to 3 sig figs (numerical determinism
