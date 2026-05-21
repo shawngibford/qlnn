@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P4 (forecaster autoregressive rollout)
+### PIVOT pick-up order — ⏩ RESUME AT P5 (mandatory baselines + H1 verdict)
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -311,29 +311,80 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   heads), §2 (te_qpinn_qnn split-qubit U_embed), §3 (qcpinn
   trivial input-dim widening). rf_qrc deferred to P4 as
   forecaster (frozen-reservoir architecture).
-- ⏩ **P4 — NEXT. Forecaster long-horizon autoregressive rollout.**
-  Retask the data-driven forecaster from the persistence-trivial
-  h-step MAE protocol to **autoregressive multi-step rollout on the
-  P2 PDE fields + the existing 5 ODE systems** (ODE_PDE_PRE_REG.md
-  §3.2 / §5). Reuse the existing Diffrax QLNN forecaster
-  (`src/qlnn_/forecaster.py`) for the forecaster-registry ansätze
-  (data_reuploading / hardware_efficient / strongly_entangling /
-  brickwall) and the new `rf_qrc` for the SOTA forecaster path.
-  Required:
-  - **Rollout-eval path** (not a destructive change to
-    `make_horizon_windows`): a new evaluation module that takes a
-    trained forecaster + an initial history + a rollout horizon, and
-    returns the field/state trajectory + the pre-registered metrics
-    (relative-L2 primary, VPT/Lyapunov for chaotic, spectral error,
-    invariant drift). **NO 1-step MAE as a headline** (banned in P1).
-  - **Task-dispatch wiring** in `train_qlnn.py` / `train_baseline.py`
-    so a config can pick {ODE forecaster, PDE field forecaster}.
-- **P5 → P6 → P7 → P8** per the plan. P5 adds the matched baselines
-  incl. the MANDATORY non-liquid Neural-ODE (the H1 contrast — see
-  ODE_PDE_PRE_REG.md §6). P6 is the gated/system-grouped unified
-  matrix v2 — `ODE_PDE_PRE_REG.md` is already committed before any
-  P6 run; no >30-min sweep without user go-ahead. P7 = T3
-  triangulation across all 9 implemented families. P8 = new dossier.
+- ✅ **P4 DONE** — forecaster autoregressive rollout (commits
+  `0ade9bf` → `d829512`, 7 atomic incl. this HANDOFF advance).
+  All pre-reg §5 metric primitives (relative-L2, VPT,
+  spectral_error, invariant_drift) implemented + tested; 5
+  forecaster families fully run on 3 ODE systems.
+
+  P4 commit ledger:
+    `0ade9bf` rollout helper + Protocol + 14+2 tests
+    `952d3ec` metric suite + 24 tests
+    `22d2d55` VectorForecaster (vector-output QLNN) + 17 tests
+    `9661c3f` one-step-ahead supervised training loop + 13 tests
+    `8a512a0` per-family adapters + python-loop rollout + 13 tests
+    `88ab57d` dispatch + sweep CLI
+    `d829512` full 45-cell sweep + figure
+
+  **45-cell sweep result (5 families × 3 ODE × 3 seeds), ~22 min wall:**
+
+  | System | Persistence floor | Best quantum (relL2) | Verdict |
+  |---|---|---|---|
+  | **lotka_volterra** (smooth/periodic) | 0.88 | brickwall 0.33 (best seed); 4 families all beat floor | quantum WIN |
+  | **van_der_pol** (stiff μ=5) | 1.35 | hardware_efficient ~1.21 | mixed/marginal |
+  | **lorenz** (chaotic) | 0.45 | rf_qrc 0.46 (tied) | universal failure (VPT < 0.1 LTE) |
+
+  **Forecaster-task corroboration of regime-dependent pattern:**
+  4 of 5 quantum families beat persistence on smooth LV; rf_qrc
+  (the SOTA reservoir family) fails on LV. Stiff VdP breaks most
+  families (brickwall catastrophic divergence to relL2 ≈ 10).
+  Chaotic Lorenz universal failure across all families (VPT in
+  Lyapunov times = 0.05-0.09, i.e. forecasts diverge in ~1/10 of
+  a Lyapunov time at the configured budget).
+
+  Pattern echoes the SOLVER-task finding from P3.8 / P3.9:
+  smooth = some quantum advantage; chaotic = universal failure.
+
+  Figure: `paper/figures/fig_p4_forecaster_rollout.{png,pdf}`.
+  Results: `results/p4_forecaster_rollout/{system}_{family}/seed_N/`.
+  CLI: `scripts/run_p4_forecaster_rollout.py`.
+
+  **NOT yet H1 evidence** — pre-reg §7 defines H1 as the QLNN−Neural-ODE
+  advantage gap, and the mandatory Neural-ODE baseline still
+  doesn't exist (P5).
+
+- 🟢 **P5 — NEXT. Mandatory baselines + H1 verdict.**
+  The critical sprint. Pre-reg §6 binding requirement: a
+  non-liquid Neural-ODE baseline. Without it the H1 verdict cannot
+  be computed; with it, pre-reg §7's mechanical decision rule
+  applies and the paper has its headline number.
+
+  6 atomic commits (per appendix A.1 commit ledger):
+    1. `feat(P5-neuralode)` — plain non-liquid Neural-ODE baseline
+       (Diffrax MLP cell, no quantum, no learnable τ; matches QLNN
+       forecaster pipeline so the comparison is apples-to-apples)
+    2. `feat(P5-mlp)` — plain MLP forecaster baseline (capacity-
+       matched classical control)
+    3. `feat(P5-skyline)` — known-structure skyline baseline
+       (fits the true RHS coefficients; the upper bound used to
+       exclude out-of-reach systems from H1)
+    4. `feat(P5-pinn-ode)` — extend the existing classical PINN
+       solver (P3.8 commit `29f097e`) to vector ODE systems
+    5. `feat(P5-verdict)` — H1 verdict module + sweep + figure:
+       Δ_smooth − Δ_broad, paired-bootstrap 95% CI (reusing the
+       existing `bootstrap.py`), mechanical CONFIRMED / FALSIFIED
+       / INCONCLUSIVE per pre-reg §7
+    6. `docs(HANDOFF): P5 DONE`
+
+  Compute estimate: ~2 hr CPU (90+ matched-baseline cells across
+  6 systems × 5 model classes × 3 seeds, plus the verdict
+  bootstrap). Dev estimate: ~1 week.
+
+- **P6 → P7 → P8** per the plan. P6 is the gated/system-grouped
+  unified matrix v2 — `ODE_PDE_PRE_REG.md` is already committed
+  before any P6 run; no >30-min sweep without user go-ahead. P7
+  = T3 triangulation across all implemented families. P8 = new
+  dossier + PRX Quantum paper draft.
 
 ### 1. There is a DETACHED background training job — do NOT wait on it
 *(OLD Option-B program — now superseded by the pivot, but let it finish
