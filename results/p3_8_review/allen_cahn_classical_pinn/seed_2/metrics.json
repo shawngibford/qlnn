@@ -1,0 +1,17 @@
+{
+  "pde": "allen_cahn",
+  "model": "classical_pinn",
+  "seed": 2,
+  "regime": "broadband_multiscale",
+  "steps": 1800,
+  "n_t_colloc": 32,
+  "n_x_colloc": 64,
+  "pqc_params": 0,
+  "classical_params": 177,
+  "config_str": "MLP H=11, L=2, target\u2248120; colloc=64\u00d732; steps=1800",
+  "audit_reason": "capacity-matched classical baseline",
+  "final_loss": 0.017205677926540375,
+  "mae": 0.025352315189397963,
+  "relative_l2": 0.051389069696653834,
+  "bc_violation": 0.11222622745736995
+}

@@ -1,28 +1,18 @@
 {
-  "pdes_completed": [
-    "heat",
-    "burgers_smooth"
+  "pdes": [],
+  "lorenz_families": [
+    "chebyshev_dqc",
+    "te_qpinn_fnn",
+    "te_qpinn_qnn",
+    "qcpinn"
   ],
-  "pdes_deferred": [
-    "allen_cahn"
-  ],
-  "lorenz_status": "not_started",
   "seeds": [
     0,
     1,
     2
   ],
-  "corrected_pde_configs": {
-    "heat": {
-      "n_t_colloc": 24,
-      "n_x_colloc": 24,
-      "steps": 1200
-    },
-    "burgers_smooth": {
-      "n_t_colloc": 28,
-      "n_x_colloc": 28,
-      "steps": 1500
-    }
-  },
-  "scope_note": "P3.8 audit-driven re-iteration (PARTIAL: heat + burgers, the smooth PDEs). Allen-Cahn at 64\u00d732 + Lorenz extended deferred to a subsequent compute pass."
+  "corrected_pde_configs": {},
+  "lorenz_t1": 5.0,
+  "lorenz_lyapunov_times": 4.53,
+  "scope_note": "P3.8 audit-driven re-iteration. Corrects P3.7's spatial under-resolution on Allen-Cahn, step-budget inconsistencies on heat/burgers, and P3.6's Lorenz time-horizon (T=5 \u2248 5.5 LTE vs P3.6's T=2). Adds the missing classical PINN baseline. NOT a paper claim; the H1 verdict still requires P5's Neural-ODE."
 }

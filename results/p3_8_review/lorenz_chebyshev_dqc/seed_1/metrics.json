@@ -1,0 +1,17 @@
+{
+  "system": "lorenz",
+  "model": "chebyshev_dqc",
+  "seed": 1,
+  "regime": "broadband_multiscale",
+  "dim": 3,
+  "t1": 5.0,
+  "lyapunov_times": 4.53,
+  "steps": 1200,
+  "pqc_params": 180,
+  "classical_params": 0,
+  "config_str": "per-component: n=4, L=5; dim=3",
+  "final_loss": 3.475332736968994,
+  "mae": 14.322083390981286,
+  "relative_l2": 0.9969457208031054,
+  "relative_l2_predict_mean_baseline": 0.353793945152362
+}

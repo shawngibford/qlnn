@@ -1,0 +1,17 @@
+{
+  "system": "lorenz",
+  "model": "te_qpinn_qnn",
+  "seed": 2,
+  "regime": "broadband_multiscale",
+  "dim": 3,
+  "t1": 5.0,
+  "lyapunov_times": 4.53,
+  "steps": 2000,
+  "pqc_params": 252,
+  "classical_params": 0,
+  "config_str": "per-component: n=4, L_var=5, K_embed=3; dim=3",
+  "final_loss": 49.96302795410156,
+  "mae": 14.288056638072261,
+  "relative_l2": 0.9881289335857869,
+  "relative_l2_predict_mean_baseline": 0.353793945152362
+}
