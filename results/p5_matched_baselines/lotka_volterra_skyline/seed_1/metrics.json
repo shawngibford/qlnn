@@ -1,0 +1,19 @@
+{
+  "system": "lotka_volterra",
+  "family": "skyline",
+  "seed": 1,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 4,
+  "sampled_dt": 0.1,
+  "rollout_steps": 200,
+  "dt_step": 0.1,
+  "relative_l2": 0.02007015854839071,
+  "vpt_step": -1,
+  "vpt_time": 20.0,
+  "vpt_lyapunov": null,
+  "spectral_error": 0.0020106912644735275,
+  "invariant_drift_final": 0.6516829217116258,
+  "persistence_floor_relative_l2": 0.8837616584035011,
+  "train_loss_history": []
+}

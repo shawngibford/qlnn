@@ -1,0 +1,25 @@
+{
+  "system": "lotka_volterra",
+  "family": "plain_mlp",
+  "seed": 2,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 159,
+  "sampled_dt": 0.1,
+  "rollout_steps": 200,
+  "dt_step": 0.1,
+  "relative_l2": 0.6937905157752409,
+  "vpt_step": 30,
+  "vpt_time": 3.0,
+  "vpt_lyapunov": null,
+  "spectral_error": 0.5573716852489191,
+  "invariant_drift_final": Infinity,
+  "persistence_floor_relative_l2": 0.8837616584035011,
+  "train_loss_history": [
+    0.05047882720828056,
+    0.036063339561223984,
+    0.028664154931902885,
+    0.022386925294995308,
+    0.016889825463294983
+  ]
+}

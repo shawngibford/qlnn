@@ -64,4 +64,6 @@ results/*
 !results/p3_8_review/
 !results/p3_9_pde_matrix/
 !results/p4_forecaster_rollout/
+!results/p5_matched_baselines/
+!results/p5_h1_verdict/
 refs/

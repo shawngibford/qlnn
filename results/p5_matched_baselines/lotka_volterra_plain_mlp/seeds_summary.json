@@ -1,0 +1,67 @@
+{
+  "system": "lotka_volterra",
+  "family": "plain_mlp",
+  "n_seeds": 3,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "trainable_params": 159,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "rollout_steps": 200,
+  "sampled_dt": 0.1,
+  "metrics": {
+    "relative_l2": {
+      "mean": 0.6695556626980984,
+      "std": 0.0984393812152398,
+      "min": 0.561262274005326,
+      "max": 0.7536141983137279,
+      "n_seeds": 3,
+      "ci95_half_width": 0.24455671595668968,
+      "ci95_low": 0.4249989467414087,
+      "ci95_high": 0.9141123786547881
+    },
+    "vpt_time": {
+      "mean": 2.6666666666666665,
+      "std": 0.3511884584284245,
+      "min": 2.3000000000000003,
+      "max": 3.0,
+      "n_seeds": 3,
+      "ci95_half_width": 0.8724709055957744,
+      "ci95_low": 1.794195761070892,
+      "ci95_high": 3.539137572262441
+    },
+    "spectral_error": {
+      "mean": 0.6236522315977275,
+      "std": 0.06056013436812222,
+      "min": 0.5573716852489191,
+      "max": 0.6760978604140931,
+      "n_seeds": 3,
+      "ci95_half_width": 0.15045185571189848,
+      "ci95_low": 0.4732003758858291,
+      "ci95_high": 0.774104087309626
+    },
+    "persistence_floor_relative_l2": {
+      "mean": 0.883761658403501,
+      "std": 1.3597399555105182e-16,
+      "min": 0.8837616584035011,
+      "max": 0.8837616584035011,
+      "n_seeds": 3,
+      "ci95_half_width": 3.378053924858142e-16,
+      "ci95_low": 0.8837616584035006,
+      "ci95_high": 0.8837616584035013
+    },
+    "invariant_drift_final": {
+      "mean": Infinity,
+      "std": NaN,
+      "min": Infinity,
+      "max": Infinity,
+      "n_seeds": 3,
+      "ci95_half_width": NaN,
+      "ci95_low": NaN,
+      "ci95_high": NaN
+    }
+  }
+}

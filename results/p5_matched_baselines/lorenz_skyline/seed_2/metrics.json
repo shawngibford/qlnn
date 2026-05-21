@@ -1,0 +1,19 @@
+{
+  "system": "lorenz",
+  "family": "skyline",
+  "seed": 2,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 6,
+  "sampled_dt": 0.05,
+  "rollout_steps": 200,
+  "dt_step": 0.05,
+  "relative_l2": 0.7083785014075185,
+  "vpt_step": 18,
+  "vpt_time": 0.9,
+  "vpt_lyapunov": 0.8154,
+  "spectral_error": 0.1333628571973432,
+  "invariant_drift_final": null,
+  "persistence_floor_relative_l2": 0.45480979577386477,
+  "train_loss_history": []
+}

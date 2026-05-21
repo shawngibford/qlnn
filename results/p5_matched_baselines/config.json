@@ -1,0 +1,27 @@
+{
+  "systems": [
+    "lotka_volterra",
+    "van_der_pol",
+    "lorenz"
+  ],
+  "families": [
+    "plain_neuralode",
+    "plain_mlp",
+    "skyline"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "n_points": 800,
+  "train_frac": 0.7,
+  "window_length": 8,
+  "num_qubits": 3,
+  "num_layers": 1,
+  "train_steps": 200,
+  "learning_rate": 0.005,
+  "rollout_steps": 200,
+  "vpt_threshold": 0.3,
+  "scope_note": "P5 matched baselines. Adds the MANDATORY Neural-ODE H1 contrast (pre-reg \u00a76) + capacity-matched MLP control + known-structure skyline. Combined with P4 QLNN forecaster data, the H1 verdict module computes \u0394_smooth\u2212\u0394_broad CI."
+}
