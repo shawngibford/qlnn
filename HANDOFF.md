@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P3.8 deferred (AC + Lorenz) → P4
+### PIVOT pick-up order — ⏩ RESUME AT P3.9 (PDE multi-family port) → P4
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -220,41 +220,69 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
   PennyLane has no Apple-Metal quantum backend); single family this
   phase (cross-family on PDEs = P6); sibling module to
   `physics_residual_loss.py` (1D gate contract immutable).
-- 🟡 **P3.8 PARTIAL** — peer-review iteration (commits `29f097e` →
-  `84d58db`, 5 atomic). The audit's 3 BLOCKERs are CLOSED via
-  framing reform (HANDOFF + READMEs) + the new classical MLP-PINN
-  baseline module. Partial sweep landed: heat + Burgers smooth × 2
-  models × 3 seeds = 12 runs. Headline:
+- ✅ **P3.8 DONE** — peer-review iteration (commits `29f097e` →
+  `25ad075`, 7 atomic). All 3 audit BLOCKERs closed (framing reform
+  + classical PINN baseline + corrected re-runs). Full sweep
+  complete (3 PDEs × 2 models × 3 seeds + 4 Lorenz families × 3
+  seeds = 30 runs). Wall-clock: 2 hr 49 min on default.qubit JAX.
 
-  | PDE | quantum (chebyshev_dqc_2d) | classical_pinn | advantage |
+  **PDE headline (quantum chebyshev_dqc_2d vs capacity-matched
+  classical MLP-PINN, all at audit-corrected configs):**
+
+  | PDE | quantum | classical_pinn | advantage |
   |---|---:|---:|---|
-  | heat | 0.056 | **0.0045** | ~12× classical |
-  | burgers_smooth | 0.358 | **0.027** | ~13× classical |
+  | heat (1200 steps) | 0.056 | **0.0045** | ~12× classical |
+  | burgers_smooth (1500 steps) | 0.358 | **0.027** | ~13× classical |
+  | allen_cahn (64×32×1800) | ~0.57 (mean) | **~0.11 (mean)** | ~5× classical |
 
-  At matched capacity, the classical PINN substantially outperforms
-  the quantum solver on both smooth PDEs. The audit's central
-  hypothesis (no quantum advantage on smooth low-Fourier-order
-  problems given physics-informed training) is empirically supported.
-  Burgers gate target relL2<0.30 STILL missed even at corrected
-  1500 steps — confirms a quantum-solver expressivity ceiling, not
-  just under-convergence.
+  AC quantum DID improve from P3.7's 0.77 with the resolution+steps
+  fix (under-resolution partly responsible), but classical PINN at
+  ~0.11 makes clear this is **quantum-specific underperformance**,
+  not a general PINN-training regime failure. Burgers gate target
+  relL2<0.30 STILL missed at corrected 1500 steps — confirms a
+  quantum-solver expressivity ceiling, not just under-convergence.
+
+  **Lorenz extended (T=5.0, ~4.53 Lyapunov times — half of pre-reg's 10):**
+
+  | family | seed-mean relL2 | predict-mean floor |
+  |---|---:|---:|
+  | chebyshev_dqc | 0.997 | 0.354 |
+  | te_qpinn_fnn | 0.997 | 0.354 |
+  | te_qpinn_qnn | 0.988 | 0.354 |
+  | qcpinn (bimodal) | 0.921 (one seed 0.77) | 0.354 |
+
+  **All 4 quantum families** sit at the predict-zero baseline (relL2≈1);
+  none beats the honest predict-mean floor (relL2=0.354). Universal
+  collapse on chaotic 4.5-LTE dynamics. NOT yet H1 evidence — the
+  pre-reg defines H1 as the QLNN−NeuralODE gap (P5).
 
   Figure: `paper/figures/fig_p3_8_review_iteration.{png,pdf}`.
+- 🟢 **P3.9 — NEXT. PDE multi-family port.**
+  Close the audit gap raised at P3.8: PDE side currently has only
+  `chebyshev_dqc_2d` while ODE side has 4 quantum families. Port the
+  three remaining PINN-style families to 2D (t, x) coordinate
+  handling so the PDE matrix becomes **4 quantum × 3 PDEs × 3 seeds**
+  (parity with the ODE matrix shape).
 
-  **Deferred to next session (compute-heavy; ~5 hr):**
-  - Allen-Cahn at n_x_colloc=64, n_t_colloc=32, steps=1800 — both
-    quantum AND classical PINN, n=3 seeds. Tests whether P3.7's
-    "broadband failure" was sub-Nyquist aliasing (Δx=0.224 vs front
-    width 0.085) or a regime-structural property. ~3 hr CPU.
-  - Lorenz extended to T=5 (~5.5 Lyapunov times) for all 4 quantum
-    families with the predict-mean baseline. ~2 hr CPU.
-  Re-run from the existing CLI:
-  `python scripts/run_p3_8_review_iteration.py --pdes allen_cahn --skip-lorenz`
-  then `--pdes (none) --lorenz-families chebyshev_dqc te_qpinn_fnn ...`.
-  After both complete, re-render the figure with
-  `make_p3_8_review_figure.py` — the same script handles the full
-  data.
-- ⏩ **P4 — NEXT (after P3.8 deferred wraps up). Forecaster long-horizon autoregressive rollout.**
+  Detailed design at `.planning/P3_9_DESIGN.md` (committed `79defc9`):
+  - `qcpinn_2d` — trivial (input_dim=2 on existing pre-NN).
+  - `te_qpinn_fnn_2d` — split-qubit FNN-embedding (per-coordinate heads).
+  - `te_qpinn_qnn_2d` — split-qubit U_embed (declared design choice).
+  - Out of scope: rf_qrc (frozen-reservoir closed-form ridge —
+    architecturally different from PINN-style residual training;
+    deferred to P4 as a forecaster).
+
+  Acceptance criteria per family: mechanism gate
+  (`jacrev(jacrev(QNode))` finite+nontrivial; same gate
+  chebyshev_dqc_2d cleared first try) + convergence-mini gate
+  (heat eq seed 0, MAE < 0.20 — looser than chebyshev_dqc_2d's 0.10
+  because non-Chebyshev families don't get the tower's spectral
+  advantage).
+
+  Compute estimate: ~4-5 hr CPU for the 27 new runs (3 new families
+  × 3 PDEs × 3 seeds). 7-commit atomic sequence; CIRCUIT_SPECS.md
+  gets P3.9 2D-port design-choice amendments (§1, §2, §3 each).
+- ⏩ **P4 — after P3.9. Forecaster long-horizon autoregressive rollout.**
   Retask the data-driven forecaster from the persistence-trivial
   h-step MAE protocol to **autoregressive multi-step rollout on the
   P2 PDE fields + the existing 5 ODE systems** (ODE_PDE_PRE_REG.md
