@@ -62,4 +62,5 @@ results/*
 !results/p3_6_multi_state/
 !results/p3_7_pde_solver/
 !results/p3_8_review/
+!results/p3_9_pde_matrix/
 refs/
