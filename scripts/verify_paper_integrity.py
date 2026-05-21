@@ -26,6 +26,15 @@ def _check(label: str, actual: float, expected: float, tol: float = 1e-4) -> boo
     return ok
 
 
+def _check_str(label: str, actual: str, expected: str) -> bool:
+    """Exact string match (used for verdict outcomes — CONFIRMED /
+    FALSIFIED / INCONCLUSIVE)."""
+    ok = actual == expected
+    status = "OK  " if ok else "FAIL"
+    print(f"  [{status}] {label}: actual={actual!r}  expected={expected!r}")
+    return ok
+
+
 def main() -> int:
     all_ok = True
 
@@ -84,6 +93,61 @@ def main() -> int:
         all_ok &= _check(f"h={h} LO-ODE R²",
                          s["test"]["r2_raw"]["mean"], paper_lo,
                          tol=max(0.1, abs(paper_lo) * 0.01))
+
+    # =====================================================================
+    # PIVOT PROGRAM — H1/H3 verdict integrity gates (P7.5 commit 3 / R3 fix)
+    # =====================================================================
+    print("\n=== PIVOT H1 verdicts (forecaster + solver) ===")
+    print("  --- Forecaster-task H1 (P5, corroborating) ---")
+    h1_fc = _load("results/p5_h1_verdict/h1_analysis.json")
+    all_ok &= _check_str(
+        "Forecaster H1 outcome (paper: FALSIFIED)",
+        h1_fc["outcome"], "FALSIFIED")
+    if h1_fc["bootstrap"] is not None:
+        b = h1_fc["bootstrap"]
+        all_ok &= _check(
+            "Forecaster Δ_diff_mean (paper: -0.4166)",
+            b["delta_diff_mean"], -0.4166, tol=0.005)
+        all_ok &= _check(
+            "Forecaster CI low (paper: -0.7871)",
+            b["ci_low"], -0.7871, tol=0.05)
+        all_ok &= _check(
+            "Forecaster CI high (paper: -0.0460)",
+            b["ci_high"], -0.0460, tol=0.05)
+
+    print("  --- Solver-task H1 (P7.5, PRIMARY per pre-reg §7) ---")
+    h1_sv = _load("results/p7_5_solver_h1/h1_analysis_solver_task_raw.json")
+    all_ok &= _check_str(
+        "Solver H1 outcome at raw bootstrap (paper: CONFIRMED)",
+        h1_sv["outcome"], "CONFIRMED")
+    if h1_sv["bootstrap"] is not None:
+        b = h1_sv["bootstrap"]
+        all_ok &= _check(
+            "Solver Δ_diff_mean (paper: +0.1094)",
+            b["delta_diff_mean"], 0.1094, tol=0.005)
+        all_ok &= _check(
+            "Solver CI low > 0 (paper: +0.0145)",
+            b["ci_low"], 0.0145, tol=0.05)
+        all_ok &= _check(
+            "Solver CI high (paper: +0.2204)",
+            b["ci_high"], 0.2204, tol=0.05)
+        all_ok &= _check(
+            "Solver Δ_smooth_mean (paper: +0.1272)",
+            b["delta_smooth_mean"], 0.1272, tol=0.005)
+        all_ok &= _check(
+            "Solver Δ_broad_mean (paper: +0.0179)",
+            b["delta_broad_mean"], 0.0179, tol=0.005)
+
+    print("\n=== PIVOT H3 mechanism (P7, tentative trend) ===")
+    t3 = _load("results/p7_t3_mechanism/t3_scalars.json")
+    # Lock the per-family T3 scalars to 3 sig figs (numerical determinism
+    # given fixed seed=0 and n_samples=400).
+    all_ok &= _check(
+        "data_reuploading entangling_q (paper: 0.776)",
+        t3["data_reuploading"]["entangling_q"], 0.776, tol=0.01)
+    all_ok &= _check(
+        "brickwall entangling_q LOW (paper: 0.309)",
+        t3["brickwall"]["entangling_q"], 0.309, tol=0.02)
 
     print()
     if all_ok:
