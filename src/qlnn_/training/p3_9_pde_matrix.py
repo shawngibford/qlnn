@@ -54,6 +54,8 @@ from qlnn_.training.p3_8_review_demo import (
     CORRECTED_PDE_CONFIGS,
     _bc_violation,
     _eval_pde_field,
+    _t_ci95 as _p38_t_ci95,
+    summarize as _p38_summarize,
 )
 from qlnn_.training.pde_demo import PDE_BENCH, _reference_field
 from qlnn_.training.pde_residual_loss import (
@@ -256,41 +258,10 @@ def train_one_cell(
 # ---------------------------------------------------------------------------
 
 
-def _t_ci95(values: list[float]) -> dict[str, float]:
-    """t-based 95% CI; n=3 seeds default. Same as p3_8_review_demo."""
-    a = np.asarray(values, dtype=np.float64)
-    n = len(a)
-    mean = float(a.mean())
-    if n < 2:
-        return {"mean": mean, "std": 0.0, "ci95": 0.0, "n": int(n)}
-    std = float(a.std(ddof=1))
-    # t_{0.025, n-1}; for n=3, t=4.303; for n=5, t=2.776; n=10, t=2.262.
-    t_table = {2: 12.706, 3: 4.303, 4: 3.182, 5: 2.776,
-               6: 2.571, 7: 2.447, 8: 2.365, 9: 2.306, 10: 2.262}
-    t = t_table.get(n, 2.0)  # asymptotic fall-back
-    ci = t * std / np.sqrt(n)
-    return {"mean": mean, "std": std, "ci95": float(ci), "n": int(n)}
-
-
-def summarize(results: list[dict]) -> dict[str, Any]:
-    """Aggregate per-seed results into a {mean, std, ci95} summary."""
-    if not results:
-        return {}
-    first = results[0]
-    return {
-        "pde": first["pde"],
-        "model": first["model"],
-        "regime": first["regime"],
-        "n_seeds": len(results),
-        "relative_l2": _t_ci95([r["relative_l2"] for r in results]),
-        "mae": _t_ci95([r["mae"] for r in results]),
-        "final_loss": _t_ci95([r["final_loss"] for r in results]),
-        "bc_violation": _t_ci95([r["bc_violation"] for r in results]),
-        "pqc_params": int(first["pqc_params"]),
-        "classical_params": int(first["classical_params"]),
-        "steps": int(first["steps"]),
-        "n_t_colloc": int(first["n_t_colloc"]),
-        "n_x_colloc": int(first["n_x_colloc"]),
-        "config_str": first["config_str"],
-        "audit_reason": first["audit_reason"],
-    }
+# Re-export the P3.8 schema so seed-summary files have the SAME layout
+# as P3.8 (metrics.{relative_l2,mae,final_loss,bc_violation} with
+# ci95_low/ci95_high/mean/std/min/max/n_seeds/ci95_half_width keys).
+# The figure script reads from both result directories and benefits
+# from a single shared schema.
+_t_ci95 = _p38_t_ci95
+summarize = _p38_summarize
