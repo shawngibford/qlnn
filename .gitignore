@@ -67,4 +67,5 @@ results/*
 !results/p5_matched_baselines/
 !results/p5_h1_verdict/
 !results/p7_t3_mechanism/
+!results/p7_5_solver_h1/
 refs/

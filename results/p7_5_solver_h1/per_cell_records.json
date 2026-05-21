@@ -1,0 +1,92 @@
+[
+  {
+    "system": "lotka_volterra",
+    "seed": 0,
+    "qlnn_best_family": "qcpinn",
+    "qlnn_relL2": 0.007431563261303369,
+    "classical_pinn_relL2": 0.01167583985934637,
+    "classical_pinn_train_relL2": 0.01176266789902074,
+    "delta": 0.004244276598043001,
+    "regime": "smooth_periodic"
+  },
+  {
+    "system": "lotka_volterra",
+    "seed": 1,
+    "qlnn_best_family": "qcpinn",
+    "qlnn_relL2": 0.00294084845578528,
+    "classical_pinn_relL2": 0.007814719987897848,
+    "classical_pinn_train_relL2": 0.007873202956320501,
+    "delta": 0.004873871532112568,
+    "regime": "smooth_periodic"
+  },
+  {
+    "system": "lotka_volterra",
+    "seed": 2,
+    "qlnn_best_family": "qcpinn",
+    "qlnn_relL2": 0.007031684790202037,
+    "classical_pinn_relL2": 0.007079134570156292,
+    "classical_pinn_train_relL2": 0.007130561319050525,
+    "delta": 4.744977995425458e-05,
+    "regime": "smooth_periodic"
+  },
+  {
+    "system": "van_der_pol",
+    "seed": 0,
+    "qlnn_best_family": "te_qpinn_fnn",
+    "qlnn_relL2": 0.8213402448263368,
+    "classical_pinn_relL2": 1.1569162462815592,
+    "classical_pinn_train_relL2": 1.1581803751123756,
+    "delta": 0.3355760014552224,
+    "regime": "smooth_periodic"
+  },
+  {
+    "system": "van_der_pol",
+    "seed": 1,
+    "qlnn_best_family": "te_qpinn_qnn",
+    "qlnn_relL2": 0.7622429372812118,
+    "classical_pinn_relL2": 0.943367722657931,
+    "classical_pinn_train_relL2": 0.9440726785496883,
+    "delta": 0.18112478537671917,
+    "regime": "smooth_periodic"
+  },
+  {
+    "system": "van_der_pol",
+    "seed": 2,
+    "qlnn_best_family": "te_qpinn_fnn",
+    "qlnn_relL2": 0.8176052896737609,
+    "classical_pinn_relL2": 1.0550124941807157,
+    "classical_pinn_train_relL2": 1.0567536338225825,
+    "delta": 0.23740720450695485,
+    "regime": "smooth_periodic"
+  },
+  {
+    "system": "lorenz",
+    "seed": 0,
+    "qlnn_best_family": "te_qpinn_qnn",
+    "qlnn_relL2": 0.9794284624300705,
+    "classical_pinn_relL2": 0.9958116340497172,
+    "classical_pinn_train_relL2": 0.9958073397837116,
+    "delta": 0.01638317161964664,
+    "regime": "broadband_multiscale"
+  },
+  {
+    "system": "lorenz",
+    "seed": 1,
+    "qlnn_best_family": "te_qpinn_qnn",
+    "qlnn_relL2": 0.9768661862856822,
+    "classical_pinn_relL2": 0.9956565538731516,
+    "classical_pinn_train_relL2": 0.9956493015576853,
+    "delta": 0.018790367587469325,
+    "regime": "broadband_multiscale"
+  },
+  {
+    "system": "lorenz",
+    "seed": 2,
+    "qlnn_best_family": "te_qpinn_qnn",
+    "qlnn_relL2": 0.9772641808795158,
+    "classical_pinn_relL2": 0.9956506928163498,
+    "classical_pinn_train_relL2": 0.9956472949154654,
+    "delta": 0.018386511936833938,
+    "regime": "broadband_multiscale"
+  }
+]

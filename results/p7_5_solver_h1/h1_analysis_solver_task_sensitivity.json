@@ -1,0 +1,25 @@
+{
+  "outcome": "INCONCLUSIVE",
+  "reasoning": "No cells remain in the broad-regime after applying underfit + skyline guards. Pre-reg \u00a77: 'if exclusions remove a regime's support, H1 is reported inconclusive for that regime.'",
+  "bootstrap": null,
+  "guards": {
+    "kept_n": 3,
+    "kept_smooth": 3,
+    "kept_broad": 0,
+    "excluded_underfit": [
+      "lorenz_seed0_neuralode",
+      "lorenz_seed1_neuralode",
+      "lorenz_seed2_neuralode"
+    ],
+    "excluded_skyline_out_of_reach": [
+      "van_der_pol_seed0",
+      "van_der_pol_seed1",
+      "van_der_pol_seed2"
+    ]
+  },
+  "thresholds": {
+    "underfit": 0.5,
+    "skyline": 0.75,
+    "alpha": 0.05
+  }
+}

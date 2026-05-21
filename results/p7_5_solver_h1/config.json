@@ -1,0 +1,16 @@
+{
+  "systems": [
+    "lotka_volterra",
+    "van_der_pol",
+    "lorenz"
+  ],
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "steps": 1500,
+  "n_colloc": 60,
+  "target_params": 60,
+  "scope_note": "P7.5 SOLVER-TASK H1 verdict. THE PRIMARY headline per pre-reg \u00a77 GATING rule 'CONFIRMED iff ... it holds on the SOLVER task'. Forecaster-task verdict from P5 is corroborating evidence."
+}
