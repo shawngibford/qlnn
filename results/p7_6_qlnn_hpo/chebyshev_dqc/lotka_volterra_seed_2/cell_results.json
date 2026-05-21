@@ -1,0 +1,72 @@
+{
+  "family": "chebyshev_dqc",
+  "system": "lotka_volterra",
+  "seed": 2,
+  "runs": [
+    {
+      "family": "chebyshev_dqc",
+      "system": "lotka_volterra",
+      "seed": 2,
+      "lr": 0.001,
+      "train_steps": 1500,
+      "qlnn_relL2": 1.3569491057237166,
+      "final_loss": 5.400147914886475
+    },
+    {
+      "family": "chebyshev_dqc",
+      "system": "lotka_volterra",
+      "seed": 2,
+      "lr": 0.001,
+      "train_steps": 3000,
+      "qlnn_relL2": 1.1979851007807092,
+      "final_loss": 2.9489920139312744
+    },
+    {
+      "family": "chebyshev_dqc",
+      "system": "lotka_volterra",
+      "seed": 2,
+      "lr": 0.005,
+      "train_steps": 1500,
+      "qlnn_relL2": 0.8654472547603617,
+      "final_loss": 1.5884490013122559
+    },
+    {
+      "family": "chebyshev_dqc",
+      "system": "lotka_volterra",
+      "seed": 2,
+      "lr": 0.005,
+      "train_steps": 3000,
+      "qlnn_relL2": 0.13243787952463792,
+      "final_loss": 0.12593059241771698
+    },
+    {
+      "family": "chebyshev_dqc",
+      "system": "lotka_volterra",
+      "seed": 2,
+      "lr": 0.01,
+      "train_steps": 1500,
+      "qlnn_relL2": 0.26472902045703484,
+      "final_loss": 0.3429090082645416
+    },
+    {
+      "family": "chebyshev_dqc",
+      "system": "lotka_volterra",
+      "seed": 2,
+      "lr": 0.01,
+      "train_steps": 3000,
+      "qlnn_relL2": 0.05399574338321712,
+      "final_loss": 0.017640605568885803
+    }
+  ],
+  "hpo_best": {
+    "family": "chebyshev_dqc",
+    "system": "lotka_volterra",
+    "seed": 2,
+    "lr": 0.01,
+    "train_steps": 3000,
+    "qlnn_relL2": 0.05399574338321712,
+    "final_loss": 0.017640605568885803
+  },
+  "hpo_best_relL2": 0.05399574338321712,
+  "default_hpo_relL2": 0.8654472547603617
+}

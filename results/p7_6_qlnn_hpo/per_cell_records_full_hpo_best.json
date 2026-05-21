@@ -1,0 +1,92 @@
+[
+  {
+    "system": "lotka_volterra",
+    "seed": 0,
+    "qlnn_relL2": 0.007431563261303369,
+    "qlnn_source": "P3.6 default-HPO",
+    "classical_pinn_relL2": 0.01167583985934637,
+    "cpinn_source": "P7.5 default-HPO classical PINN",
+    "delta": 0.004244276598043001,
+    "regime": "smooth_periodic"
+  },
+  {
+    "system": "lotka_volterra",
+    "seed": 1,
+    "qlnn_relL2": 0.00294084845578528,
+    "qlnn_source": "P3.6 default-HPO",
+    "classical_pinn_relL2": 0.007814719987897848,
+    "cpinn_source": "P7.5 default-HPO classical PINN",
+    "delta": 0.004873871532112568,
+    "regime": "smooth_periodic"
+  },
+  {
+    "system": "lotka_volterra",
+    "seed": 2,
+    "qlnn_relL2": 0.005657271341201132,
+    "qlnn_source": "HPO-best (lr=0.005, steps=3000, family=qcpinn)",
+    "classical_pinn_relL2": 0.007241970431246685,
+    "cpinn_source": "HPO-best classical PINN (from P7.5 HPO)",
+    "delta": 0.0015846990900455537,
+    "regime": "smooth_periodic"
+  },
+  {
+    "system": "van_der_pol",
+    "seed": 0,
+    "qlnn_relL2": 0.8213402448263368,
+    "qlnn_source": "P3.6 default-HPO",
+    "classical_pinn_relL2": 1.1569162462815592,
+    "cpinn_source": "P7.5 default-HPO classical PINN",
+    "delta": 0.3355760014552224,
+    "regime": "smooth_periodic"
+  },
+  {
+    "system": "van_der_pol",
+    "seed": 1,
+    "qlnn_relL2": 0.7921484386125099,
+    "qlnn_source": "HPO-best (lr=0.001, steps=3000, family=te_qpinn_qnn)",
+    "classical_pinn_relL2": 0.6654138848506164,
+    "cpinn_source": "HPO-best classical PINN (from P7.5 HPO)",
+    "delta": -0.12673455376189358,
+    "regime": "smooth_periodic"
+  },
+  {
+    "system": "van_der_pol",
+    "seed": 2,
+    "qlnn_relL2": 0.8176052896737609,
+    "qlnn_source": "P3.6 default-HPO",
+    "classical_pinn_relL2": 1.0550124941807157,
+    "cpinn_source": "P7.5 default-HPO classical PINN",
+    "delta": 0.23740720450695485,
+    "regime": "smooth_periodic"
+  },
+  {
+    "system": "lorenz",
+    "seed": 0,
+    "qlnn_relL2": 0.9794284624300705,
+    "qlnn_source": "P3.6 default-HPO",
+    "classical_pinn_relL2": 0.9958116340497172,
+    "cpinn_source": "P7.5 default-HPO classical PINN",
+    "delta": 0.01638317161964664,
+    "regime": "broadband_multiscale"
+  },
+  {
+    "system": "lorenz",
+    "seed": 1,
+    "qlnn_relL2": 0.9768661862856822,
+    "qlnn_source": "P3.6 default-HPO",
+    "classical_pinn_relL2": 0.9956565538731516,
+    "cpinn_source": "P7.5 default-HPO classical PINN",
+    "delta": 0.018790367587469325,
+    "regime": "broadband_multiscale"
+  },
+  {
+    "system": "lorenz",
+    "seed": 2,
+    "qlnn_relL2": 0.9738654094280758,
+    "qlnn_source": "HPO-best (lr=0.01, steps=3000, family=te_qpinn_qnn)",
+    "classical_pinn_relL2": 0.9906443755747067,
+    "cpinn_source": "HPO-best classical PINN (from P7.5 HPO)",
+    "delta": 0.01677896614663099,
+    "regime": "broadband_multiscale"
+  }
+]

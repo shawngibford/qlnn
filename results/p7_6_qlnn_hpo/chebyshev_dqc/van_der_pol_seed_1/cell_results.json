@@ -1,0 +1,72 @@
+{
+  "family": "chebyshev_dqc",
+  "system": "van_der_pol",
+  "seed": 1,
+  "runs": [
+    {
+      "family": "chebyshev_dqc",
+      "system": "van_der_pol",
+      "seed": 1,
+      "lr": 0.001,
+      "train_steps": 1500,
+      "qlnn_relL2": 1.3822613844683336,
+      "final_loss": 48.121551513671875
+    },
+    {
+      "family": "chebyshev_dqc",
+      "system": "van_der_pol",
+      "seed": 1,
+      "lr": 0.001,
+      "train_steps": 3000,
+      "qlnn_relL2": 1.2999305391940423,
+      "final_loss": 13.462692260742188
+    },
+    {
+      "family": "chebyshev_dqc",
+      "system": "van_der_pol",
+      "seed": 1,
+      "lr": 0.005,
+      "train_steps": 1500,
+      "qlnn_relL2": 1.228431988303253,
+      "final_loss": 6.094017505645752
+    },
+    {
+      "family": "chebyshev_dqc",
+      "system": "van_der_pol",
+      "seed": 1,
+      "lr": 0.005,
+      "train_steps": 3000,
+      "qlnn_relL2": 1.1948915357557952,
+      "final_loss": 2.4472310543060303
+    },
+    {
+      "family": "chebyshev_dqc",
+      "system": "van_der_pol",
+      "seed": 1,
+      "lr": 0.01,
+      "train_steps": 1500,
+      "qlnn_relL2": 1.1964708549165133,
+      "final_loss": 3.380455493927002
+    },
+    {
+      "family": "chebyshev_dqc",
+      "system": "van_der_pol",
+      "seed": 1,
+      "lr": 0.01,
+      "train_steps": 3000,
+      "qlnn_relL2": 1.1452461338707762,
+      "final_loss": 1.451961636543274
+    }
+  ],
+  "hpo_best": {
+    "family": "chebyshev_dqc",
+    "system": "van_der_pol",
+    "seed": 1,
+    "lr": 0.01,
+    "train_steps": 3000,
+    "qlnn_relL2": 1.1452461338707762,
+    "final_loss": 1.451961636543274
+  },
+  "hpo_best_relL2": 1.1452461338707762,
+  "default_hpo_relL2": 1.228431988303253
+}

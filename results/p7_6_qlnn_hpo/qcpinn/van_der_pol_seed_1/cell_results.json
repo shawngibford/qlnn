@@ -1,0 +1,72 @@
+{
+  "family": "qcpinn",
+  "system": "van_der_pol",
+  "seed": 1,
+  "runs": [
+    {
+      "family": "qcpinn",
+      "system": "van_der_pol",
+      "seed": 1,
+      "lr": 0.001,
+      "train_steps": 1500,
+      "qlnn_relL2": 1.278137724067706,
+      "final_loss": 1.1641823053359985
+    },
+    {
+      "family": "qcpinn",
+      "system": "van_der_pol",
+      "seed": 1,
+      "lr": 0.001,
+      "train_steps": 3000,
+      "qlnn_relL2": 1.2649578539053328,
+      "final_loss": 0.7659553289413452
+    },
+    {
+      "family": "qcpinn",
+      "system": "van_der_pol",
+      "seed": 1,
+      "lr": 0.005,
+      "train_steps": 1500,
+      "qlnn_relL2": 1.137935656839696,
+      "final_loss": 0.33343732357025146
+    },
+    {
+      "family": "qcpinn",
+      "system": "van_der_pol",
+      "seed": 1,
+      "lr": 0.005,
+      "train_steps": 3000,
+      "qlnn_relL2": 1.1884564709896166,
+      "final_loss": 0.08346923440694809
+    },
+    {
+      "family": "qcpinn",
+      "system": "van_der_pol",
+      "seed": 1,
+      "lr": 0.01,
+      "train_steps": 1500,
+      "qlnn_relL2": 0.9352822314249726,
+      "final_loss": 0.3685906231403351
+    },
+    {
+      "family": "qcpinn",
+      "system": "van_der_pol",
+      "seed": 1,
+      "lr": 0.01,
+      "train_steps": 3000,
+      "qlnn_relL2": 0.9732913821136707,
+      "final_loss": 0.31337007880210876
+    }
+  ],
+  "hpo_best": {
+    "family": "qcpinn",
+    "system": "van_der_pol",
+    "seed": 1,
+    "lr": 0.01,
+    "train_steps": 1500,
+    "qlnn_relL2": 0.9352822314249726,
+    "final_loss": 0.3685906231403351
+  },
+  "hpo_best_relL2": 0.9352822314249726,
+  "default_hpo_relL2": 1.137935656839696
+}

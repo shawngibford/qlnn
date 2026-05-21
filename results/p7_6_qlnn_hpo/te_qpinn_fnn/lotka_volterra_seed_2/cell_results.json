@@ -1,0 +1,72 @@
+{
+  "family": "te_qpinn_fnn",
+  "system": "lotka_volterra",
+  "seed": 2,
+  "runs": [
+    {
+      "family": "te_qpinn_fnn",
+      "system": "lotka_volterra",
+      "seed": 2,
+      "lr": 0.001,
+      "train_steps": 1500,
+      "qlnn_relL2": 1.0914527609771691,
+      "final_loss": 4.480620861053467
+    },
+    {
+      "family": "te_qpinn_fnn",
+      "system": "lotka_volterra",
+      "seed": 2,
+      "lr": 0.001,
+      "train_steps": 3000,
+      "qlnn_relL2": 0.7485418908928084,
+      "final_loss": 2.8516643047332764
+    },
+    {
+      "family": "te_qpinn_fnn",
+      "system": "lotka_volterra",
+      "seed": 2,
+      "lr": 0.005,
+      "train_steps": 1500,
+      "qlnn_relL2": 0.5140792426716753,
+      "final_loss": 1.7574635744094849
+    },
+    {
+      "family": "te_qpinn_fnn",
+      "system": "lotka_volterra",
+      "seed": 2,
+      "lr": 0.005,
+      "train_steps": 3000,
+      "qlnn_relL2": 0.23259460257532846,
+      "final_loss": 0.581281840801239
+    },
+    {
+      "family": "te_qpinn_fnn",
+      "system": "lotka_volterra",
+      "seed": 2,
+      "lr": 0.01,
+      "train_steps": 1500,
+      "qlnn_relL2": 0.3014821109156989,
+      "final_loss": 0.8423900008201599
+    },
+    {
+      "family": "te_qpinn_fnn",
+      "system": "lotka_volterra",
+      "seed": 2,
+      "lr": 0.01,
+      "train_steps": 3000,
+      "qlnn_relL2": 0.09881485791868241,
+      "final_loss": 0.128705695271492
+    }
+  ],
+  "hpo_best": {
+    "family": "te_qpinn_fnn",
+    "system": "lotka_volterra",
+    "seed": 2,
+    "lr": 0.01,
+    "train_steps": 3000,
+    "qlnn_relL2": 0.09881485791868241,
+    "final_loss": 0.128705695271492
+  },
+  "hpo_best_relL2": 0.09881485791868241,
+  "default_hpo_relL2": 0.5140792426716753
+}

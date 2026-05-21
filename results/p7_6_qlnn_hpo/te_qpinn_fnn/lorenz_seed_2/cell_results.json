@@ -1,0 +1,72 @@
+{
+  "family": "te_qpinn_fnn",
+  "system": "lorenz",
+  "seed": 2,
+  "runs": [
+    {
+      "family": "te_qpinn_fnn",
+      "system": "lorenz",
+      "seed": 2,
+      "lr": 0.001,
+      "train_steps": 1500,
+      "qlnn_relL2": 0.9883025239638723,
+      "final_loss": 27.362600326538086
+    },
+    {
+      "family": "te_qpinn_fnn",
+      "system": "lorenz",
+      "seed": 2,
+      "lr": 0.001,
+      "train_steps": 3000,
+      "qlnn_relL2": 0.9905350212361583,
+      "final_loss": 19.886457443237305
+    },
+    {
+      "family": "te_qpinn_fnn",
+      "system": "lorenz",
+      "seed": 2,
+      "lr": 0.005,
+      "train_steps": 1500,
+      "qlnn_relL2": 0.9926039710357105,
+      "final_loss": 14.636082649230957
+    },
+    {
+      "family": "te_qpinn_fnn",
+      "system": "lorenz",
+      "seed": 2,
+      "lr": 0.005,
+      "train_steps": 3000,
+      "qlnn_relL2": 0.9943187884084185,
+      "final_loss": 10.229772567749023
+    },
+    {
+      "family": "te_qpinn_fnn",
+      "system": "lorenz",
+      "seed": 2,
+      "lr": 0.01,
+      "train_steps": 1500,
+      "qlnn_relL2": 0.9939666177805608,
+      "final_loss": 11.232515335083008
+    },
+    {
+      "family": "te_qpinn_fnn",
+      "system": "lorenz",
+      "seed": 2,
+      "lr": 0.01,
+      "train_steps": 3000,
+      "qlnn_relL2": 0.994989812303071,
+      "final_loss": 8.137582778930664
+    }
+  ],
+  "hpo_best": {
+    "family": "te_qpinn_fnn",
+    "system": "lorenz",
+    "seed": 2,
+    "lr": 0.001,
+    "train_steps": 1500,
+    "qlnn_relL2": 0.9883025239638723,
+    "final_loss": 27.362600326538086
+  },
+  "hpo_best_relL2": 0.9883025239638723,
+  "default_hpo_relL2": 0.9926039710357105
+}

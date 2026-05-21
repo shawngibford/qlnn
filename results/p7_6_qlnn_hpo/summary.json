@@ -1,0 +1,135 @@
+{
+  "families": [
+    "chebyshev_dqc",
+    "te_qpinn_fnn",
+    "te_qpinn_qnn",
+    "qcpinn"
+  ],
+  "anchor_cells": [
+    "lotka_volterra_seed2",
+    "van_der_pol_seed1",
+    "lorenz_seed2"
+  ],
+  "lrs": [
+    0.001,
+    0.005,
+    0.01
+  ],
+  "train_steps_list": [
+    1500,
+    3000
+  ],
+  "family_sign_stability": {
+    "chebyshev_dqc": {
+      "lotka_volterra_seed2": {
+        "delta_range": [
+          -1.3498699711535604,
+          -0.046916608813060826
+        ],
+        "all_positive": false
+      },
+      "van_der_pol_seed1": {
+        "delta_range": [
+          -0.43889366181040257,
+          -0.20187841121284522
+        ],
+        "all_positive": false
+      },
+      "lorenz_seed2": {
+        "delta_range": [
+          -0.005134820313787314,
+          0.006415436071391611
+        ],
+        "all_positive": false
+      }
+    },
+    "te_qpinn_fnn": {
+      "lotka_volterra_seed2": {
+        "delta_range": [
+          -1.084373626407013,
+          -0.09173572334852612
+        ],
+        "all_positive": false
+      },
+      "van_der_pol_seed1": {
+        "delta_range": [
+          -0.6541468126936995,
+          0.102106471624413
+        ],
+        "all_positive": false
+      },
+      "lorenz_seed2": {
+        "delta_range": [
+          0.0006608805132787277,
+          0.007348168852477466
+        ],
+        "all_positive": true
+      }
+    },
+    "te_qpinn_qnn": {
+      "lotka_volterra_seed2": {
+        "delta_range": [
+          -0.5178975265768678,
+          -0.516945364636914
+        ],
+        "all_positive": false
+      },
+      "van_der_pol_seed1": {
+        "delta_range": [
+          -0.2445117028463163,
+          0.15121928404542107
+        ],
+        "all_positive": false
+      },
+      "lorenz_seed2": {
+        "delta_range": [
+          0.01131160831598621,
+          0.021785283388274013
+        ],
+        "all_positive": true
+      }
+    },
+    "qcpinn": {
+      "lotka_volterra_seed2": {
+        "delta_range": [
+          -0.33422359866506973,
+          0.0014218632289551602
+        ],
+        "all_positive": false
+      },
+      "van_der_pol_seed1": {
+        "delta_range": [
+          -0.3347700014097751,
+          0.00808549123295843
+        ],
+        "all_positive": false
+      },
+      "lorenz_seed2": {
+        "delta_range": [
+          -0.0002808947614317825,
+          0.0008779594869617879
+        ],
+        "all_positive": false
+      }
+    }
+  },
+  "full_hpo_best_h1_outcome": "FALSIFIED",
+  "full_hpo_best_h1_bootstrap": {
+    "delta_smooth_mean": 0.07615858323674746,
+    "delta_broad_mean": 0.01731750178458232,
+    "delta_diff_mean": 0.05884108145216514,
+    "ci_low": -0.05751442865350573,
+    "ci_high": 0.1913238170300995,
+    "n_iter": 10000,
+    "n_smooth": 6,
+    "n_broad": 3,
+    "alpha": 0.05,
+    "smooth_systems": [
+      "lotka_volterra",
+      "van_der_pol"
+    ],
+    "broad_systems": [
+      "lorenz"
+    ]
+  }
+}
