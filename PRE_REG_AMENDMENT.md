@@ -175,6 +175,96 @@ is consistent with the inverted-pattern reading: less-expressive
 ansätze (further from Haar) show larger QLNN advantage on the
 forecaster task.
 
+## Amendment A9 — Symmetric QLNN HPO sensitivity (P7.6 commit 1)
+
+**Audit gap closed:** P7.5 commit 6 swept HPO ONLY for the classical
+PINN baseline (the H1 contrast model). A peer reviewer would
+correctly ask: *"Did you tune the QLNN side symmetrically? If yes
+and the SIGN flips, your verdict isn't robust. If you didn't try,
+the comparison isn't fair under Bowles/Schuld 2024."*
+
+**Amendment:** P7.6 commit 1 runs the symmetric QLNN HPO sweep —
+same anchor cells, same LRs ({1e-3, 5e-3, 1e-2}), same train_steps
+({1500, 3000}) — across all 4 quantum solver families. 72 retrains
+total. Per-family HPO-best per anchor cell is selected, applied to
+the anchor seeds, and a new H1 verdict computed.
+
+**Result (results/p7_6_qlnn_hpo/h1_verdict_full_hpo_best.json):**
+
+  Full-HPO-best H1 verdict (n=9 ODE solver-task):
+    outcome  = FALSIFIED
+    Δ_smooth = +0.0762
+    Δ_broad  = +0.0173
+    Δ_diff   = +0.0588
+    95% CI   = [-0.0575, +0.1913]   (includes 0)
+
+**Key empirical findings:**
+
+1. **te_qpinn_fnn on LV s2** improves substantially with tuning
+   (default 0.524 → HPO-best 0.0988 at lr=1e-2, steps=3000).
+2. **qcpinn on LV s2** reaches 0.0057 at lr=5e-3, steps=3000
+   (~90× better than the P3.6 default-Adam baseline).
+3. **te_qpinn_qnn LV s2 confirmed HPO-INVARIANT structural ceiling**:
+   all 6 HPO combos cluster at 0.524 (range 0.5240–0.5250). The
+   structural trainability claim from P3.5 generalizes.
+4. **All Lorenz s2 cells stay at predict-zero floor (~0.99) across
+   all 24 HPO combos** for all 4 quantum families — chaotic-regime
+   failure is HPO-invariant.
+5. **te_qpinn_fnn / qcpinn on VdP s1** improve substantially with
+   high LR but stay above linear-extrapolation floor.
+
+**Rationale:** with both sides at their HPO-best (the cleanest
+possible Bowles/Schuld 2024 "tune both sides" sensitivity test),
+QLNN does NOT show a regime-dependent advantage. The default-Adam
+n=9 raw CONFIRMED (P7.5 / A7) was sample-size-fragile and
+HPO-fragile. The HPO-symmetric verdict is FALSIFIED. This is the
+methodologically strongest sensitivity point and supersedes the
+n=9 raw-bootstrap CONFIRMED as the paper's principal verdict.
+
+## Amendment A10 — PDE solver-task H1 via existing-data combination (P7.6 commit 2)
+
+**Audit gap closed:** the P7.5 solver-task H1 verdict used only the
+3 ODE solver cells (n=9). The pre-reg §4 hardness ladder lists both
+ODE and PDE systems. P3.7-3.9 had already run 4 quantum families ×
+3 PDEs × 3 seeds + classical-PINN-on-PDEs. That data was on disk and
+unused for the H1 verdict.
+
+**Amendment:** P7.6 commit 2 combines existing P3.7-3.9 data into a
+PDE solver-task H1 verdict (n=9), then combines it with the P7.5
+ODE solver-task data into a combined ODE+PDE verdict (n=18, the
+largest H1 bootstrap sample in the paper).
+
+**Results:**
+
+  PDE-only solver-task H1 (n=9):
+    outcome  = FALSIFIED
+    (CI includes 0)
+
+  Combined ODE+PDE solver-task H1 (n=18, n_smooth=12, n_broad=6):
+    outcome  = FALSIFIED
+    Δ_smooth = +0.0674
+    Δ_broad  = +0.0358
+    Δ_diff   = +0.0316
+    95% CI   = [-0.0400, +0.1088]   (includes 0)
+
+**Key empirical finding:** doubling the bootstrap sample size from
+n=9 to n=18 moved the CI from EXCLUDING zero (P7.5 raw CONFIRMED)
+to INCLUDING zero (P7.6 n=18 FALSIFIED). The smaller-n CONFIRMED
+was sample-size-fragile. The n=18 FALSIFIED is the headline verdict.
+
+**Per-PDE highlights:** te_qpinn_qnn_2d on Allen-Cahn shows the
+strongest quantum advantage (Δ ≈ +0.149, +0.014, -0.002 across
+seeds). qcpinn_2d wins on Heat + Burgers (Δ ≈ +0.003-0.032). But
+aggregated over all 18 cells with paired-bootstrap, the Δ_smooth −
+Δ_broad contrast straddles zero.
+
+**Rationale:** the existing-data combination is zero new compute,
+uses pre-registered metrics (relative_l2), and respects the original
+H1 regime tagging (smooth_periodic for heat/burgers/LV/VdP;
+broadband_multiscale for allen_cahn/lorenz). A reviewer asking
+"why only n=9?" gets the strongest answer: n=18, FALSIFIED, CI
+tightened relative to n=9 default-Adam.
+
 ---
 
 ## Summary table
@@ -189,11 +279,25 @@ forecaster task.
 | A6 | underfit guard active on SOLVER only | DISCLOSED |
 | A7 | report strict (INCONCLUSIVE) + raw (CONFIRMED) | DISCLOSED |
 | A8 | H3 trend (ρ=+0.518) not significant at n=9 | DISCLOSED |
+| A9 | symmetric QLNN HPO (P7.6 c1): FALSIFIED at HPO-best | SUPERSEDES |
+| A10 | combined ODE+PDE n=18 (P7.6 c2): FALSIFIED | SUPERSEDES |
 
-**None of these amendments change the SIGN or qualitative nature of
-the headline verdicts.** They tighten the methodological disclosure
-to peer-review-grade transparency.
+**Headline verdict update (post-P7.6):**
 
-The paper's headline outcomes — SOLVER-task H1 CONFIRMED (raw) +
-FORECASTER-task H1 FALSIFIED — are robust to every amendment listed
-above.
+The paper's PRIMARY verdict is now the **combined ODE+PDE n=18
+solver-task H1 = FALSIFIED, CI [-0.04, +0.11]** (A10). The full-
+HPO-best n=9 verdict (A9) corroborates: even with both sides tuned,
+QLNN does not show a regime-dependent advantage at matched-capacity
+at this compute budget.
+
+The original P7.5 raw n=9 CONFIRMED (A7) is reported as the
+underlying empirical pattern (every (system, seed) cell had Δ > 0),
+but the final scientific verdict is FALSIFIED at the
+methodologically-strongest sensitivity points (A9 + A10).
+
+Per pre-reg §7 ("Published as a rigorous mechanistic null"), the
+FALSIFIED outcome is independently publishable and directly extends
+the Bowles/Schuld 2024 critique of QML benchmarking with a
+pre-registered, matched-baseline, paired-bootstrap demonstration
+that the regime-dependent advantage hypothesis does NOT survive
+HPO-symmetric scrutiny at n=18.
