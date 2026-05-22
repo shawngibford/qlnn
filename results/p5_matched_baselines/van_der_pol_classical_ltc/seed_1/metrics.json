@@ -1,0 +1,25 @@
+{
+  "system": "van_der_pol",
+  "family": "classical_ltc",
+  "seed": 1,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 51,
+  "sampled_dt": 0.1,
+  "rollout_steps": 200,
+  "dt_step": 0.1,
+  "relative_l2": 1.2163960112448926,
+  "vpt_step": 4,
+  "vpt_time": 0.4,
+  "vpt_lyapunov": null,
+  "spectral_error": 1.1352197096974017,
+  "invariant_drift_final": null,
+  "persistence_floor_relative_l2": 1.34648773242043,
+  "train_loss_history": [
+    0.3009454309940338,
+    0.29583877325057983,
+    0.2863195538520813,
+    0.2770101726055145,
+    0.25815486907958984
+  ]
+}

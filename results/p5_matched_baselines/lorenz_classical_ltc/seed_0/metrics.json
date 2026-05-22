@@ -1,0 +1,25 @@
+{
+  "system": "lorenz",
+  "family": "classical_ltc",
+  "seed": 0,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 61,
+  "sampled_dt": 0.05,
+  "rollout_steps": 200,
+  "dt_step": 0.05,
+  "relative_l2": 0.8551827783670534,
+  "vpt_step": 2,
+  "vpt_time": 0.1,
+  "vpt_lyapunov": 0.09060000000000001,
+  "spectral_error": 1.9182275043565564,
+  "invariant_drift_final": null,
+  "persistence_floor_relative_l2": 0.45480979577386477,
+  "train_loss_history": [
+    10.233919143676758,
+    10.060457229614258,
+    9.796989440917969,
+    9.498266220092773,
+    9.069944381713867
+  ]
+}
