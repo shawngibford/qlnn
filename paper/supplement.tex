@@ -1,0 +1,433 @@
+% =====================================================================
+% PRX Quantum supplement — Regime-dependent quantum PINN benchmarking
+% =====================================================================
+% Compile: pdflatex supplement && pdflatex supplement
+% Or:      bash paper/build_supplement.sh
+%
+% Every numerical claim here is verified by
+% scripts/verify_paper_integrity.py against committed JSONs.
+% =====================================================================
+\documentclass[%
+  prx,
+  amsmath,
+  amssymb,
+  aps,
+  reprint,
+  superscriptaddress,
+  floatfix,
+]{revtex4-2}
+
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{siunitx}
+\usepackage{microtype}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+
+% Mirror the custom commands used in main.tex.
+\newcommand{\relltwo}{\mathrm{relL}^2}
+\newcommand{\dsmooth}{\Delta_{\mathrm{smooth}}}
+\newcommand{\dbroad}{\Delta_{\mathrm{broad}}}
+\newcommand{\ddiff}{\Delta_{\mathrm{diff}}}
+\newcommand{\fhn}{FitzHugh--Nagumo}
+\newcommand{\lv}{Lotka--Volterra}
+\newcommand{\vdp}{Van der Pol}
+\newcommand{\ac}{Allen--Cahn}
+
+\begin{document}
+
+\title{Supplementary Material:\\
+  Regime-dependent advantage in quantum physics-informed neural
+  networks: a pre-registered comparison on an ODE/PDE hardness
+  ladder}
+
+\author{Shawn Gibford}
+\email{gibfords@gmail.com}
+\affiliation{Independent}
+
+\date{\today}
+
+\maketitle
+
+\tableofcontents
+
+% =====================================================================
+\section{Circuit specifications and faithfulness manifest}
+\label{sup:circuit-specs}
+
+The four quantum-PINN ansatz families used as solver/forecaster
+encoders in the main text are each implemented against published
+specifications; the binding manifest is
+\texttt{refs/CIRCUIT\_SPECS.md} in the open-source release.
+Table~\ref{sup:tab:circuits} summarizes the per-family
+configuration used throughout the paper.
+
+\begin{table*}[t]
+\centering
+\caption{Quantum-PINN ansatz roster. Per-scalar-circuit parameter
+counts. Ansätze marked ``2D port'' add a split-qubit coordinate
+encoding to the same base circuit (P3.9 design).}
+\label{sup:tab:circuits}
+\small
+\begin{tabular}{lllrrl}
+\toprule
+Family & Source & Cell paradigm & PQC params & Classical params & Notes \\
+\midrule
+\texttt{data\_reuploading} & P\'erez-Salinas 2020 & encoder + LiquidQuantumCell &
+  60 & 0 & 4 qubits, 5 layers (ODE) \\
+\texttt{hardware\_efficient} & registry default & encoder + LiquidQuantumCell &
+  60 & 0 & ring entanglement \\
+\texttt{strongly\_entangling} & PennyLane native & encoder + LiquidQuantumCell &
+  60 & 0 & alias of data\_reuploading in registry \\
+\texttt{brickwall} & registry default & encoder + LiquidQuantumCell &
+  60 & 0 & adjacent-pair CZ pattern \\
+\texttt{te\_qpinn\_fnn} & Berger 2025 & FNN encoder + 4-qubit PQC &
+  60 & 100 & 2D port: \texttt{te\_qpinn\_fnn\_2d} \\
+\texttt{te\_qpinn\_qnn} & Berger 2025 & QNN encoder + 4-qubit PQC &
+  84 & 0 & zero classical params; 2D port available \\
+\texttt{qcpinn} & Farea 2025 & Classical pre/post + 4-qubit PQC &
+  15 & 706 & largest classical overhead; 2D port available \\
+\texttt{chebyshev\_dqc\_2d} & P3.7 design & 2D Chebyshev tower + HEA &
+  -- & 0 & solver-task only, $n_t = n_x = 4$ qubits \\
+\texttt{rf\_qrc} & Ahmed 2024 & Frozen reservoir + ridge readout &
+  0 (trainable) & varies & non-liquid by construction (fixed leak\_rate) \\
+\texttt{non\_liquid\_<ansatz>} & this work (P7.11) & encoder + NonLiquidQuantumCell &
+  same as base $-Q$ & same & $\tau$-ablated; 4 variants \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Cell-level dynamics, all variants}
+
+The hidden-state dynamics inside the Diffrax integration step (for
+the forecaster task; the solver task does not integrate a hidden
+state) are:
+
+\begin{align}
+\text{LiquidQuantumCell:}\quad
+  \frac{dh}{dt} &= -\!\left(\frac{1}{\tau} + q(x)\right) \odot h
+                 + A \odot q(x) \\[2pt]
+\text{NonLiquidQuantumCell:}\quad
+  \frac{dh}{dt} &= -q(x) \odot h + A \odot q(x) \\[2pt]
+\text{ClassicalLTCCell:}\quad
+  \frac{dh}{dt} &= -\frac{1}{\tau} \odot h
+                 + \mathrm{MLP}([h, x]) \\[2pt]
+\text{PlainNeuralODECell:}\quad
+  \frac{dh}{dt} &= \mathrm{MLP}([h, x])
+\end{align}
+
+The two pairs (LQC vs NLQC) and (LTC vs PlainNeuralODE) differ by
+exactly the $-(1/\tau) \odot h$ term. The cell-level math-identity
+test (\texttt{tests/qlnn\_/test\_non\_liquid\_quantum\_cell.py})
+verifies this identity numerically at random probe points.
+
+% =====================================================================
+\section{Per-cell error tables, full precision}
+\label{sup:per-cell}
+
+\subsection{Solver-task ODE matrix ($4 \times 4 \times 3 = 48$ cells)}
+\label{sup:solver-ode}
+
+Table~\ref{sup:tab:solver-ode} reports relative-$L^2$ error per
+(family, system, seed) at full 4-decimal precision. Best-per-row
+quantum family is bolded.
+
+\begin{table*}[t]
+\centering
+\caption{Solver-task ODE per-cell error. Bold = per-row best quantum.}
+\label{sup:tab:solver-ode}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lc|cccc|c}
+\toprule
+System & Seed & cheb & fnn & qnn & qcp & cPINN \\
+\midrule
+\lv{} & 0 & 0.0996 & 0.0879 & 0.5242 & \textbf{0.0074} & 0.0117 \\
+\lv{} & 1 & 0.1161 & 0.1407 & 0.5229 & \textbf{0.0029} & 0.0078 \\
+\lv{} & 2 & 0.1024 & 0.1409 & 0.5240 & \textbf{0.0070} & 0.0071 \\
+\vdp{} & 0 & 0.9064 & \textbf{0.8213} & 1.1796 & 3.4025 & 1.1569 \\
+\vdp{} & 1 & 1.1516 & 0.8652 & \textbf{0.7622} & 0.8674 & 0.9434 \\
+\vdp{} & 2 & 0.9087 & \textbf{0.8176} & 1.1890 & 2.6739 & 1.0550 \\
+Lorenz & 0 & 1.0013 & 0.9950 & \textbf{0.9794} & 0.9957 & 0.9958 \\
+Lorenz & 1 & 0.9994 & 0.9947 & \textbf{0.9769} & 0.9957 & 0.9957 \\
+Lorenz & 2 & 0.9966 & 0.9946 & \textbf{0.9773} & 0.9943 & 0.9957 \\
+\fhn{} & 0 & 0.5311 & 0.4521 & \textbf{0.3270} & 1.2126 & 0.6398 \\
+\fhn{} & 1 & 0.6152 & 0.3903 & \textbf{0.3560} & 1.5467 & 0.6410 \\
+\fhn{} & 2 & 0.6165 & 0.6248 & \textbf{0.3290} & 1.6251 & 1.3265 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Solver-task PDE matrix ($4 \times 4 \times 3 = 48$ cells)}
+\label{sup:solver-pde}
+
+\begin{table*}[t]
+\centering
+\caption{Solver-task PDE per-cell error.}
+\label{sup:tab:solver-pde}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lc|cccc|c}
+\toprule
+PDE & Seed & cheb\_2d & fnn\_2d & qnn\_2d & qcp\_2d & cPINN \\
+\midrule
+Heat & 0 & 0.0553 & 0.0023 & 0.0455 & \textbf{0.0010} & 0.0054 \\
+Heat & 1 & 0.0560 & 0.0031 & 0.0455 & \textbf{0.0020} & 0.0046 \\
+Heat & 2 & 0.0565 & \textbf{0.0013} & 0.0458 & 0.0020 & 0.0036 \\
+Burgers smooth & 0 & 0.3475 & 0.0146 & 0.3647 & \textbf{0.0112} & 0.0428 \\
+Burgers smooth & 1 & 0.3522 & \textbf{0.0126} & 0.3543 & 0.0160 & 0.0191 \\
+Burgers smooth & 2 & 0.3742 & 0.0246 & 0.3556 & \textbf{0.0206} & 0.0187 \\
+\ac{} & 0 & 0.5783 & 0.5514 & \textbf{0.0528} & 0.8956 & 0.2018 \\
+\ac{} & 1 & 0.5200 & 0.5345 & \textbf{0.0489} & 0.5620 & 0.0633 \\
+\ac{} & 2 & 0.6146 & 0.0927 & \textbf{0.0534} & 0.4936 & 0.0514 \\
+Burgers shock & 0 & 0.4282 & 0.2507 & 0.4268 & \textbf{0.2408} & 0.1682 \\
+Burgers shock & 1 & 0.4385 & 0.1589 & 0.4227 & \textbf{0.1526} & 0.2730 \\
+Burgers shock & 2 & 0.4168 & \textbf{0.1630} & 0.4473 & 0.2553 & 0.1270 \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+\subsection{Forecaster-task complete 2$\times$2 matrix ($n=9$)}
+\label{sup:forecaster}
+
+The body's Table~\ref{tab:forecaster-matrix} reports the all-to-all
+5-quantum-family $\times$ 4-classical-baseline matrix. Here we add
+the four non-liquid quantum forecaster columns (P7.11) so the full
+2$\times$2 decomposition is visible at the per-cell level.
+
+\begin{table*}[t]
+\centering
+\caption{Forecaster-task non-liquid quantum cells (P7.11).
+Same training budget and adapter as the liquid forecasters in
+the body's Table~\ref{tab:forecaster-matrix}; only the cell's
+$\tau$-leak removed.}
+\label{sup:tab:forecaster-nonliquid}
+\footnotesize
+\begin{tabular}{lc|cccc}
+\toprule
+System & Seed & nl\_dataru & nl\_hweff & nl\_stngent & nl\_brick \\
+\midrule
+\lv{} & 0 & 0.5830 & 0.6455 & 0.5830 & 0.7732 \\
+\lv{} & 1 & 0.7951 & 0.7196 & 0.7951 & 0.7057 \\
+\lv{} & 2 & 0.6482 & 0.6791 & 0.6482 & 0.3088 \\
+\vdp{} & 0 & 1.4067 & 1.2307 & 1.4067 & --- \\
+\vdp{} & 1 & 9.6720 & --- & 9.6720 & --- \\
+\vdp{} & 2 & 1.2035 & --- & 1.2035 & --- \\
+Lorenz & 0 & 1.2807 & 1.2699 & 1.2807 & 1.3128 \\
+Lorenz & 1 & 0.9913 & 0.5100 & 0.9913 & 0.5025 \\
+Lorenz & 2 & 1.0768 & 1.0544 & 1.0768 & 1.1571 \\
+\bottomrule
+\end{tabular}\\[2pt]
+\footnotesize Note: \texttt{nl\_stngent} reproduces
+\texttt{nl\_dataru} exactly because both dispatch the same
+registered ansatz under the hood (pre-existing behavior of the
+ansatz registry; see \texttt{src/qlnn\_/circuits/protocol.py}).
+``---'' marks cells where rollout diverged beyond a stable
+relative-$L^2$ measurement.
+\end{table*}
+
+% =====================================================================
+\section{Bootstrap diagnostics and guard reports}
+\label{sup:bootstrap}
+
+All paired-bootstrap intervals are computed via
+\texttt{src/quantum\_liquid\_neuralode/evaluation/h1\_verdict.py}
+with $n_\mathrm{iter} = 10{,}000$, $\alpha = 0.05$ (95\% percentile
+CI), and a fixed seed for reproducibility. The skyline guard uses
+threshold $0.5$ (amendment A1) and excludes cells where the
+known-RHS least-squares fit cannot reach the threshold.
+
+\subsection{Per-bin sample counts (post-guard)}
+
+Table~\ref{sup:tab:bins} reports the kept-sample sizes per regime
+bin for each headline verdict.
+
+\begin{table}[h]
+\centering
+\caption{Post-guard sample sizes per regime bin. The combined
+n=24 verdict (PRIMARY SOLVER) is the largest sample in the paper.}
+\label{sup:tab:bins}
+\small
+\begin{tabular}{lrr}
+\toprule
+Verdict & $n_\mathrm{smooth}$ & $n_\mathrm{broad}$ \\
+\midrule
+P5 forecaster (4-fam) & 6 & 3 \\
+P7.5 solver raw n=9 & 6 & 3 \\
+P7.6 combined n=18 & 12 & 6 \\
+P7.6 HPO-best n=9 & 6 & 3 \\
+P7.6 PDE-only n=9 & 6 & 3 \\
+P7.8 full ladder n=24 & 12 & 12 \\
+P7.10 forecaster combined (5-fam) & 6 & 3 \\
+P7.11 all decomposition verdicts & 6 & 3 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Algebraic identities, exact}
+
+Two per-cell identities, verified by the integrity script with
+tolerance $10^{-3}$:
+
+\begin{align}
+\Delta_\mathrm{combined}
+  &= \Delta_\mathrm{quantum\_via\_LTC} + \Delta_\mathrm{liquid\_via\_classical}
+  \notag \\
+  &= -0.6160 + 0.1153 = -0.5007 \checkmark \\[4pt]
+\Delta_\mathrm{combined}
+  &= \Delta_\mathrm{liquid\_via\_quantum} + \Delta_\mathrm{quantum\_via\_nonliquid}
+  \notag \\
+  &= -0.3339 + (-0.1668) = -0.5007 \checkmark
+\end{align}
+
+Both identities are derived from the same per-cell records; only
+the slot-assignment in the bootstrap differs. The exactness
+($|\text{diff}| < 10^{-3}$) is the cleanest verification that the
+decomposition is a real mathematical structure, not a sampling
+artifact.
+
+% =====================================================================
+\section{Reproduction and audit}
+\label{sup:repro}
+
+\subsection{One-command reproduction}
+
+The entire benchmark regenerates from scratch via:
+\begin{verbatim}
+bash scripts/reproduce_paper.sh
+\end{verbatim}
+Estimated wall-clock on a single MacBook Pro M1: approximately
+8\,hours. Each sweep is independent and the script is structured
+so individual phases (P3.5--P7.11) can be re-run in isolation.
+
+\subsection{Mechanical integrity gate}
+
+\begin{verbatim}
+PYTHONPATH=src .venv/bin/python \
+  scripts/verify_paper_integrity.py
+\end{verbatim}
+The script reads committed JSON files from \texttt{results/} and
+matches each cited numerical claim in the paper body against its
+on-disk value with explicit tolerances. Returns exit-0 if and only
+if every claim verifies. At the submission commit the script gates
+16+ $H_1$ outcomes (5 solver-task sensitivity points + 5
+forecaster-task decomposition verdicts + 3 PDE-only and
+ODE-only sub-verdicts) plus the two algebraic identities and the
+H3 mechanism trend.
+
+\subsection{GitHub release tags}
+
+\begin{itemize}
+  \item \texttt{v0.1-prepaper-rigor} — post-P7.6 (HPO symmetry + 16
+        gated outcomes). Anchored at commit \texttt{2309faa}.
+  \item \texttt{v0.2-airtight-matrix} — post-P7.8 (full ladder
+        n=24 PRIMARY SOLVER verdict + Kuramoto/KdV deferral
+        documentation). Anchored at commit \texttt{79cf435}.
+  \item \texttt{v1.0-paper-draft} — submission anchor (to be
+        created at acceptance / preprint posting).
+\end{itemize}
+
+Repository: \url{https://github.com/shawngibford/qlnn}.
+
+% =====================================================================
+\section{Pre-registration and amendments}
+\label{sup:prereg}
+
+The full pre-registration document is at
+\texttt{ODE\_PDE\_PRE\_REG.md} in the repository (locked
+2026-05-19 before any benchmark results were generated;
+SHA stamped). Section~7's decision rule is applied mechanically by
+\texttt{verify\_paper\_integrity.py}.
+
+The complete amendment record (A1--A13) is at
+\texttt{PRE\_REG\_AMENDMENT.md}. Table~\ref{sup:tab:amendments}
+summarizes the headline status of each amendment.
+
+\begin{table*}[t]
+\centering
+\caption{Pre-registration amendments (A1--A13). Status column
+flags PRIMARY = canonical headline verdict; SUPERSEDED = the
+amendment is documented but a later amendment takes precedence
+for the paper's narrative; DISCLOSED = methodological choice
+made open without superseding.}
+\label{sup:tab:amendments}
+\small
+\begin{tabular}{lll}
+\toprule
+\# & Subject & Status \\
+\midrule
+A1 & skyline\_threshold = 0.5 & LOCKED \\
+A2 & $n=3$ seeds; 3-then-4 ODE systems & DISCLOSED \\
+A3 & fixed hyperparameters $\to$ sensitivity sweep added at P7.6 & DISCLOSED + sensitivity \\
+A4 & MLP capacity $3.3\times$ violates §6 factor-of-2 (conservative direction) & DISCLOSED \\
+A5 & \vdp{} at $\mu=5$ near learnability boundary & DISCLOSED \\
+A6 & underfit guard active on solver only & DISCLOSED \\
+A7 & strict-vs-raw verdict reporting at P7.5 & DISCLOSED \\
+A8 & H3 trend $\rho = +0.518$ not significant at $n=9$; LOO-robust & DISCLOSED \\
+A9 & symmetric QLNN HPO (P7.6 c1) & SUPERSEDED-BY-A11 \\
+A10 & combined ODE+PDE n=18 (P7.6 c2) & SUPERSEDED-BY-A11 \\
+A11 & full-ladder n=24 sign-flip (P7.8) & \textbf{PRIMARY SOLVER} \\
+A12 & classical LTC + 3-verdict forecaster decomposition (P7.10) & PRIMARY FORECASTER (via classical path) \\
+A13 & non-liquid QLNN + complete 2$\times$2 + $\tau$-cross-check disagreement (P7.11) & \textbf{PRIMARY FORECASTER (complete)} \\
+\bottomrule
+\end{tabular}
+\end{table*}
+
+% =====================================================================
+\section{Deferred follow-up work}
+\label{sup:deferred}
+
+Two pre-registered systems and three optimization techniques are
+deferred to the follow-up paper. Each is documented here with
+its current state (where applicable, the mechanism gate has been
+cleared so the follow-up can proceed without architectural risk).
+
+\paragraph{Kuramoto (12-dimensional coupled oscillators).}
+Per-component scalar circuits scale linearly with state dimension.
+At our default config (4 qubits per component, $L=1$
+reuploading), a 12D system projects to $\approx 7$\,hr per cell.
+The per-component dispatcher works correctly (single-cell smoke
+verified); the full sweep is the follow-up paper's first compute
+item.
+
+\paragraph{KdV (Korteweg--de Vries, $u_t + 6 u u_x + u_{xxx} = 0$).}
+Third-order spatial derivative requires triple-nested
+reverse-mode autodiff (\texttt{jacrev}$^3$) through the QNode.
+The mechanism gate at \texttt{scripts/run\_p7\_8\_kdv\_gate.py}
+PASSED: $u_{xxx}$ values are finite and non-trivial, JIT compile
+takes 4.55\,s, and the per-point cost ratio is $0.43\times$ the
+baseline second-order autodiff (XLA fuses the third derivative
+tightly). The integrated training cost remains prohibitive at
+$\approx 12$\,s per gradient step, projecting $\approx 8$\,hr per
+seed across the four quantum families + classical PINN baseline.
+
+\paragraph{Quantum Natural Gradient~\cite{stokes2020quantum}.}
+Targets the quantum-circuit training-inefficiency identified by
+the LTC decomposition's $\Delta_\mathrm{quantum\_via\_LTC} =
+-0.616$. Uses the Quantum Fisher Information matrix as the
+optimizer preconditioner.
+
+\paragraph{Causal training weighting (Wang, Sankaran,
+Perdikaris)~\cite{wang2022causality}.}
+Weights collocation points by inverse time-order so that residuals
+at early times converge first. Targets the \vdp{} stiff-dynamics
+failure mode (where multiple cells diverge to
+$\relltwo > 1$ at the program's compute budget).
+
+\paragraph{Higher data-reuploading depth.}
+The H3 analysis found Fourier $K_{\max} = 3$ at $L = 1$ across
+all four ansätze: at the theoretical ceiling
+$K_{\max} = L \cdot n$ with $L=1, n=4$. The
+Schuld--Sweke--Meyer relation predicts a 5-fold increase
+in accessible Fourier bandwidth at $L = 5$. This is the most
+direct test of whether the LTC decomposition's
+$\Delta_\mathrm{liquid\_via\_classical} = +0.115$ smooth-bin
+inductive bias can be recovered by giving the quantum side more
+expressivity.
+
+% =====================================================================
+\bibliographystyle{apsrev4-2}
+\bibliography{references}
+
+\end{document}
