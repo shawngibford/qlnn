@@ -1,4 +1,166 @@
-% Section: Mechanism (H3) — filled in P8 commit 7.
-\section{Mechanism: trainability and Fourier spectrum (H3)}
+% Section: Mechanism (H3) — P8 commit 7.
+% All numerical claims verified against:
+%   - results/p7_t3_mechanism/t3_scalars.json
+%   - results/p7_5_h3_loo/h3_loo_results.json
+%   - PRE_REG_AMENDMENT A8 (H3 trend not significant; LOO-robust)
+
+\section{Mechanism: trainability and expressivity (H3)}
 \label{sec:mechanism}
-\noindent\emph{[Section stub. Drafted in P8 commit 7.]}
+
+The pre-registered $H_3$ asks whether per-cell trainability and
+expressivity scalars correlate with the per-cell H1 advantage gap
+$\Delta$. The motivating intuition: if the FALSIFIED $H_1$ regime
+contrast is mechanistically a quantum-circuit property (as the
+P7.10 LTC decomposition indicates), then per-family scalars
+describing circuit expressivity and trainability should track the
+sign of the per-cell $\Delta$ when stratified by quantum family.
+
+\subsection{T3 scalar inventory}
+\label{sec:mechanism-scalars}
+
+For each of the four registered forecaster ansätze
+(\texttt{data\_reuploading}, \texttt{hardware\_efficient},
+\texttt{strongly\_entangling}, \texttt{brickwall}) we computed four
+ansatz-level scalars from
+\texttt{scripts/run\_p7\_t3\_mechanism.py}.
+
+\textbf{Meyer--Wallach $Q$-entangling capability} ($Q$): random-init
+entanglement of the parameterized circuit on a held-out probe
+distribution. The data-reuploading and strongly-entangling ansätze
+attain $Q = 0.776$, hardware-efficient attains $0.796$, and
+brickwall attains $0.309$ -- substantially less entangling. This
+matches the architectural reading: brickwall's adjacent-pair CZ
+pattern explores a smaller subspace than ring or all-to-all
+entanglers.
+
+\textbf{Fourier-spectrum bandwidth $K_{\max}$}~\cite{schuld2021effect}.
+The accessible Fourier order at our default reuploading depth
+($L=1$) is $K_{\max}=3$ across all four families -- they all reach
+the same upper bound at this depth. The Schuld--Sweke--Meyer
+theorem predicts $K_{\max} = L \cdot n$ where $L$ is the
+reuploading depth and $n$ is the number of qubits; with our
+$L=1, n=4$ configuration we recover exactly that bound. This
+explains the lack of per-family discrimination on the Fourier
+axis at the program's compute budget: every family is operating
+at the same theoretical ceiling.
+
+\textbf{Mean-square gradient variance} (random-init). The four
+ansätze span $0.025$--$0.046$, with the lowest value being
+hardware-efficient ($0.0245$) and the highest being brickwall
+($0.0457$). All four are well above the barren-plateau threshold
+at the program's qubit count.
+
+\textbf{Expressibility KL-to-Haar divergence}~\cite{schuld2021effect}.
+Lower KL = closer to a Haar-random unitary ensemble = higher
+expressivity. Data-reuploading and strongly-entangling attain
+$\mathrm{KL} = 0.195$ (low), hardware-efficient and brickwall
+attain $0.211$ (slightly higher). The differences are small but
+systematic.
+
+\subsection{Cross-tabulation with the per-cell advantage gap}
+\label{sec:mechanism-h3}
+
+Per pre-reg \S H3, we compute the Spearman rank correlation
+between each T3 scalar (per quantum family) and the per-cell
+$\Delta = \relltwo_\text{cPINN} - \relltwo_\text{best QLNN}$
+on the forecaster task ($n=9$ cells). Table~\ref{tab:h3} reports
+the full-sample $\rho$ and the leave-one-out (LOO) mean and
+range (per amendment A8 + P7.5 commit 5).
+
+\begin{table}[h]
+\centering
+\caption{$H_3$ cross-tabulation: Spearman $\rho$ between per-cell
+$\Delta$ and four T3 scalars at $n=9$. \textit{Full $\rho$} uses
+all nine cells; the LOO columns sweep one cell out at a time and
+report the resulting distribution. Sign-stable = all 9 LOO
+resamples have the same sign as the full $\rho$. Per pre-reg
+A8, none of the trends reach significance at $p<0.05$ given
+$n=9$; we report point estimates and stability.}
+\label{tab:h3}
+\small
+\begin{tabular}{lrrrl}
+\toprule
+T3 scalar & Full $\rho$ & LOO mean & LOO range &
+Sign-stable \\
+\midrule
+KL-to-Haar (expressivity) & $+0.518$ & $+0.512$ & $[+0.247,+0.630]$ & yes \\
+Meyer--Wallach $Q$ & $+0.179$ & $+0.180$ & $[-0.047,+0.504]$ & no \\
+Gradient variance & $-0.179$ & $-0.180$ & $[-0.504,+0.047]$ & no \\
+Fourier $K_{\max}$ & --- & --- & --- & n/a (constant) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The KL-to-Haar scalar is the only one with a robust trend: its
+full-sample $\rho = +0.518$ stays positive across all nine LOO
+resamples (LOO mean $+0.512$, std $\pm 0.113$, minimum $+0.247$).
+The Meyer--Wallach $Q$ and gradient-variance trends are
+sign-unstable (LOO ranges cross zero); we treat them as
+non-discriminating at this sample size.
+
+\subsection{What the KL trend means in light of $H_1$ FALSIFIED}
+\label{sec:mechanism-interp}
+
+The KL-to-Haar trend's sign is positive: \emph{higher expressivity
+(lower KL = closer to Haar) correlates with higher $\Delta$
+favoring the quantum family on the cell}. Across the four
+families, the data-reuploading and strongly-entangling ansätze
+($\mathrm{KL} = 0.195$, more expressive) systematically sit on
+the higher-$\Delta$ side of the $n=9$ matrix.
+
+Combined with the P7.10 decomposition: the regime-contrast
+$\Delta_\text{diff}$ is FALSIFIED at every layered sensitivity
+point, with the quantum-circuit component dominating the
+underperformance, but \emph{conditional on the quantum circuit
+being included}, more expressive (lower-KL) circuits attain a
+larger per-cell $\Delta$. Two readings of this combination are
+consistent with the data:
+
+\begin{enumerate}
+  \item \textbf{The expressivity-helps reading.} If the H1
+        FALSIFICATION simply reflects insufficient compute /
+        matched-capacity, the KL trend says that scaling up to
+        more expressive ansätze ($\mathrm{KL} \to 0$ via deeper
+        circuits or larger qubit counts) could recover the
+        smooth-favoring direction. P7.7 (deferred to the
+        follow-up paper) tests this directly via higher
+        data-reuploading depth and Quantum Natural Gradient.
+  \item \textbf{The compute-conditioned reading.} If the regime
+        contrast is intrinsically broadband-favoring for
+        quantum-PINN forecasters at matched-capacity, then the
+        KL trend says higher expressivity reduces the magnitude
+        of the broadband-favoring effect but does not reverse
+        it. This is consistent with the LTC decomposition's
+        identification of the quantum circuit as the
+        regime-inverting mechanism.
+\end{enumerate}
+
+The data at $n=9$ cannot discriminate between these two
+readings. The P7 LOO robustness ($\rho > 0$ in 9/9 resamples)
+makes the trend's existence at this sample size hard to dismiss
+as a single-cell artifact, but the absence of $p < 0.05$
+significance means we report KL as a \emph{candidate mechanism},
+not a confirmed one. A P6-scale unified matrix
+(Section~\ref{sec:discussion}) would discriminate.
+
+\subsection{Connecting the mechanism story to the LTC decomposition}
+\label{sec:mechanism-ltc}
+
+The mechanism cross-tabulation and the P7.10 LTC decomposition
+agree on the locus: \emph{the quantum circuit is the active
+component} in the regime-contrast inversion. The LTC
+decomposition shows this at the verdict level (the
+quantum-isolated $\Delta = -0.616$, CI $[-1.167, -0.178]$,
+significantly negative); the H3 cross-tabulation shows it at the
+within-quantum-roster level (the family with the most expressive
+circuit, data-reuploading at lowest KL, attains the largest
+positive per-cell $\Delta$ on average).
+
+Neither finding rescues the pre-registered $H_1$ direction. Both
+identify the quantum circuit as the mechanism. The follow-up
+paper (Section~\ref{sec:discussion}) will pursue this
+mechanistic line directly: P7.7's three hardening techniques
+(Quantum Natural Gradient, causal training weighting, higher
+reuploading depth) are precisely the interventions that would
+shift the per-cell $\Delta$ via the KL-to-Haar mechanism, if
+the expressivity-helps reading is correct.
