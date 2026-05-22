@@ -1,0 +1,25 @@
+{
+  "system": "lorenz",
+  "family": "non_liquid_strongly_entangling",
+  "seed": 1,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 49,
+  "sampled_dt": 0.05,
+  "rollout_steps": 200,
+  "dt_step": 0.05,
+  "relative_l2": 0.9912805762424441,
+  "vpt_step": 2,
+  "vpt_time": 0.1,
+  "vpt_lyapunov": 0.09060000000000001,
+  "spectral_error": 2.2066858938468794,
+  "invariant_drift_final": null,
+  "persistence_floor_relative_l2": 0.45480979577386477,
+  "train_loss_history": [
+    10.251616477966309,
+    10.063063621520996,
+    9.76619815826416,
+    9.406639099121094,
+    9.000960350036621
+  ]
+}

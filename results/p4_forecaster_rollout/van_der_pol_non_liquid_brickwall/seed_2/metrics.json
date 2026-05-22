@@ -1,0 +1,25 @@
+{
+  "system": "van_der_pol",
+  "family": "non_liquid_brickwall",
+  "seed": 2,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 36,
+  "sampled_dt": 0.1,
+  "rollout_steps": 200,
+  "dt_step": 0.1,
+  "relative_l2": 5.369115488131667,
+  "vpt_step": 17,
+  "vpt_time": 1.7000000000000002,
+  "vpt_lyapunov": null,
+  "spectral_error": 66.43410451587232,
+  "invariant_drift_final": null,
+  "persistence_floor_relative_l2": 1.34648773242043,
+  "train_loss_history": [
+    0.30056264996528625,
+    0.29059267044067383,
+    0.276696115732193,
+    0.26043689250946045,
+    0.24201205372810364
+  ]
+}

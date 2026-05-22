@@ -1,0 +1,25 @@
+{
+  "system": "lotka_volterra",
+  "family": "non_liquid_strongly_entangling",
+  "seed": 0,
+  "n_train_points": 560,
+  "n_test_points": 240,
+  "trainable_params": 39,
+  "sampled_dt": 0.1,
+  "rollout_steps": 200,
+  "dt_step": 0.1,
+  "relative_l2": 0.5829894179787481,
+  "vpt_step": 83,
+  "vpt_time": 8.3,
+  "vpt_lyapunov": null,
+  "spectral_error": 0.3078288544766479,
+  "invariant_drift_final": 0.3900704970264797,
+  "persistence_floor_relative_l2": 0.8837616584035011,
+  "train_loss_history": [
+    0.055910106748342514,
+    0.04188879579305649,
+    0.031979721039533615,
+    0.02369142323732376,
+    0.016768310219049454
+  ]
+}
