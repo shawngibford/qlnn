@@ -1,0 +1,17 @@
+{
+  "pde": "burgers_shock",
+  "model": "classical_pinn",
+  "seed": 0,
+  "regime": "broadband_multiscale",
+  "steps": 2400,
+  "n_t_colloc": 32,
+  "n_x_colloc": 64,
+  "pqc_params": 0,
+  "classical_params": 177,
+  "config_str": "MLP H=11, L=2, target\u2248120; colloc=64\u00d732; steps=2400",
+  "audit_reason": "capacity-matched classical baseline",
+  "final_loss": 0.011885533109307289,
+  "mae": 0.06382983922636451,
+  "relative_l2": 0.16816951262810856,
+  "bc_violation": 1.4267905719669622
+}

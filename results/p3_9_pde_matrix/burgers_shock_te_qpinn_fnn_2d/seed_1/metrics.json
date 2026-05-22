@@ -1,0 +1,17 @@
+{
+  "pde": "burgers_shock",
+  "model": "te_qpinn_fnn_2d",
+  "seed": 1,
+  "regime": "broadband_multiscale",
+  "steps": 2400,
+  "n_t_colloc": 32,
+  "n_x_colloc": 64,
+  "pqc_params": 60,
+  "classical_params": 164,
+  "config_str": "n_t=2, n_x=2 (n=4), L=5; two FNN heads (H=16); \u27e8\u2297 Z\u27e9 readout",
+  "audit_reason": "\u03bd=0.004 with IC=sin(x) \u2192 near-shock at t*\u22481; matched the AC-style high-resolution config (\u0394x=2\u03c0/64 \u2248 0.098) plus 33% more steps for the broader frequency content",
+  "final_loss": 0.009137913584709167,
+  "mae": 0.04760547989492124,
+  "relative_l2": 0.15889959266699,
+  "bc_violation": 0.6521781961994098
+}

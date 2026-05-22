@@ -1,0 +1,39 @@
+{
+  "outcome": "FALSIFIED",
+  "reasoning": "H1 FALSIFIED: \u0394_smooth \u2212 \u0394_broad = -0.0844 with 95% CI [-0.2780, 0.0613] (includes 0). Pre-reg \u00a77: 'Published as a rigorous mechanistic null.' QLNN does NOT show a regime-dependent advantage over the non-liquid Neural-ODE baseline at this compute budget.",
+  "bootstrap": {
+    "delta_smooth_mean": 0.06739307981507764,
+    "delta_broad_mean": 0.15182837082375364,
+    "delta_diff_mean": -0.084435291008676,
+    "ci_low": -0.2779652052674086,
+    "ci_high": 0.061266757477020775,
+    "n_iter": 10000,
+    "n_smooth": 12,
+    "n_broad": 12,
+    "alpha": 0.05,
+    "smooth_systems": [
+      "burgers_smooth",
+      "heat",
+      "lotka_volterra",
+      "van_der_pol"
+    ],
+    "broad_systems": [
+      "allen_cahn",
+      "burgers_shock",
+      "fitzhugh_nagumo",
+      "lorenz"
+    ]
+  },
+  "guards": {
+    "kept_n": 24,
+    "kept_smooth": 12,
+    "kept_broad": 12,
+    "excluded_underfit": [],
+    "excluded_skyline_out_of_reach": []
+  },
+  "thresholds": {
+    "underfit": 0.5,
+    "skyline": 10.0,
+    "alpha": 0.05
+  }
+}

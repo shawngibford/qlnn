@@ -1,0 +1,17 @@
+{
+  "pde": "burgers_shock",
+  "model": "qcpinn_2d",
+  "seed": 1,
+  "regime": "broadband_multiscale",
+  "steps": 2400,
+  "n_t_colloc": 32,
+  "n_x_colloc": 64,
+  "pqc_params": 15,
+  "classical_params": 756,
+  "config_str": "n=5, L=1, Cascade topology; pre_hidden=50 + post_hidden=50; per-qubit \u27e8Z\u27e9 readout + post-NN scalar",
+  "audit_reason": "\u03bd=0.004 with IC=sin(x) \u2192 near-shock at t*\u22481; matched the AC-style high-resolution config (\u0394x=2\u03c0/64 \u2248 0.098) plus 33% more steps for the broader frequency content",
+  "final_loss": 0.0194264966994524,
+  "mae": 0.054784866211628445,
+  "relative_l2": 0.15255048705769564,
+  "bc_violation": 0.6818557435373702
+}

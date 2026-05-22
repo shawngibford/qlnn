@@ -74,3 +74,4 @@ results/*
 !results/p7_6_pde_solver_h1/
 refs/
 !results/p7_8_kdv_gate/
+!results/p7_8_solver_h1_n24/

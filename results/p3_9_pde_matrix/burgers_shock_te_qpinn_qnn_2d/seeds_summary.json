@@ -1,0 +1,58 @@
+{
+  "pde": "burgers_shock",
+  "model": "te_qpinn_qnn_2d",
+  "regime": "broadband_multiscale",
+  "n_seeds": 3,
+  "seeds": [
+    0,
+    1,
+    2
+  ],
+  "pqc_params": 84,
+  "classical_params": 0,
+  "config_str": "n_t=2, n_x=2 (n=4), L=5, K=3; split-qubit U_embed + \u03a3 Z readout",
+  "steps": 2400,
+  "metrics": {
+    "mae": {
+      "mean": 0.23617561294558734,
+      "std": 0.003921281390660721,
+      "min": 0.23302021372308163,
+      "max": 0.24056561402622428,
+      "n_seeds": 3,
+      "ci95_half_width": 0.009741789184404222,
+      "ci95_low": 0.22643382376118312,
+      "ci95_high": 0.24591740212999155
+    },
+    "relative_l2": {
+      "mean": 0.4322640814978153,
+      "std": 0.013188525525984316,
+      "min": 0.4227206545740976,
+      "max": 0.44731341421041915,
+      "n_seeds": 3,
+      "ci95_half_width": 0.0327647578756455,
+      "ci95_low": 0.39949932362216983,
+      "ci95_high": 0.4650288393734608
+    },
+    "final_loss": {
+      "mean": 0.08801418542861938,
+      "std": 0.019766286752506884,
+      "min": 0.07612310349941254,
+      "max": 0.11083152890205383,
+      "n_seeds": 3,
+      "ci95_half_width": 0.049106141415920804,
+      "ci95_low": 0.03890804401269858,
+      "ci95_high": 0.13712032684454017
+    },
+    "bc_violation": {
+      "mean": 1.151605557784516,
+      "std": 0.656266203665928,
+      "min": 0.6482698644170041,
+      "max": 1.8938600073334275,
+      "n_seeds": 3,
+      "ci95_half_width": 1.6303872045983223,
+      "ci95_low": -0.4787816468138064,
+      "ci95_high": 2.7819927623828384
+    }
+  },
+  "audit_reason": "\u03bd=0.004 with IC=sin(x) \u2192 near-shock at t*\u22481; matched the AC-style high-resolution config (\u0394x=2\u03c0/64 \u2248 0.098) plus 33% more steps for the broader frequency content"
+}
