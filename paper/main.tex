@@ -1,0 +1,126 @@
+% =====================================================================
+% PRX Quantum submission: Regime-dependent quantum PINN benchmarking
+% =====================================================================
+% Compile: pdflatex main && bibtex main && pdflatex main && pdflatex main
+% Or run: bash paper/build.sh
+%
+% Build status (P8 commit 1): SCAFFOLD ONLY. Title + abstract +
+% section stubs. Numerical claims are added section-by-section in
+% subsequent commits, with each cited number traced to a
+% `results/` file via `scripts/verify_paper_integrity.py`.
+% =====================================================================
+\documentclass[%
+  prx,
+  twocolumn,
+  amsmath,
+  amssymb,
+  aps,
+  reprint,
+  superscriptaddress,
+  floatfix,
+]{revtex4-2}
+
+% Packages
+\usepackage{graphicx}
+\usepackage{booktabs}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
+\usepackage{siunitx}
+\usepackage{microtype}
+
+% Custom commands for our framework
+\newcommand{\relltwo}{\mathrm{relL}^2}
+\newcommand{\nsmooth}{n_{\mathrm{smooth}}}
+\newcommand{\nbroad}{n_{\mathrm{broad}}}
+\newcommand{\dsmooth}{\Delta_{\mathrm{smooth}}}
+\newcommand{\dbroad}{\Delta_{\mathrm{broad}}}
+\newcommand{\ddiff}{\Delta_{\mathrm{diff}}}
+\newcommand{\qlnn}{QLNN}
+\newcommand{\cpinn}{cPINN}
+
+% Common abbreviations for system names
+\newcommand{\fhn}{FitzHugh--Nagumo}
+\newcommand{\lv}{Lotka--Volterra}
+\newcommand{\vdp}{Van der Pol}
+\newcommand{\ac}{Allen--Cahn}
+
+\begin{document}
+
+% =====================================================================
+% Title, authors, abstract
+% =====================================================================
+\title{%
+  Regime-dependent advantage in quantum physics-informed neural
+  networks: a pre-registered comparison on an ODE/PDE hardness
+  ladder%
+}
+
+\author{Shawn Gibford}
+\email{gibfords@gmail.com}
+\affiliation{Independent}
+
+\date{\today}
+
+\begin{abstract}
+We pre-register and execute a head-to-head benchmark of four quantum
+physics-informed neural network (PINN) families against capacity-matched
+classical PINN and Neural-ODE baselines on a hardness ladder of four
+ordinary differential equations (Lotka--Volterra, Van der Pol,
+Lorenz, FitzHugh--Nagumo) and four partial differential equations
+(heat, smooth Burgers, Allen--Cahn, shock Burgers), each at three
+random seeds. Following the methodology proposed by Bowles, Ahmed,
+and Schuld for QML benchmarking, every comparison uses matched
+training budgets, paired-bootstrap confidence intervals, an underfit
+guard, and a known-structure skyline. The pre-registered hypothesis
+\textemdash{} that quantum PINNs achieve a regime-dependent advantage
+favoring smooth/periodic systems over broadband/multiscale ones
+\textemdash{} is FALSIFIED at five layered sensitivity points: the
+forecaster task ($n=9$), the default-Adam solver task ($n=18$), the
+both-sides HPO-best solver task ($n=9$), and the expanded full-ladder
+solver task ($n=24$, with the point-estimate sign inverted relative
+to the original hypothesis). The expanded matrix surfaces a
+positive sub-finding: the trainable-embedding quantum PINN with QNN
+encoder (te\_qpinn\_qnn) exhibits a $25\times$ tighter seed variance
+and $2\times$ lower mean error than the classical PINN on FitzHugh--Nagumo,
+a regime-dependent structural advantage on stiff fast--slow dynamics
+that was not visible at the smaller sample size. We release the
+full open-source benchmark framework, including a
+\texttt{verify\_paper\_integrity.py} script that gates every cited
+number against a committed JSON file, and document two
+mechanism-proven-but-compute-deferred extensions (12-dimensional
+Kuramoto, KdV with third-order spatial autodiff) for follow-up.
+\end{abstract}
+
+\maketitle
+
+% =====================================================================
+% Body sections — modular includes, one .tex per section
+% =====================================================================
+\input{sections/01_introduction}
+\input{sections/02_methods}
+\input{sections/03_solver_results}
+\input{sections/04_forecaster_results}
+\input{sections/05_h1_verdict}
+\input{sections/06_mechanism}
+\input{sections/07_discussion}
+\input{sections/08_conclusions}
+
+% =====================================================================
+% Acknowledgments
+% =====================================================================
+\begin{acknowledgments}
+This work was carried out as an independent research project. The
+author thanks the open-source PennyLane, JAX, Equinox, Diffrax, and
+optax communities for the core scientific computing infrastructure
+that made this benchmark possible. Anthropic's Claude provided
+research assistance throughout.
+\end{acknowledgments}
+
+% =====================================================================
+% Bibliography
+% =====================================================================
+\bibliographystyle{apsrev4-2}
+\bibliography{references}
+
+\end{document}
