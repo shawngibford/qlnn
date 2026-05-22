@@ -126,7 +126,18 @@ VECTOR_QLNN_FAMILIES = (
     "brickwall",
 )
 
-ALL_FAMILIES_P4 = VECTOR_QLNN_FAMILIES + ("rf_qrc",)
+# P7.11: τ-ablated variants of the 4 vector-QLNN families. Use a
+# `non_liquid_` prefix so the dispatcher can route them to the
+# NonLiquidVectorForecaster builder while reusing the same ansatz
+# name for the encoder. rf_qrc is already non-liquid by construction
+# (fixed leak_rate), so no non_liquid_rf_qrc variant is needed.
+NON_LIQUID_QLNN_FAMILIES = tuple(
+    f"non_liquid_{name}" for name in VECTOR_QLNN_FAMILIES
+)
+
+ALL_FAMILIES_P4 = (
+    VECTOR_QLNN_FAMILIES + ("rf_qrc",) + NON_LIQUID_QLNN_FAMILIES
+)
 
 
 # ---------------------------------------------------------------------------
@@ -163,6 +174,56 @@ def _train_vector_forecaster_family(
         steps=cfg.train_steps, lr=cfg.learning_rate,
         log_every=max(1, cfg.train_steps // 5), seed=seed)
     # Param count: sum sizes of trainable arrays in the model pytree.
+    import equinox as eqx
+    diff_model, _ = eqx.partition(trained, eqx.is_array)
+    param_count = sum(
+        int(np.asarray(leaf).size)
+        for leaf in jax.tree_util.tree_leaves(diff_model))
+    return trained, history, {"trainable_params": param_count}
+
+
+def _train_non_liquid_vector_forecaster_family(
+    family: str, X_train: np.ndarray, Y_train: np.ndarray,
+    *, cfg: P4SweepConfig, seed: int,
+) -> tuple[Any, list[float], dict[str, int]]:
+    """P7.11: train one of the 4 non-liquid VectorForecaster variants.
+
+    Strips the `non_liquid_` prefix to recover the underlying ansatz
+    name, then instantiates a NonLiquidVectorForecaster (same encoder
+    + decoder + Diffrax integration as VectorForecaster, but with the
+    τ-ablated NonLiquidQuantumCell).
+    """
+    from qlnn_.models.non_liquid_vector_forecaster import (
+        NonLiquidVectorForecaster, NonLiquidVectorForecasterConfig,
+    )
+
+    if not family.startswith("non_liquid_"):
+        raise ValueError(
+            f"non-liquid family must start with 'non_liquid_', got {family!r}")
+    base_ansatz = family[len("non_liquid_"):]
+    if base_ansatz not in VECTOR_QLNN_FAMILIES:
+        raise ValueError(
+            f"non-liquid family {family!r} → base ansatz {base_ansatz!r} "
+            f"is not in VECTOR_QLNN_FAMILIES {VECTOR_QLNN_FAMILIES!r}")
+
+    d = X_train.shape[-1]
+    ansatz = AnsatzConfig(
+        name=base_ansatz, num_qubits=cfg.num_qubits,
+        num_layers=cfg.num_layers)
+    fc_cfg = NonLiquidVectorForecasterConfig(
+        input_dim=d,
+        num_qubits=cfg.num_qubits,
+        num_layers=cfg.num_layers,
+        step_dt=0.05,
+        delta_scale_init=cfg.delta_scale_init,
+        delta_scale_min=cfg.delta_scale_min,
+        ansatz=ansatz,
+    )
+    model = NonLiquidVectorForecaster(fc_cfg, key=jax.random.PRNGKey(seed))
+    trained, history = train_vector_forecaster(
+        model, X_train, Y_train,
+        steps=cfg.train_steps, lr=cfg.learning_rate,
+        log_every=max(1, cfg.train_steps // 5), seed=seed)
     import equinox as eqx
     diff_model, _ = eqx.partition(trained, eqx.is_array)
     param_count = sum(
@@ -299,6 +360,15 @@ def train_and_rollout_one_cell(
         model, hist, pcount = _train_rfqrc(
             X_train_windows, Y_train_targets, cfg=cfg, seed=seed)
         adapter = make_rf_qrc_adapter(model)
+    elif family in NON_LIQUID_QLNN_FAMILIES:
+        # P7.11: τ-ablated quantum forecaster (matches the
+        # NonLiquidQuantumCell + same Diffrax scaffold). Uses the
+        # standard vector-forecaster adapter since the call signature
+        # is identical: (T, d) → (d,).
+        model, hist, pcount = _train_non_liquid_vector_forecaster_family(
+            family, X_train_windows, Y_train_targets,
+            cfg=cfg, seed=seed)
+        adapter = make_vector_forecaster_adapter(model)
     else:
         model, hist, pcount = _train_vector_forecaster_family(
             family, X_train_windows, Y_train_targets,
