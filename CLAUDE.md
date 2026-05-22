@@ -2,13 +2,52 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Project Overview
+## ⚠️ PROJECT HAS PIVOTED — read HANDOFF.md FIRST
 
-Research code for a head-to-head comparison of classical Liquid Neural ODE
-and Quantum Liquid Neural Network forecasters on a 778-sample
+The repository is now a **QLNN ODE/PDE solver+forecaster benchmark
+paper** (PRX Quantum target). The original bioreactor-OD work is
+archived (still gated by `verify_paper_integrity.py` for continuity,
+but `PAPER_SUMMARY.md` and the 3-OD-claims framing are superseded by
+`ODE_PDE_PRE_REG.md` + `PRE_REG_AMENDMENT.md` + `paper/main.tex`).
+
+**Current state (commit `ad65b33`, 2026-05-22):**
+
+- **Paper at 15 pages, all body sections §1–§8 drafted** in
+  `paper/sections/`. Supplement is the only remaining work.
+- **PRIMARY SOLVER verdict (n=24): FALSIFIED** with Δ_diff=−0.084,
+  CI [−0.278, +0.061]. Point-estimate sign FLIPPED from +0.032 at n=18
+  when broadband bin was expanded with FHN + burgers_shock (P7.8).
+- **PRIMARY FORECASTER verdict (n=9): FALSIFIED** with complete 2×2
+  mechanism decomposition: Δ_combined=−0.501 (CI excludes 0
+  negatively), Δ_quantum_via_LTC=−0.616, Δ_τ_via_classical=+0.115,
+  Δ_τ_via_quantum=−0.334, Δ_quantum_via_nonliquid=−0.167. Both
+  algebraic identities hold per-cell exactly.
+- **THE MAJOR NEW FINDING:** the τ-isolation cross-check DISAGREES
+  in sign between the two paths. The liquid-τ machinery is
+  substrate-dependent: positive Δ on classical MLP (matches H1
+  prediction), negative Δ on quantum cell (opposite of H1).
+- **GitHub:** branch `claude/upbeat-elbakyan-68b56a` pushed; tags
+  `v0.1-prepaper-rigor`, `v0.2-airtight-matrix`.
+- **13 pre-reg amendments** (A1–A13) in `PRE_REG_AMENDMENT.md`.
+- **`scripts/verify_paper_integrity.py`** mechanically gates 16+ H1
+  outcomes + 2 algebraic identities; exit-0 at HEAD.
+
+**Next agent: pick up at `paper/supplement.tex` drafting.** See
+`HANDOFF.md` for the precise step-by-step.
+
+**Worktree path:**
+`/Users/shawngibford/dev/phd/qlnn/.claude/worktrees/upbeat-elbakyan-68b56a/`
+
+---
+
+## Legacy OD-program overview (superseded but kept for `verify_paper_integrity` continuity)
+
+The original work was a head-to-head comparison of classical Liquid
+Neural ODE and Quantum Liquid Neural Network forecasters on a 778-sample
 single-fermentation-run bioreactor OD dataset.
 
-**Status: code + experiments complete; paper writing is the remaining work.**
+**OD status: code + experiments complete; OD paper writing was halted
+when the program pivoted to the ODE/PDE solver+forecaster benchmark.**
 
 The three pre-registered claims (`hypothesis.md` v2; original QWGAN-GP
 claim was explicitly dropped after the Phase A/B/C peer-review-style
