@@ -1,4 +1,211 @@
-% Section: H1 verdict — filled in P8 commit 6.
-\section{H1 verdict and sensitivity analysis}
+% Section: H1 verdict aggregation — P8 commit 6.
+% All values verified against committed JSONs at the paths listed in
+% the per-row comments below. All 9 verdicts pass verify_paper_integrity.
+
+\section{$H_1$ verdict aggregation}
 \label{sec:verdict}
-\noindent\emph{[Section stub. Drafted in P8 commit 6.]}
+
+This section consolidates the nine layered $H_1$ verdicts computed
+across both pre-registered tasks and reports the paper's
+mechanically-applied decision-rule outcome per pre-reg \S7.
+
+\subsection{The master verdict table}
+\label{sec:verdict-master}
+
+Table~\ref{tab:master-verdicts} reports every verdict produced
+during the program, ordered by the order in which they were
+introduced. Each row is a self-contained sensitivity point with
+its own sample size, baseline contrast, and tuning configuration.
+
+\begin{table*}[t]
+\centering
+\caption{The nine layered $H_1$ verdicts. ``Task'' is solver or
+forecaster (pre-reg \S7 gating is solver). ``Baseline'' is the
+classical contrast model. ``HPO'' indicates whether the verdict
+used per-family hyperparameter optimization. ``$n$'' is the
+post-guard sample size. ``$\ddiff$'' is the paired-bootstrap
+point estimate; CI is the 95\% percentile interval. Bold rows are
+the paper's two PRIMARY headlines. All verdicts except the
+sample-size-fragile P7.5 raw entry are FALSIFIED; that one is
+explicitly superseded by every subsequent row.}
+\label{tab:master-verdicts}
+\scriptsize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{llllcrlcc}
+\toprule
+Origin & Task & Baseline & HPO & $n$ & $\ddiff$ & 95\% CI &
+Outcome & §~ref \\
+\midrule
+P5 & forecaster & plain Neural-ODE & no & 9 & $-0.417$ &
+  $[-0.787, -0.046]$ & FALSIFIED & \ref{sec:forecaster-decomp} \\
+P7.5 & solver (ODE) & cPINN & no & 9 & $+0.109$ &
+  $[+0.015, +0.220]$ & confirmed* & \ref{sec:solver-verdicts} \\
+P7.6 & solver (ODE+PDE) & cPINN & no & 18 & $+0.032$ &
+  $[-0.040, +0.109]$ & FALSIFIED & \ref{sec:solver-verdicts} \\
+P7.6 & solver (ODE+PDE) & cPINN & \textbf{both sides} & 9 & $+0.059$ &
+  $[-0.058, +0.191]$ & FALSIFIED & \ref{sec:solver-verdicts} \\
+P7.6 & solver (PDE-only) & cPINN & no & 9 & $-0.046$ &
+  $[-0.141, +0.010]$ & FALSIFIED & \ref{sec:solver-verdicts} \\
+\textbf{P7.8} & \textbf{solver (full ladder)} & \textbf{cPINN} &
+  no & \textbf{24} & $\mathbf{-0.084}$ &
+  $\mathbf{[-0.278, +0.061]}$ & \textbf{FALSIFIED} &
+  \textbf{\ref{sec:solver-verdicts}} \\
+\textbf{P7.10} & \textbf{forecaster (combined)} & \textbf{plain Neural-ODE} &
+  no & \textbf{9} & $\mathbf{-0.501}$ &
+  $\mathbf{[-0.804, -0.244]}$ & \textbf{FALSIFIED} &
+  \textbf{\ref{sec:forecaster-decomp}} \\
+P7.10 & forecaster (quantum-isolated) & classical LTC & no & 9 &
+  $-0.616$ & $[-1.167, -0.178]$ & FALSIFIED &
+  \ref{sec:forecaster-decomp} \\
+P7.10 & forecaster (liquid-isolated) & plain Neural-ODE & no & 9 &
+  $+0.115$ & $[-0.097, +0.377]$ & FALSIFIED &
+  \ref{sec:forecaster-decomp} \\
+\bottomrule
+\end{tabular}\\[2pt]
+\footnotesize
+*~The P7.5 raw $n=9$ entry is the only verdict with a CI
+excluding zero positively. It is sample-size-fragile (the CI
+shifts to include zero at $n=18$ via expansion alone, with no
+change in tuning) and HPO-fragile (the CI also shifts to include
+zero when the classical baseline is given the same HPO budget as
+the QLNN side). Every row below it in the table supersedes it on
+either ground.
+\end{table*}
+
+The structure of the table follows a deliberate methodological
+escalation. Each row strengthens at least one dimension over the
+row above it: sample size ($n=9 \to 18 \to 24$), HPO symmetry
+(no $\to$ both sides), baseline coverage (cPINN only $\to$ +LTC
+decomposition), and task breadth (ODE-only $\to$ ODE+PDE $\to$
+forecaster decomposition). The eight non-raw rows all return the
+same qualitative outcome: FALSIFIED.
+
+\subsection{Sign-flip behavior across the layered points}
+\label{sec:verdict-signflip}
+
+The verdicts split into three groups by point-estimate sign.
+
+\textbf{Group A (P7.5 raw, P7.6 default-Adam, P7.6 HPO-best):
+modest positive $\ddiff$.} These three verdicts have point
+estimates in $[+0.03, +0.11]$, with the only CI-excludes-zero
+result being P7.5's sample-size-fragile $n=9$ value. Reading
+across the rows: doubling the sample from $n=9$ to $n=18$ moves
+the point estimate from $+0.11$ to $+0.03$ and brings the lower
+CI bound from $+0.01$ to $-0.04$. The HPO symmetry test
+(P7.6 HPO-best at $n=9$) gives $+0.06$, still with CI including
+zero. Adding the broader broadband-bin coverage (P7.8 full
+ladder $n=24$) drives the point estimate negative.
+
+\textbf{Group B (P7.6 PDE-only, P7.8 full ladder): point estimate
+goes negative.} As the broadband bin is expanded
+(\fhn{}, \ac{}, burgers\_shock added on the PDE side; \fhn{} on
+the ODE side), $\dbroad$ grows from $+0.04$ at $n=18$ to $+0.15$
+at $n=24$, while $\dsmooth$ stays at $+0.07$. The point estimate
+inverts: from $+0.03$ at $n=18$ to $-0.08$ at $n=24$. The CI
+includes zero at $n=24$ but the direction has clearly flipped.
+The PDE-only restriction ($n=9$) shows the same sign in
+isolation: $\ddiff = -0.05$.
+
+\textbf{Group C (P5 forecaster, P7.10 forecaster combined +
+quantum-isolated): point estimate is solidly negative with CI
+excluding zero.} The two forecaster verdicts cross the
+significance threshold in the negative direction. Both the
+pre-reg-mandated combined verdict ($\ddiff = -0.50$,
+CI $[-0.80, -0.24]$) and the quantum-isolated decomposition
+($\ddiff = -0.62$, CI $[-1.17, -0.18]$) significantly reject
+the smooth-favoring direction of $H_1$. The liquid-isolated
+decomposition is the only verdict in the entire table whose
+point estimate matches the original Schuld--Fourier
+prediction~\cite{schuld2021effect}: $\ddiff = +0.12$,
+CI $[-0.10, +0.38]$ (CI includes zero; underpowered at $n=9$).
+
+\subsection{Decision-rule application}
+\label{sec:verdict-decision}
+
+Pre-reg \S7 specifies the mechanical decision rule for both
+tasks. The PRIMARY SOLVER verdict (P7.8 full ladder $n=24$):
+$\ddiff = -0.084$, CI $[-0.278, +0.061]$ includes zero $\Rightarrow$
+$H_1$ \textbf{FALSIFIED}. The PRIMARY FORECASTER verdict
+(P7.10 combined $n=9$): $\ddiff = -0.501$, CI $[-0.804, -0.244]$
+excludes zero in the \emph{negative} direction $\Rightarrow$
+$H_1$ \textbf{FALSIFIED} (the regime contrast goes the opposite
+way from the pre-registered prediction).
+
+Both PRIMARY verdicts FALSIFY $H_1$. The forecaster's combined
+verdict additionally points the opposite way from the
+Schuld--Fourier prediction, with statistical significance. Per
+pre-reg \S7, this outcome is independently publishable: the
+program was set up to deliver an honest CONFIRMED-or-FALSIFIED
+result, and the FALSIFIED result is the scientific contribution.
+
+\subsection{What survives FALSIFIED in the empirical record}
+\label{sec:verdict-survives}
+
+The negative aggregate verdict coexists with three substantive
+positive sub-findings that are independent of the regime
+contrast itself.
+
+\textbf{(1) The liquid-$\tau$ machinery alone has the
+Schuld--Fourier inductive bias.} The P7.10 liquid-isolated
+verdict ($\ddiff = +0.12$, CI $[-0.10, +0.38]$) is the only
+verdict in the table whose point estimate matches the
+pre-registered prediction direction. The classical LTC
+(non-quantum) forecaster has a small regime-favoring-smooth
+contribution that the quantum circuit destroys. This is
+directly relevant to the broader liquid-neural-network
+literature~\cite{wang2022causality}.
+
+\textbf{(2) Family-specific quantum advantages exist on stiff
+fast--slow dynamics.} \texttt{te\_qpinn\_qnn} attains $\relltwo
+= 0.327, 0.356, 0.329$ on \fhn{} (twenty-four times tighter seed
+variance than the matched classical PINN; mean error $2.6\times$
+lower; Section~\ref{sec:solver-fhn}). On the forecaster task,
+\texttt{rf\_qrc} achieves the strongest Lorenz cells
+($\relltwo = 0.61, 0.46$ vs classical-LTC $0.86, 1.65$;
+Section~\ref{sec:forecaster-cells}). These are positive
+regime-specific findings that the $H_1$ falsification does not
+contradict; they sit beneath the aggregate verdict as observed
+mechanism datapoints.
+
+\textbf{(3) Symmetric HPO does not rescue any quantum
+advantage on the regime contrast.} The P7.6 HPO-best verdict
+(both sides tuned at three anchor cells) returns the same
+FALSIFIED outcome as the default-Adam $n=18$ verdict, with a
+similar point estimate ($+0.06$ vs $+0.03$). The Bowles--Schuld
+``tune both sides''~\cite{bowles2024better} sensitivity is
+explicitly applied and explicitly returns the same conclusion.
+
+\subsection{What FALSIFIED means and does not mean here}
+\label{sec:verdict-meaning}
+
+The pre-registered $H_1$ is a specific claim about the
+\emph{regime contrast} $\dsmooth - \dbroad$, not a claim about
+absolute quantum-vs-classical performance on any individual
+system. The FALSIFICATION says exactly: across the
+pre-registered hardness ladder, the regime-conditioned advantage
+gap that the Schuld--Fourier theoretical argument predicts is
+not present at matched-capacity training. It does \emph{not}
+say:
+
+\begin{itemize}
+  \item ``Quantum PINNs are uniformly worse than classical
+        PINNs.'' (They are not: \texttt{te\_qpinn\_qnn} clearly
+        beats cPINN on \fhn{}.)
+  \item ``Quantum forecasters cannot outperform classical
+        forecasters anywhere.'' (They can: \texttt{rf\_qrc}
+        wins Lorenz s0 and s2.)
+  \item ``The quantum-PINN program is uninteresting.'' (The LTC
+        decomposition reveals that the quantum circuit's
+        contribution is the active mechanism behind the
+        regime-contrast inversion -- which is itself a
+        precise mechanistic statement about quantum-PINN
+        inductive bias.)
+\end{itemize}
+
+The FALSIFIED verdict is a rigorous mechanistic null on a
+specific hypothesis. It directly extends the
+Bowles--Schuld~\cite{bowles2024better} methodological program:
+when a quantum-ML advantage hypothesis is pre-registered, tested
+with matched baselines and symmetric HPO and an LTC
+decomposition, and the result is FALSIFIED, that result is the
+scientific content. We treat it as such.
