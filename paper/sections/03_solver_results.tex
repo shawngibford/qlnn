@@ -16,70 +16,114 @@ relative-$L^2$ error of the trained model against a high-resolution
 reference field. This section reports the full $n=24$ per-cell
 matrix and the four solver-task sensitivity points.
 
-\subsection{Per-cell error matrix}
+\subsection{Per-cell error matrix (all-to-all)}
 \label{sec:solver-cells}
 
 Table~\ref{tab:cell-matrix} reports, for each (system, seed)
-cell, the relative-$L^2$ error of the best-performing quantum
-ansatz across the four-family roster
-(Section~\ref{sec:methods-roster}) and of the capacity-matched
-classical PINN. Best-quantum is per-cell because no single family
-dominates the matrix: \texttt{qcpinn} wins on \lv{} and most
-PDE-smooth cells, \texttt{te\_qpinn\_qnn} dominates the
-broadband bin and \vdp{} seeds 1, and \texttt{te\_qpinn\_fnn}
-wins a handful of edge cells. \texttt{chebyshev\_dqc} is never
-the best on any cell of the $n=24$ matrix in its 2D PDE form;
-its smooth-only logistic-saturation feature
-map cannot represent the sharp-gradient burgers\_shock or AC
-dynamics (relative-$L^2 \approx 0.42$--$0.44$ across all three
-burgers\_shock seeds and similar on AC).
+cell, the relative-$L^2$ error of \emph{every} quantum-PINN
+family in our roster (Section~\ref{sec:methods-roster}) alongside
+the matched classical PINN baseline -- the full all-to-all
+contrast matrix. The best-per-row quantum family is bolded; the
+$\Delta$ column compares the best-QLNN to the cPINN on that row.
+The architectural family names abbreviate to: ``cheb'' for
+\texttt{chebyshev\_dqc} (or \texttt{\_2d} on the PDE half),
+``fnn'' for \texttt{te\_qpinn\_fnn(\_2d)}, ``qnn'' for
+\texttt{te\_qpinn\_qnn(\_2d)}, and ``qcp'' for
+\texttt{qcpinn(\_2d)}.
+
+No single quantum family dominates the matrix: \texttt{qcpinn}
+wins on \lv{} and most PDE-smooth cells; \texttt{te\_qpinn\_qnn}
+dominates the broadband bin (Lorenz, \fhn{}, \ac{}); and
+\texttt{te\_qpinn\_fnn} wins a handful of edge cells
+(\vdp{} s0,s2, heat s2, burgers\_smooth s1, burgers\_shock s2).
+\texttt{chebyshev\_dqc} is never the per-row winner on the
+$n=24$ matrix in its 2D PDE form (its smooth-only
+logistic-saturation feature map sits at
+$\relltwo \approx 0.42$--$0.44$ on burgers\_shock and similar
+on AC). \texttt{qcpinn} is the largest classical-parameter
+ansatz in the roster (Section~\ref{sec:methods-roster}) and
+its dominance on \lv{} should be read with that capacity-overhead
+caveat in mind.
 
 \begin{table*}[t]
 \centering
-\caption{Per-cell relative-$L^2$ error on the $n=24$ solver
-matrix. Best-quantum is the minimum across the four-family
-roster; cPINN is the matched classical PINN baseline.
-$\Delta = \relltwo_\text{cPINN} - \relltwo_\text{QLNN}$. Bold
-entries identify the largest single-cell quantum advantages
-(\fhn{} seed~2; \ac{} seed~0). Smooth/periodic in the
-upper half; broadband/multiscale in the lower half.}
+\caption{All-to-all per-cell relative-$L^2$ error on the $n=24$
+solver matrix. Every quantum-PINN family across the
+roster (cheb, fnn, qnn, qcp) reports its per-cell
+$\relltwo$ alongside the capacity-matched cPINN. Bold = best
+quantum family on that row; star ($\star$) = largest single-cell
+quantum advantage ($\Delta = \relltwo_\text{cPINN} -
+\relltwo_\text{best QLNN}$, with $\Delta > 0$ meaning quantum
+wins). Smooth/periodic systems in the upper half; broadband/
+multiscale in the lower half. The architectural family names
+follow Section~\ref{sec:methods-roster}; ODE-side families have
+\texttt{\_2d} variants on the PDE rows.}
 \label{tab:cell-matrix}
-\small
-\begin{tabular}{lcllllr}
+\footnotesize
+\setlength{\tabcolsep}{4pt}
+\begin{tabular}{lc|cccc|cr}
 \toprule
-System & Seed & Task & Best QLNN family & QLNN $\relltwo$ &
-cPINN $\relltwo$ & $\Delta$ \\
+System & Seed & cheb & fnn & qnn & qcp & cPINN & $\Delta$ \\
 \midrule
-\multicolumn{7}{l}{\emph{Smooth/periodic ($\nsmooth = 12$):}} \\
-\lv{}        & 0 & ODE & qcpinn          & 0.0074 & 0.0117 & $+0.004$ \\
-\lv{}        & 1 & ODE & qcpinn          & 0.0029 & 0.0078 & $+0.005$ \\
-\lv{}        & 2 & ODE & qcpinn          & 0.0070 & 0.0071 & $+0.000$ \\
-\vdp{}       & 0 & ODE & te\_qpinn\_fnn  & 0.8213 & 1.1569 & $+0.336$ \\
-\vdp{}       & 1 & ODE & te\_qpinn\_qnn  & 0.7622 & 0.9434 & $+0.181$ \\
-\vdp{}       & 2 & ODE & te\_qpinn\_fnn  & 0.8176 & 1.0550 & $+0.237$ \\
-Heat         & 0 & PDE & qcpinn\_2d      & 0.0010 & 0.0054 & $+0.004$ \\
-Heat         & 1 & PDE & qcpinn\_2d      & 0.0020 & 0.0046 & $+0.003$ \\
-Heat         & 2 & PDE & te\_qpinn\_fnn\_2d & 0.0013 & 0.0036 & $+0.002$ \\
-Burgers smooth & 0 & PDE & qcpinn\_2d    & 0.0112 & 0.0428 & $+0.032$ \\
-Burgers smooth & 1 & PDE & te\_qpinn\_fnn\_2d & 0.0126 & 0.0191 & $+0.007$ \\
-Burgers smooth & 2 & PDE & qcpinn\_2d    & 0.0206 & 0.0187 & $-0.002$ \\
+\multicolumn{8}{l}{\emph{Smooth/periodic ($\nsmooth = 12$):}} \\
+\lv{}          & 0 & 0.100 & 0.088 & 0.524 & \textbf{0.007} & 0.012 & $+0.004$ \\
+\lv{}          & 1 & 0.116 & 0.141 & 0.523 & \textbf{0.003} & 0.008 & $+0.005$ \\
+\lv{}          & 2 & 0.102 & 0.141 & 0.524 & \textbf{0.007} & 0.007 & $+0.000$ \\
+\vdp{}         & 0 & 0.906 & \textbf{0.821} & 1.180 & 3.402 & 1.157 & $+0.336$ \\
+\vdp{}         & 1 & 1.152 & 0.865 & \textbf{0.762} & 0.867 & 0.943 & $+0.181$ \\
+\vdp{}         & 2 & 0.909 & \textbf{0.818} & 1.189 & 2.674 & 1.055 & $+0.237$ \\
+Heat           & 0 & 0.055 & 0.002 & 0.046 & \textbf{0.001} & 0.005 & $+0.004$ \\
+Heat           & 1 & 0.056 & 0.003 & 0.046 & \textbf{0.002} & 0.005 & $+0.003$ \\
+Heat           & 2 & 0.057 & \textbf{0.001} & 0.046 & 0.002 & 0.004 & $+0.002$ \\
+Burg.\ smooth  & 0 & 0.347 & 0.015 & 0.365 & \textbf{0.011} & 0.043 & $+0.032$ \\
+Burg.\ smooth  & 1 & 0.352 & \textbf{0.013} & 0.354 & 0.016 & 0.019 & $+0.007$ \\
+Burg.\ smooth  & 2 & 0.374 & 0.025 & 0.356 & \textbf{0.021} & 0.019 & $-0.002$ \\
 \midrule
-\multicolumn{7}{l}{\emph{Broadband/multiscale ($\nbroad = 12$):}} \\
-Lorenz       & 0 & ODE & te\_qpinn\_qnn  & 0.9794 & 0.9958 & $+0.016$ \\
-Lorenz       & 1 & ODE & te\_qpinn\_qnn  & 0.9769 & 0.9957 & $+0.019$ \\
-Lorenz       & 2 & ODE & te\_qpinn\_qnn  & 0.9773 & 0.9957 & $+0.018$ \\
-\fhn{}       & 0 & ODE & te\_qpinn\_qnn  & 0.3270 & 0.6398 & $+0.313$ \\
-\fhn{}       & 1 & ODE & te\_qpinn\_qnn  & 0.3560 & 0.6410 & $+0.285$ \\
-\fhn{}       & 2 & ODE & te\_qpinn\_qnn  & 0.3290 & 1.3265 & $\mathbf{+0.998}$ \\
-\ac{}        & 0 & PDE & te\_qpinn\_qnn\_2d & 0.0528 & 0.2018 & $\mathbf{+0.149}$ \\
-\ac{}        & 1 & PDE & te\_qpinn\_qnn\_2d & 0.0489 & 0.0633 & $+0.014$ \\
-\ac{}        & 2 & PDE & te\_qpinn\_qnn\_2d & 0.0534 & 0.0514 & $-0.002$ \\
-Burgers shock & 0 & PDE & qcpinn\_2d     & 0.2408 & 0.1682 & $-0.073$ \\
-Burgers shock & 1 & PDE & qcpinn\_2d     & 0.1526 & 0.2730 & $+0.120$ \\
-Burgers shock & 2 & PDE & te\_qpinn\_fnn\_2d & 0.1630 & 0.1270 & $-0.036$ \\
+\multicolumn{8}{l}{\emph{Broadband/multiscale ($\nbroad = 12$):}} \\
+Lorenz         & 0 & 1.001 & 0.995 & \textbf{0.979} & 0.996 & 0.996 & $+0.016$ \\
+Lorenz         & 1 & 0.999 & 0.995 & \textbf{0.977} & 0.996 & 0.996 & $+0.019$ \\
+Lorenz         & 2 & 0.997 & 0.995 & \textbf{0.977} & 0.994 & 0.996 & $+0.018$ \\
+\fhn{}         & 0 & 0.531 & 0.452 & \textbf{0.327} & 1.213 & 0.640 & $+0.313$ \\
+\fhn{}         & 1 & 0.615 & 0.390 & \textbf{0.356} & 1.547 & 0.641 & $+0.285$ \\
+\fhn{}         & 2 & 0.617 & 0.625 & \textbf{0.329} & 1.625 & 1.326 & $\star$~$+0.998$ \\
+\ac{}          & 0 & 0.578 & 0.551 & \textbf{0.053} & 0.896 & 0.202 & $\star$~$+0.149$ \\
+\ac{}          & 1 & 0.520 & 0.535 & \textbf{0.049} & 0.562 & 0.063 & $+0.014$ \\
+\ac{}          & 2 & 0.615 & 0.093 & \textbf{0.053} & 0.494 & 0.051 & $-0.002$ \\
+Burg.\ shock   & 0 & 0.428 & 0.251 & 0.427 & \textbf{0.241} & 0.168 & $-0.073$ \\
+Burg.\ shock   & 1 & 0.438 & 0.159 & 0.423 & \textbf{0.153} & 0.273 & $+0.120$ \\
+Burg.\ shock   & 2 & 0.417 & \textbf{0.163} & 0.447 & 0.255 & 0.127 & $-0.036$ \\
 \bottomrule
 \end{tabular}
 \end{table*}
+
+The all-to-all view exposes structural family preferences invisible
+in the single best-QLNN reduction. Three patterns stand out.
+
+\textbf{(1) Family specialization is real.} \texttt{qcpinn} owns the
+smooth, very-easy-to-fit cells (\lv{}, heat, burgers\_smooth s0)
+where its 706-classical-parameter overhead presumably helps; the
+pure-quantum \texttt{te\_qpinn\_qnn} (zero classical parameters)
+owns the broadband bin entirely. The two TE-QPINN variants
+sometimes trade leadership by seed on stiff cells (\vdp{},
+burgers\_shock).
+
+\textbf{(2) Lorenz is a shared-failure datapoint.} At $T=2$
+($\approx 2$ Lyapunov times) every quantum family and the cPINN
+sit at the predict-zero baseline ($\relltwo \approx 0.98$--$1.00$).
+The $\Delta \approx +0.02$ contribution to the verdict is in the
+noise. We treat the Lorenz cells as discriminating evidence for
+neither H1 nor its inverse.
+
+\textbf{(3) chebyshev\_dqc and qcpinn fail on different broadband
+PDEs.} \texttt{chebyshev\_dqc\_2d} sits at $\relltwo \approx 0.42$--$0.44$
+on all three burgers\_shock seeds (smooth-only feature map cannot
+represent the near-shock gradient) and at $\relltwo \approx 0.52$--$0.62$
+on AC (cannot represent the sharp two-front structure).
+\texttt{qcpinn\_2d} fails on AC ($\relltwo \approx 0.49$--$0.90$)
+even with its classical-parameter overhead, but it is the leader
+on burgers\_shock (s0, s1). These family-level failure modes are
+the kind of structural information the best-QLNN reduction
+discards.
 
 The smooth-bin mean $\dsmooth = +0.067$ and broad-bin mean
 $\dbroad = +0.152$. The broadband mean is dominated by the
