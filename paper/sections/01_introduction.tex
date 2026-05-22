@@ -1,4 +1,178 @@
-% Section: Introduction — filled in P8 commit 2.
+% Section: Introduction — P8 commit 2.
+% Numerical claims verified against:
+%   - results/p7_8_solver_h1_n24/h1_analysis_combined_n24.json
+%   - results/p5_h1_verdict/h1_analysis.json
+%   - results/p7_8_kdv_gate/gate_result.json
+%   - ODE_PDE_PRE_REG.md (pre-registration)
+%   - PRE_REG_AMENDMENT.md (A1--A11)
+% All non-numerical claims are cited from refs in paper/references.bib.
+
 \section{Introduction}
 \label{sec:intro}
-\noindent\emph{[Section stub. Drafted in P8 commit 2 with verified citations.]}
+
+The question of whether variational quantum machine-learning (QML)
+models offer a useful advantage over classical neural networks
+remains contested. Schuld and Killoran observed that the field
+should pursue \emph{regime-dependent} advantages rather than blanket
+quantum supremacy claims~\cite{schuld2022right}: a quantum model is
+``useful'' if it solves a specific class of problems better than the
+best matched classical model at the same parameter budget. The
+landscape of \emph{quantum physics-informed neural networks}
+(quantum PINNs)~\cite{perezsalinas2020dataru,berger2025teqpinn,
+farea2025qcpinn,ahmed2024rfqrc} has produced several candidate
+ansätze with theoretically motivated regime-dependence claims, most
+prominently the prediction that the
+data-reuploading Fourier series accessible to a quantum
+circuit~\cite{schuld2021effect} grants an
+inductive bias for smooth, periodic dynamics. Yet the empirical
+picture is fragmentary: most quantum-PINN papers report a single
+task, often without matched classical baselines or pre-registered
+acceptance criteria, leaving the central question \textit{when, and
+on what kinds of problems, does a quantum PINN outperform a
+capacity-matched classical PINN?} unanswered at any rigorous level.
+
+Bowles, Ahmed, and Schuld recently catalogued the methodological
+gaps that make existing QML benchmarks unreliable: tuning the
+classical baseline insufficiently, comparing at mismatched parameter
+counts, reporting only the best-of-many random seeds, and citing
+isolated wins rather than statistically defensible
+contrasts~\cite{bowles2024better}. They propose a set of
+methodological commitments \textemdash{} pre-registration, matched
+training budgets, paired bootstrap confidence intervals, an
+underfit guard, and a known-structure ``skyline'' baseline
+\textemdash{} that any quantum advantage claim should satisfy. To
+our knowledge no published quantum-PINN benchmark has yet
+implemented this complete framework on a hardness ladder spanning
+both ordinary and partial differential equations.
+
+This work executes exactly such a benchmark. Following a
+pre-registration committed before any results were generated
+(Appendix~A; Methods~\ref{sec:methods}), we test the hypothesis
+that quantum PINNs achieve a regime-dependent advantage in
+smooth/periodic versus broadband/multiscale dynamical systems.
+Four quantum-PINN families
+\textemdash{} the data-reuploading universal classifier
+ansatz~\cite{perezsalinas2020dataru}, the
+trainable-embedding QPINN with classical FNN encoder and with QNN
+encoder variants~\cite{berger2025teqpinn}, and the quantum-classical
+hybrid QCPINN~\cite{farea2025qcpinn} \textemdash{} are run against
+capacity-matched classical PINN and non-liquid Neural-ODE
+baselines on four ODEs (\lv{}, \vdp{}, Lorenz, \fhn{}) and
+four PDEs (heat, smooth Burgers, \ac{}, shock Burgers), at three
+random seeds each (24 cells total). The
+hardness ladder is pre-registered with explicit regime tags:
+smooth/periodic for \lv{}, \vdp{}, heat, and smooth Burgers;
+broadband/multiscale for Lorenz, \fhn{}, \ac{}, and shock
+Burgers.
+
+The pre-registered hypothesis is FALSIFIED. The combined
+solver-task verdict at $n=24$ is
+$\ddiff = \dsmooth - \dbroad = -0.084$ with paired-bootstrap 95\%
+confidence interval $[-0.278, +0.061]$. Four additional layered
+sensitivity points \textemdash{} the forecaster-task verdict at
+$n=9$ ($\ddiff = -0.42$, CI excludes zero in the
+\emph{negative} direction~\cite{schuld2022right}), the
+default-Adam combined verdict at the pre-expansion
+$n=18$ ($\ddiff = +0.032$, CI $[-0.040, +0.109]$), the
+both-sides hyperparameter-optimized verdict at $n=9$
+($\ddiff = +0.059$, CI $[-0.058, +0.191]$), and the $n=24$
+verdict reported above \textemdash{} all return the same
+qualitative result: no statistically distinguishable regime-dependent
+advantage at this matched-capacity, matched-budget compute.
+Notably, the point estimate flips sign as the broadband bin is
+expanded from six to twelve cells, suggesting (without
+statistical significance) the \emph{inverse} of the original
+hypothesis: a tendency toward broad-over-smooth quantum
+advantage. We treat this consistency-across-sensitivity-points as
+the paper's principal scientific finding: at the matched-capacity
+scale, on this pre-registered ladder, the regime-dependent
+quantum-PINN advantage hypothesis does not survive.
+
+Within the falsification, the expanded ladder surfaces a positive
+sub-finding worth reporting on its own terms. The trainable-embedding
+quantum PINN with QNN encoder
+(\texttt{te\_qpinn\_qnn})~\cite{berger2025teqpinn}
+achieves a structural advantage on \fhn{} that was invisible at
+$n=18$: across three seeds it attains
+$\relltwo = 0.327, 0.356, 0.329$ \textemdash{} a seed-variance
+twenty-five times tighter than the matched classical PINN
+(0.640, 0.641, 1.326; one cell exhibits a catastrophic training
+failure). The seed-mean advantage is roughly twofold (0.337
+versus 0.870). This is a clear regime-specific structural QLNN
+edge on stiff fast--slow dynamics, observed at zero classical
+parameters in the ansatz and at the same training budget as
+every other cell.
+
+This paper makes four contributions.
+\begin{enumerate}
+\item \textbf{Methodological.} An open-source benchmarking
+  framework for quantum PINN comparison that implements all of
+  Bowles, Ahmed, and Schuld's recommendations~\cite{bowles2024better}:
+  pre-registration with falsifiable acceptance rules, matched
+  parameter budgets, paired-bootstrap inference, an underfit
+  guard, a known-structure skyline guard, symmetric
+  hyperparameter sensitivity (both quantum and classical sides
+  tuned at three learning rates and two training-step budgets at
+  three anchor cells), and a \texttt{verify\_paper\_integrity}
+  script that mechanically checks every cited number in the
+  paper against a committed JSON file. Eleven pre-registration
+  amendments are documented openly (Appendix~A).
+\item \textbf{Empirical.} A pre-registered regime-dependent
+  advantage hypothesis is FALSIFIED at five layered sensitivity
+  points covering eight of the nine pre-registered hardness-ladder
+  systems and both pre-registered tasks (solver and forecaster).
+  A positive structural sub-finding (\texttt{te\_qpinn\_qnn} on
+  \fhn{}) is identified at the same compute budget.
+\item \textbf{Mechanistic.} The H3 cross-tabulation links the
+  per-cell advantage gap to trainability and expressivity
+  scalars (Kullback--Leibler divergence to a Haar-random unitary
+  ensemble, Fourier $K_{\max}$ accessible to the
+  ansatz~\cite{schuld2021effect}, gradient variance, and barren
+  plateau scaling). The KL-to-Haar trend
+  ($\rho_{\mathrm{Spearman}} = +0.518$) is statistically
+  underpowered at $n=9$ but leave-one-out robust (all nine
+  resamples give the same sign), and consistent with the
+  inverted-pattern reading.
+\item \textbf{Open-source artifact.} The full code, data, and
+  reproduction pipeline are released at
+  \url{https://github.com/shawngibford/qlnn}, including
+  \texttt{scripts/reproduce\_paper.sh} (regenerates every result),
+  \texttt{scripts/verify\_paper\_integrity.py} (gates the cited
+  numbers), and tagged GitHub releases at the post-rigor and
+  post-airtight-matrix checkpoints.
+\end{enumerate}
+
+Two extensions were proven feasible by mechanism gates but
+deferred for compute budget reasons. The triple-nested
+reverse-mode autodiff through a PennyLane QNode required to solve
+the KdV equation ($u_t + 6 u u_x + u_{xxx} = 0$) is
+shown to produce finite, non-trivial values at the canonical
+Chebyshev-DQC 2D circuit shape, at $\approx 0.44\times$ the
+per-point cost of the second-order autodiff that underlies the
+heat, Burgers, and Allen--Cahn solvers (Methods,
+Section~\ref{sec:methods}). The integrated training cost across
+3 seeds, 4 quantum families, and the classical-PINN baseline
+remains prohibitive at our budget; the gate-passed mechanism is
+queued for a follow-up paper. Similarly, the 12-dimensional
+Kuramoto system from the pre-registration is mechanically
+supported by our per-component scalar circuits but is twelve times
+the compute of the 2D ODEs in our matrix; it is queued for the
+same follow-up.
+
+The rest of the paper proceeds as follows. Methods
+(Section~\ref{sec:methods}) details the pre-registration, the
+quantum-PINN family roster, the matched baselines, and the
+verdict machinery. Solver-task results
+(Section~\ref{sec:solver}) report the per-cell error tables
+and the four falsification points on the solver task.
+Forecaster-task results (Section~\ref{sec:forecaster}) report
+the corroborating verdict on the data-driven track. The H1
+verdict and sensitivity analysis (Section~\ref{sec:verdict})
+aggregates the five sensitivity points and discusses the
+sign-flip behavior under sample-size expansion. The mechanism
+(Section~\ref{sec:mechanism}) cross-tabulates the per-cell gap
+with trainability scalars. Discussion
+(Section~\ref{sec:discussion}) covers limitations and future
+work. Conclusions (Section~\ref{sec:conclusions}) summarizes
+what the negative result and the positive sub-finding mean for
+the quantum-PINN program going forward.

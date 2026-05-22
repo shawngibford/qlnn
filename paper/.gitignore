@@ -8,3 +8,5 @@
 *.fls
 *.synctex.gz
 *.toc
+mainNotes.bib
+main.pdf
