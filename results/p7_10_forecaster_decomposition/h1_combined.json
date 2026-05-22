@@ -1,12 +1,12 @@
 {
   "outcome": "FALSIFIED",
-  "reasoning": "H1 FALSIFIED: \u0394_smooth \u2212 \u0394_broad = -0.3236 with 95% CI [-0.6612, 0.0118] (includes 0). Pre-reg \u00a77: 'Published as a rigorous mechanistic null.' QLNN does NOT show a regime-dependent advantage over the non-liquid Neural-ODE baseline at this compute budget.",
+  "reasoning": "H1 FALSIFIED: \u0394_smooth \u2212 \u0394_broad = -0.5007 with 95% CI [-0.8040, -0.2438] (is negative). Pre-reg \u00a77: 'Published as a rigorous mechanistic null.' QLNN does NOT show a regime-dependent advantage over the non-liquid Neural-ODE baseline at this compute budget.",
   "bootstrap": {
     "delta_smooth_mean": -0.03501917881577369,
-    "delta_broad_mean": 0.28855265128709834,
-    "delta_diff_mean": -0.32357183010287205,
-    "ci_low": -0.6611851504207927,
-    "ci_high": 0.011814436873205691,
+    "delta_broad_mean": 0.46569894485439595,
+    "delta_diff_mean": -0.5007181236701697,
+    "ci_low": -0.8040447284284786,
+    "ci_high": -0.243750996772235,
     "n_iter": 10000,
     "n_smooth": 6,
     "n_broad": 3,

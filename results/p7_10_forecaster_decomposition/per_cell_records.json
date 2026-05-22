@@ -81,13 +81,13 @@
     "system": "lorenz",
     "seed": 0,
     "regime": "broadband_multiscale",
-    "qlnn_best_family": "hardware_efficient",
-    "qlnn_relL2": 0.9862267453071663,
+    "qlnn_best_family": "rf_qrc",
+    "qlnn_relL2": 0.6066096974442445,
     "neuralode_relL2": 0.9431813262903764,
     "classical_ltc_relL2": 0.8551827783670534,
     "skyline_relL2": 0.7083785014075185,
-    "delta_combined": -0.04304541901678982,
-    "delta_quantum_isolated": -0.1310439669401129,
+    "delta_combined": 0.3365716288461319,
+    "delta_quantum_isolated": 0.24857308092280883,
     "delta_liquid_isolated": 0.08799854792332307
   },
   {
@@ -107,13 +107,13 @@
     "system": "lorenz",
     "seed": 2,
     "regime": "broadband_multiscale",
-    "qlnn_best_family": "hardware_efficient",
-    "qlnn_relL2": 0.6119638019244765,
+    "qlnn_best_family": "rf_qrc",
+    "qlnn_relL2": 0.4601419690855052,
     "neuralode_relL2": 1.2481350660671902,
     "classical_ltc_relL2": 1.6496542536838066,
     "skyline_relL2": 0.7083785014075185,
-    "delta_combined": 0.6361712641427136,
-    "delta_quantum_isolated": 1.03769045175933,
+    "delta_combined": 0.787993096981685,
+    "delta_quantum_isolated": 1.1895122845983015,
     "delta_liquid_isolated": -0.4015191876166164
   }
 ]

@@ -57,6 +57,7 @@ REGIME = {
 QLNN_FAMILIES = (
     "data_reuploading", "hardware_efficient",
     "strongly_entangling", "brickwall",
+    "rf_qrc",                              # P7.10 fix: include the SOTA reservoir
 )
 
 

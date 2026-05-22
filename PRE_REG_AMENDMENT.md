@@ -253,23 +253,27 @@ with the per-cell algebraic identity
 $\Delta_\text{combined} = \Delta_\text{quantum} + \Delta_\text{liquid}$
 holding exactly (verified by ``verify_paper_integrity.py``).
 
-**Results (results/p7_10_forecaster_decomposition/):**
+**Results (results/p7_10_forecaster_decomposition/, n=9 with
+all 5 quantum families including rf_qrc):**
 
 | Verdict | $\Delta_\text{diff}$ | 95% CI | Outcome |
 |---|---|---|---|
-| combined | $-0.3236$ | $[-0.6612, +0.0118]$ | FALSIFIED |
-| quantum-isolated | $-0.4389$ | $[-1.0170, +0.1044]$ | FALSIFIED |
-| liquid-isolated | $+0.1153$ | $[-0.0973, +0.3772]$ | FALSIFIED |
+| combined | $-0.5007$ | $[-0.8040, -0.2438]$ | FALSIFIED (CI excludes 0 negatively) |
+| quantum-isolated | $-0.6160$ | $[-1.1665, -0.1782]$ | FALSIFIED (CI excludes 0 negatively) |
+| liquid-isolated | $+0.1153$ | $[-0.0973, +0.3772]$ | FALSIFIED (CI includes 0) |
 
 **Key empirical findings:**
 
 1. **The QLNN forecaster's underperformance on the
    pre-registered regime contrast is mechanistically the
-   quantum circuit, not the liquid-$\tau$ machinery.** The
-   quantum-isolated point estimate ($-0.44$) is more negative
-   than the combined point estimate ($-0.32$); the liquid-isolated
-   contribution is small and POSITIVE ($+0.12$), partially
-   counteracting the quantum-circuit deficit.
+   quantum circuit, at high statistical confidence.** The
+   quantum-isolated CI is $[-1.167, -0.178]$ and EXCLUDES
+   zero in the negative direction: the quantum circuit's
+   contribution to the regime contrast is significantly
+   negative, with point estimate $-0.62$. The combined point
+   estimate ($-0.50$) is less negative than the quantum-isolated
+   estimate because the liquid-$\tau$ component partially offsets
+   it ($+0.12$).
 
 2. **The liquid-$\tau$ component on its own tracks the
    Schuld--Fourier H1 prediction direction.** The liquid-isolated
@@ -498,14 +502,15 @@ pre-registered task):
     n=9 (A9), and the P7.5 raw n=9 (A7) sample-size-fragile
     pattern.
 
-  PRIMARY FORECASTER (A12): **forecaster H1 combined =
-    FALSIFIED**, Δ_diff = -0.3236, CI [-0.6612, +0.0118];
-    decomposed into Δ_quantum = -0.4389 (CI [-1.0170, +0.1044])
-    and Δ_liquid = +0.1153 (CI [-0.0973, +0.3772]). The
-    quantum-circuit component is the mechanism of the
-    underperformance; the liquid-τ component on its own is
-    directionally consistent with the H1 prediction but
-    underpowered at n=9.
+  PRIMARY FORECASTER (A12, all 5 quantum families incl. rf_qrc):
+    **forecaster H1 combined = FALSIFIED**, Δ_diff = -0.5007,
+    CI [-0.8040, -0.2438] excludes 0 negatively. Decomposed into
+    Δ_quantum = -0.6160 (CI [-1.1665, -0.1782], also excludes 0
+    negatively) and Δ_liquid = +0.1153 (CI [-0.0973, +0.3772]).
+    The quantum-circuit component is the mechanism of the
+    underperformance, at high statistical confidence. The
+    liquid-τ component on its own is directionally consistent
+    with the H1 prediction but underpowered at n=9.
 
 The original P7.5 raw n=9 CONFIRMED (A7) is reported as an
 "underlying empirical pattern at the original sample size" — every
@@ -519,13 +524,18 @@ PRIMARY verdicts are independently publishable. The paper's
 narrative now has FIVE layered sensitivity points and a clean
 two-way decomposition all converging on the same outcome:
 
-  P5 forecaster combined (n=9):     FALSIFIED, CI [-0.79, -0.05]
-                                    excludes 0 negatively
-  P7.10 forecaster q-isolated (n=9): FALSIFIED, Δ=-0.44
-                                    (mechanism: quantum circuit)
-  P7.10 forecaster τ-isolated (n=9): FALSIFIED, Δ=+0.12
-                                    (mechanism: liquid-τ; small
-                                     positive in H1 direction)
+  P5 forecaster combined (n=9, 4-fam):  FALSIFIED, CI [-0.79, -0.05]
+                                        excludes 0 negatively
+  P7.10 forecaster combined (n=9, 5-fam): FALSIFIED, CI [-0.80, -0.24]
+                                          excludes 0 negatively
+  P7.10 forecaster q-isolated (n=9): FALSIFIED, Δ=-0.62, CI [-1.17, -0.18]
+                                     EXCLUDES 0 negatively
+                                     (mechanism: quantum circuit
+                                     significant at 95% level)
+  P7.10 forecaster τ-isolated (n=9): FALSIFIED, Δ=+0.12, CI [-0.10, +0.38]
+                                     (mechanism: liquid-τ; small
+                                      positive in H1 direction;
+                                      underpowered at n=9)
   P7.5/P7.6 solver n=9-18 ODE+PDE:  FALSIFIED, CI straddles 0
   P7.6 solver HPO-best n=9:          FALSIFIED, CI straddles 0
   P7.8 solver full-ladder n=24:      FALSIFIED, CI straddles 0 with

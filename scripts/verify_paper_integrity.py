@@ -234,26 +234,31 @@ def main() -> int:
         h1_l["outcome"], "FALSIFIED")
     if h1_comb["bootstrap"] is not None:
         b = h1_comb["bootstrap"]
+        # NOTE: includes rf_qrc as 5th QLNN candidate per cell. With rf_qrc
+        # included, the combined verdict's CI EXCLUDES 0 negatively.
         all_ok &= _check(
-            "Forecaster combined Δ_diff (paper: -0.3236)",
-            b["delta_diff_mean"], -0.3236, tol=0.005)
+            "Forecaster combined Δ_diff (paper: -0.5007)",
+            b["delta_diff_mean"], -0.5007, tol=0.005)
         all_ok &= _check(
-            "Forecaster combined CI low (paper: -0.6612)",
-            b["ci_low"], -0.6612, tol=0.05)
+            "Forecaster combined CI low (paper: -0.8040)",
+            b["ci_low"], -0.8040, tol=0.05)
         all_ok &= _check(
-            "Forecaster combined CI high (paper: +0.0118)",
-            b["ci_high"], 0.0118, tol=0.05)
+            "Forecaster combined CI high (paper: -0.2438; excludes 0)",
+            b["ci_high"], -0.2438, tol=0.05)
     if h1_q["bootstrap"] is not None:
         b = h1_q["bootstrap"]
+        # NOTE: also EXCLUDES 0 negatively with rf_qrc included → the
+        # quantum circuit's underperformance on the regime contrast is
+        # now statistically significant.
         all_ok &= _check(
-            "Forecaster quantum-isolated Δ_diff (paper: -0.4389)",
-            b["delta_diff_mean"], -0.4389, tol=0.005)
+            "Forecaster quantum-isolated Δ_diff (paper: -0.6160)",
+            b["delta_diff_mean"], -0.6160, tol=0.005)
         all_ok &= _check(
-            "Forecaster quantum-isolated CI low (paper: -1.0170)",
-            b["ci_low"], -1.0170, tol=0.10)
+            "Forecaster quantum-isolated CI low (paper: -1.1665)",
+            b["ci_low"], -1.1665, tol=0.10)
         all_ok &= _check(
-            "Forecaster quantum-isolated CI high (paper: +0.1044)",
-            b["ci_high"], 0.1044, tol=0.05)
+            "Forecaster quantum-isolated CI high (paper: -0.1782; excludes 0)",
+            b["ci_high"], -0.1782, tol=0.05)
     if h1_l["bootstrap"] is not None:
         b = h1_l["bootstrap"]
         all_ok &= _check(
