@@ -184,6 +184,39 @@ def main() -> int:
             "HPO-best CI high (paper: +0.1913)",
             b["ci_high"], 0.1913, tol=0.05)
 
+    print("  --- Full-ladder n=24 H1 (P7.8, PAPER PRIMARY headline) ---")
+    h1_24 = _load("results/p7_8_solver_h1_n24/h1_analysis_combined_n24.json")
+    all_ok &= _check_str(
+        "n=24 full-ladder H1 outcome (paper: FALSIFIED)",
+        h1_24["outcome"], "FALSIFIED")
+    if h1_24["bootstrap"] is not None:
+        b = h1_24["bootstrap"]
+        # Point estimate FLIPS SIGN vs P7.6 n=18 (was +0.032, now -0.084):
+        # the expanded broadband bin (FHN + burgers_shock) reveals a
+        # modest broad>smooth advantage trend (still CI-inclusive of 0).
+        all_ok &= _check(
+            "n=24 Δ_diff_mean (paper: -0.0844)",
+            b["delta_diff_mean"], -0.0844, tol=0.005)
+        all_ok &= _check(
+            "n=24 CI low (paper: -0.2780)",
+            b["ci_low"], -0.2780, tol=0.05)
+        all_ok &= _check(
+            "n=24 CI high (paper: +0.0613)",
+            b["ci_high"], 0.0613, tol=0.05)
+        all_ok &= _check(
+            "n=24 Δ_smooth_mean (paper: +0.0674; unchanged vs n=18)",
+            b["delta_smooth_mean"], 0.0674, tol=0.005)
+        all_ok &= _check(
+            "n=24 Δ_broad_mean (paper: +0.1518; up from +0.036 with "
+            "FHN + burgers_shock)",
+            b["delta_broad_mean"], 0.1518, tol=0.005)
+        all_ok &= _check(
+            "n=24 n_smooth (paper: 12)",
+            b["n_smooth"], 12, tol=0)
+        all_ok &= _check(
+            "n=24 n_broad (paper: 12)",
+            b["n_broad"], 12, tol=0)
+
     print("\n=== PIVOT H3 mechanism (P7, tentative trend) ===")
     t3 = _load("results/p7_t3_mechanism/t3_scalars.json")
     # Lock the per-family T3 scalars to 3 sig figs (numerical determinism

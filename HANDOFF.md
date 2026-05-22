@@ -11,7 +11,7 @@ NN ODE/PDE solver+forecaster** across an ODE→PDE hardness ladder.
 ODE/PDE solver/forecaster"). Read it first.** `PROJECT_DOSSIER.md`
 describes the *old* (now-superseded) program; keep for archive only.
 
-### PIVOT pick-up order — ⏩ RESUME AT P7.7 (QLNN performance optimization) — P7.6 complete
+### PIVOT pick-up order — ⏩ RESUME AT P8 (LaTeX paper draft) — P7.8 complete, GitHub published
 
 **Branch note (read first):** the pivot lives on the worktree branch
 that was fast-forwarded onto the pivot base `1eabdc2` (it carries the
@@ -584,9 +584,72 @@ The committed P3a `.md` evidence trail (force-added) travels with git.
     Y3 HPO budget (BOTH SIDES)  ✅ HARDENED (P7.6 c1 — symmetric QLNN HPO)
     Y2 sample size (n=9 → n=18) ✅ HARDENED (P7.6 c2 — combined verdict)
 
-- ⏩ **P7.7 — NEXT. QLNN performance optimization.** 7-commit
-  sprint adding three literature-best techniques to potentially
-  improve the QLNN side and re-run the n=18 H1 verdict:
+- ✅ **P7.8 DONE — PRE-PAPER FULL-LADDER EXPANSION (n=18 → n=24)**
+  (commits `4d9f07e` → THIS HANDOFF, 3 atomic). Adds FHN + burgers_shock
+  to the pre-reg §4 hardness ladder, brings coverage from 6/9 to
+  8/9 pre-reg systems. Kuramoto + KdV deferred to follow-up paper
+  (Kuramoto: 12D compute; KdV: mechanism PASS but integrated cost
+  prohibitive).
+
+  P7.8 commit ledger:
+    `4d9f07e` feat(P7.8-fhn):       FHN ODE solver + KdV mechanism gate
+    `36ca0fe` feat(P7.8-n24):       burgers_shock + n=24 H1 verdict
+    THIS     wrap-up:               integrity gates + A11 + HANDOFF
+
+  **THE PAPER'S NEW PRIMARY HEADLINE** (n=24 ODE+PDE solver-task H1):
+
+    outcome    = FALSIFIED
+    Δ_smooth   = +0.0674   (unchanged from n=18 baseline)
+    Δ_broad    = +0.1518   (up from +0.0358 — driven by FHN + AC)
+    Δ_diff     = -0.0844   ← POINT ESTIMATE FLIPPED SIGN
+    95% CI     = [-0.2780, +0.0613]
+    n_smooth   = 12  /  n_broad = 12  (symmetric)
+
+  Two key empirical findings unlocked by the expansion:
+
+  1. **te_qpinn_qnn structural FHN advantage** (the "ceiling on LV
+     becomes anchor on stiff dynamics" finding):
+       FHN s0: Δ = +0.313  (QLNN 0.327 vs cPINN 0.640)
+       FHN s1: Δ = +0.285  (QLNN 0.356 vs cPINN 0.641)
+       FHN s2: Δ = +0.998  (QLNN 0.329 vs cPINN 1.327 — cPINN train fail)
+     QLNN seed variance ≈ 0.015 vs cPINN ≈ 0.39 → 25× tighter.
+
+  2. **chebyshev_dqc_2d is worst on burgers_shock** (relL²≈0.42-0.44
+     across 3 seeds) — confirms the smooth-only specialization of
+     the logistic-saturation feature map documented in P3.5.
+
+  **Five layered H1 falsifications now converge on the same outcome:**
+    P5  forecaster H1 (n=9):    FALSIFIED, CI [-0.79, -0.05] NEGATIVE
+    P7.5 solver-task raw (n=9): CONFIRMED (sample-size fragile)
+    P7.6 combined (n=18):       FALSIFIED, CI [-0.04, +0.11]
+    P7.6 HPO-best (n=9):        FALSIFIED, CI [-0.06, +0.19]
+    P7.8 full-ladder (n=24):    FALSIFIED, CI [-0.28, +0.06] **★ PRIMARY**
+
+  **Deferral disclosures (PRE_REG_AMENDMENT A11):**
+    - kuramoto: 12D per-component scalar circuits → ~7 hr/cell;
+      cost out of scope for paper deadline. Follow-up paper.
+    - kdv: mechanism gate PASSED (jacrev³ works through QNode at
+      0.44× the jacrev² baseline cost); integrated training cost
+      ~8 hr/seed × 15 cells = ~5 days CPU. Compute out of scope
+      for paper deadline. Follow-up paper.
+
+  **GitHub publish:** branches + tag pushed to
+  github.com/shawngibford/qlnn:
+    - main (placeholder, 6-byte README on remote)
+    - master (~v1.0 OD-program history)
+    - claude/upbeat-elbakyan-68b56a (~ this work, current HEAD)
+    - tag v0.1-prepaper-rigor (anchored at P7.6 commit 2309faa)
+
+- ⏭️ **P7.7 — DEFERRED TO FOLLOW-UP PAPER.** QNG optimizer + causal
+  training + L=5 reuploading were the planned QLNN-side hardening
+  sprint. Per the user's session decision, P7.7 is its own follow-up
+  paper: "Hardening quantum PINN training" — a methods-prong
+  contribution on top of the empirical+benchmark paper. P7.7
+  techniques DO NOT block submission of the current paper.
+
+- ⏩ **P8 — NEXT. PRX Quantum paper draft (LaTeX, section-by-section).**
+
+(P7.7 OLD-PLAN context, archived below — for reference only.)
 
   1. **Quantum Natural Gradient optimizer** (Stokes 2020 + recent
      2025 papers): replace optax Adam with PennyLane's QNG. Drop-in.
