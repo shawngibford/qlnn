@@ -1,4 +1,89 @@
-% Section: Conclusions — filled in P8 commit 9.
+% Section: Conclusions — P8 commit 9.
+
 \section{Conclusions}
 \label{sec:conclusions}
-\noindent\emph{[Section stub. Drafted in P8 commit 9.]}
+
+We pre-registered, executed, and aggregated a quantum
+physics-informed neural network benchmark organized around the
+Schuld--Fourier regime-dependent advantage
+hypothesis~\cite{schuld2022right,schuld2021effect}. The benchmark
+ran four quantum-PINN families on a hardness ladder of four
+ODEs and four PDEs, three seeds each ($n = 24$ for the primary
+solver verdict), with five matched classical baselines
+(plain Neural-ODE, classical LTC, plain MLP, classical PINN,
+known-structure skyline) and the complete 2$\times$2 fairness
+matrix on the forecaster task (liquid$\times$quantum cross of
+\texttt{LiquidQuantumCell}, \texttt{ClassicalLTCCell},
+\texttt{NonLiquidQuantumCell}, and \texttt{PlainNeuralODECell}).
+
+\textbf{The pre-registered $H_1$ regime-dependent quantum
+advantage is FALSIFIED.} Across all eight non-fragile sensitivity
+points (the only positive-CI verdict, P7.5 raw $n = 9$, is
+sample-size-fragile and HPO-fragile and is superseded by every
+subsequent row of Table~\ref{tab:master-verdicts}), the
+paired-bootstrap 95\% confidence intervals on
+$\dsmooth - \dbroad$ either include zero or exclude it in the
+\emph{negative} direction. The primary solver verdict at
+$n = 24$ has $\ddiff = -0.084$, CI $[-0.278, +0.061]$; the
+primary forecaster verdict at $n = 9$ (with all five quantum
+families including \texttt{rf\_qrc}) has $\ddiff = -0.501$,
+CI $[-0.804, -0.244]$, statistically excluding zero in the
+direction opposite the original prediction.
+
+\textbf{The LTC decomposition mechanistically attributes the
+inversion to the quantum circuit.} With all four corners of the
+forecaster fairness 2$\times$2 filled, the quantum-isolated
+$\ddiff = -0.616$ (CI $[-1.167, -0.178]$) is significantly
+negative, while the liquid-isolated $\ddiff = +0.115$
+(CI $[-0.097, +0.377]$) is the only verdict in the program
+whose point estimate matches the original Schuld--Fourier
+direction. The classical liquid-time-constant machinery alone
+has the smooth-bin inductive bias the theory predicts; the
+quantum circuit's contribution to the regime contrast destroys
+it.
+
+\textbf{Positive sub-findings remain.} The expanded matrix
+surfaces two structural quantum advantages observable at zero
+classical parameters in the quantum cell: \texttt{te\_qpinn\_qnn}
+on \fhn{} (24$\times$ tighter seed variance and 2.5$\times$
+lower mean error than the matched cPINN) and \texttt{rf\_qrc}
+on the chaotic Lorenz cells (the strongest forecaster on
+Lorenz s0 and s2). The H3 cross-tabulation identifies expressivity
+(KL-to-Haar distance) as a candidate within-roster predictor of
+per-cell $\Delta$ ($\rho = +0.518$, LOO-robust at $n = 9$);
+significance at the program's sample size is insufficient, but
+the trend's direction is consistent with the LTC decomposition's
+mechanism attribution.
+
+\textbf{The methodological contribution is the benchmark
+framework itself.} The open-source pipeline at
+\url{https://github.com/shawngibford/qlnn} implements the
+Bowles--Schuld~\cite{bowles2024better} program in its
+entirety: pre-registration with twelve openly-documented
+amendments, paired-bootstrap inference, underfit and skyline
+guards, symmetric HPO on three anchor cells, the all-to-all
+contrast matrix in body-text tables, and the
+\texttt{verify\_paper\_integrity.py} mechanical gate that
+matches every cited number to a committed JSON file. The
+P7.11 non-liquid quantum forecaster ablation completes the
+fairness 2$\times$2 on the forecaster task -- to our knowledge
+the first quantum-PINN benchmark to do so.
+
+\textbf{Future work targets the mechanism.} The follow-up paper
+applies three concrete interventions identified by the
+mechanism analysis as plausibly relevant: Quantum Natural
+Gradient optimization~\cite{stokes2020quantum} (targeting the
+quantum-circuit training inefficiency the LTC decomposition
+identifies), causal training weighting~\cite{wang2022causality}
+(targeting the stiff-dynamics failure mode), and higher
+data-reuploading depth at $L = 5$
+(targeting the Fourier $K_{\max}$ ceiling identified in
+Section~\ref{sec:mechanism-scalars}). The deferred Kuramoto
+(12-dim) and KdV (third-order spatial) systems are also
+queued for the follow-up; the mechanism gate for KdV's triple-
+nested autodiff has been pre-cleared
+(Section~\ref{sec:discussion-limitations}). Whether any of
+these interventions recovers the $H_1$-predicted direction
+remains an empirical question that the current benchmark cannot
+answer; the methodological framework introduced here is what
+makes the future answer falsifiable.
