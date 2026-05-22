@@ -10,8 +10,14 @@ from .liquid_quantum_cell import (
     LiquidQuantumCell,
     LiquidQuantumCellConfig,
 )
+from .non_liquid_quantum_cell import (
+    NonLiquidQuantumCell,
+    NonLiquidQuantumCellConfig,
+)
 
 __all__ = [
     "LiquidQuantumCell",
     "LiquidQuantumCellConfig",
+    "NonLiquidQuantumCell",
+    "NonLiquidQuantumCellConfig",
 ]
