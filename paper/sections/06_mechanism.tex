@@ -39,7 +39,7 @@ The accessible Fourier order at our default reuploading depth
 the same upper bound at this depth. The Schuld--Sweke--Meyer
 theorem predicts $K_{\max} = L \cdot n$ where $L$ is the
 reuploading depth and $n$ is the number of qubits; with our
-$L=1, n=4$ configuration we recover exactly that bound. This
+$L=1, n=4$ configuration we recover precisely that bound. This
 explains the lack of per-family discrimination on the Fourier
 axis at the program's compute budget: every family is operating
 at the same theoretical ceiling.
@@ -164,3 +164,15 @@ mechanistic line directly: P7.7's three hardening techniques
 reuploading depth) are precisely the interventions that would
 shift the per-cell $\Delta$ via the KL-to-Haar mechanism, if
 the expressivity-helps reading is correct.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_p7_mechanism.pdf}
+\caption{$H_3$ mechanism cross-tabulation: per-family T3 scalars
+(Meyer--Wallach $Q$, KL-to-Haar divergence, gradient variance,
+Fourier $K_{\max}$) versus per-cell $\Delta$ on the forecaster
+task. KL-to-Haar (lower $=$ more expressive) is the only scalar
+with a sign-stable leave-one-out trend ($\rho = +0.518$, all 9
+LOO resamples positive).}
+\label{fig:mechanism}
+\end{figure}

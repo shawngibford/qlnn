@@ -45,7 +45,9 @@ $n=9$ forecaster matrix. Five quantum forecaster families
 $\times$ four classical baselines. The architectural family names
 abbreviate to: ``dataru'' for \texttt{data\_reuploading},
 ``hweff'' for \texttt{hardware\_efficient}, ``stngent'' for
-\texttt{strongly\_entangling}, ``brick'' for \texttt{brickwall},
+\texttt{strongly\_entangling} (which aliases to the
+\texttt{data\_reuploading} circuit in our registry; the column is
+kept for all-to-all transparency), ``brick'' for \texttt{brickwall},
 ``rfqrc'' for \texttt{rf\_qrc}. Classical baselines:
 ``ne'' for \texttt{plain\_neuralode} (the pre-reg-mandated H1
 contrast), ``mlp'' for \texttt{plain\_mlp}, ``sky'' for
@@ -136,13 +138,13 @@ verdicts that share the cell records but swap which baseline
 sits in the contrast slot:
 
 \begin{align*}
-\Delta_\text{combined} &= \text{QLNN} - \text{plain\_neuralode} \\
-\Delta_\text{quantum}  &= \text{QLNN} - \text{classical\_ltc} \\
-\Delta_\text{liquid}   &= \text{classical\_ltc} - \text{plain\_neuralode}
+\Delta_\mathrm{cmb} &= \mathrm{QLNN} - \text{Neural-ODE} \\
+\Delta_q  &= \mathrm{QLNN} - \text{cLTC} \\
+\Delta_\tau   &= \text{cLTC} - \text{Neural-ODE}
 \end{align*}
 
-The per-cell algebraic identity $\Delta_\text{combined} =
-\Delta_\text{quantum} + \Delta_\text{liquid}$ holds exactly
+The per-cell algebraic identity $\Delta_\mathrm{cmb} =
+\Delta_q + \Delta_\tau$ holds exactly
 (verified mechanically in
 \texttt{verify\_paper\_integrity.py}; tolerance $10^{-3}$).
 
@@ -211,18 +213,18 @@ are FALSIFIED with CIs excluding zero negatively.
 \subsection{Per-cell decomposition: where the underperformance lives}
 \label{sec:forecaster-percell-decomp}
 
-The $\Delta_\text{quantum}$ values per cell expose substantial
+The $\Delta_q$ values per cell expose substantial
 seed-level bimodality on \lv{} (best-QLNN selection includes
 \texttt{rf\_qrc}):
 
 \begin{itemize}
-  \item \lv{} s0: $\Delta_\text{quantum} = -0.347$
+  \item \lv{} s0: $\Delta_q = -0.347$
         (classical-LTC beats best QLNN \texttt{data\_reuploading}:
         $0.230$ vs $0.577$)
-  \item \lv{} s1: $\Delta_\text{quantum} = -0.328$
+  \item \lv{} s1: $\Delta_q = -0.328$
         (classical-LTC beats best QLNN \texttt{hardware\_efficient}:
         $0.209$ vs $0.537$)
-  \item \lv{} s2: $\Delta_\text{quantum} = +0.332$
+  \item \lv{} s2: $\Delta_q = +0.332$
         (best QLNN \texttt{brickwall} beats classical-LTC:
         $0.327$ vs $0.659$)
 \end{itemize}
@@ -235,10 +237,10 @@ a real, seed-dependent failure mode on smooth ODEs that the
 classical-LTC does not exhibit at the same compute budget.
 
 The decomposition's broadband side tells the opposite story.
-On Lorenz s2, $\Delta_\text{quantum} = +1.190$: \texttt{rf\_qrc}
+On Lorenz s2, $\Delta_q = +1.190$: \texttt{rf\_qrc}
 attains $\relltwo = 0.460$ while the classical-LTC collapses to
 $\relltwo = 1.650$ (worse than predict-zero) on the same cell.
-On Lorenz s0, $\Delta_\text{quantum} = +0.249$: \texttt{rf\_qrc}
+On Lorenz s0, $\Delta_q = +0.249$: \texttt{rf\_qrc}
 ($0.607$) again beats classical-LTC ($0.855$). This is consistent with the solver-task FHN and AC
 sub-findings (Section~\ref{sec:solver-fhn}): the quantum
 families exhibit regime-specific structural advantages on
@@ -256,19 +258,17 @@ four corners filled, the $\tau$-isolation contribution can be computed
 along TWO independent paths:
 
 \begin{align*}
-\Delta_\text{liquid, via classical}
-  &= \text{classical\_LTC} - \text{plain\_neuralode} \\
-\Delta_\text{liquid, via quantum}
-  &= \text{QLNN} - \text{non\_liquid\_QLNN}
+\Delta_{\tau,\,\text{cls}}
+  &= \text{cLTC} - \text{Neural-ODE} \\
+\Delta_{\tau,\,\text{q}}
+  &= \mathrm{QLNN} - \text{NL-QLNN}
 \end{align*}
 
-Two algebraic identities hold per-cell exactly (verified
-mechanically by \texttt{verify\_paper\_integrity}):
+Two algebraic identities hold per-cell exactly (verified by
+\texttt{verify\_paper\_integrity}):
 \begin{align*}
-\Delta_\text{combined}
-  &= \Delta_\text{quantum, via LTC} + \Delta_\text{liquid, via classical} \\
-\Delta_\text{combined}
-  &= \Delta_\text{liquid, via quantum} + \Delta_\text{quantum, via non\_liquid}
+\Delta_\mathrm{cmb} &= \Delta_{q,\,\text{ltc}} + \Delta_{\tau,\,\text{cls}} \\
+\Delta_\mathrm{cmb} &= \Delta_{\tau,\,\text{q}} + \Delta_{q,\,\text{nl}}
 \end{align*}
 
 Table~\ref{tab:forecaster-2x2} reports the full 5-verdict
@@ -277,8 +277,8 @@ decomposition.
 \begin{table}[h]
 \centering
 \caption{Complete 2$\times$2 forecaster H1 decomposition at $n=9$.
-$\Delta_\text{liquid, via classical}$ and
-$\Delta_\text{liquid, via quantum}$ are two independent paths to
+$\Delta_{\tau,\,\text{cls}}$ and
+$\Delta_{\tau,\,\text{q}}$ are two independent paths to
 isolating the liquid-$\tau$ contribution; the sign of the point
 estimate \emph{disagrees} between the two paths.}
 \label{tab:forecaster-2x2}
@@ -299,10 +299,10 @@ Quantum via non-liquid    & $-0.167$ & $[-0.495, +0.204]$ & FALSIFIED \\
 \end{table}
 
 \paragraph{The $\tau$-isolation cross-check disagrees in sign.}
-$\Delta_\text{liquid, via classical} = +0.115$ has positive
+$\Delta_{\tau,\,\text{cls}} = +0.115$ has positive
 point estimate (smooth-bin advantage, matching the
 Schuld--Fourier H1 prediction direction);
-$\Delta_\text{liquid, via quantum} = -0.334$ has \emph{negative}
+$\Delta_{\tau,\,\text{q}} = -0.334$ has \emph{negative}
 point estimate. Both CIs cross zero individually, but the
 qualitative directions are opposite. The liquid-$\tau$ machinery
 is therefore not a context-independent component -- its
@@ -311,16 +311,16 @@ modulates.
 
 Per-cell inspection clarifies the mechanism:
 \begin{itemize}
-  \item Lorenz s2 (chaotic): $\Delta_\text{liquid, via quantum} =
+  \item Lorenz s2 (chaotic): $\Delta_{\tau,\,\text{q}} =
         +0.594$. Adding $\tau$ to the quantum cell substantially
         improves the chaotic-regime performance:
         \texttt{rf\_qrc} (with $\tau$) attains $\relltwo = 0.460$;
         \texttt{non\_liquid\_hardware\_efficient} (without $\tau$)
         attains $1.054$.
-  \item \vdp{} s1 (stiff): $\Delta_\text{liquid, via quantum} =
+  \item \vdp{} s1 (stiff): $\Delta_{\tau,\,\text{q}} =
         +0.421$. Same pattern -- $\tau$ helps on stiff dynamics.
   \item \lv{} s0, s1 (smooth-periodic):
-        $\Delta_\text{liquid, via quantum} = +0.006, +0.169$ --
+        $\Delta_{\tau,\,\text{q}} = +0.006, +0.169$ --
         near-neutral on smooth.
 \end{itemize}
 
@@ -329,7 +329,7 @@ When stratified by the smooth-minus-broad regime contrast, this
 yields the negative point estimate above. The combined
 $\ddiff = -0.501$ inversion is therefore the net of (a) a
 quantum-circuit underperformance
-($\Delta_\text{quantum via LTC} = -0.62$) and (b) a
+($\Delta_{q,\,\text{ltc}} = -0.62$) and (b) a
 substrate-dependent $\tau$ contribution that goes opposite
 directions on classical vs quantum substrates.
 
@@ -350,3 +350,16 @@ inductive bias) is recovered by the liquid-$\tau$ machinery on
 its own, then inverted by the quantum component. This is
 exactly the kind of regime-dependent attribution Bowles, Ahmed,
 and Schuld~\cite{bowles2024better} call for in QML benchmarking.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_p4_forecaster_rollout.pdf}
+\caption{Forecaster-task autoregressive-rollout error on the three
+pre-registered ODE systems. The figure visualizes the per-cell
+values reported in Table~\ref{tab:forecaster-matrix} (five quantum
+families plus the four classical baselines). The Lorenz cells
+show the largest spread, consistent with the structural quantum
+advantage of \texttt{rf\_qrc} on chaotic dynamics
+(Section~\ref{sec:forecaster-cells}).}
+\label{fig:forecaster-rollout}
+\end{figure}

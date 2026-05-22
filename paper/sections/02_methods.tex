@@ -209,9 +209,9 @@ relative-$L^2$ error against the reference field. We construct one
 \texttt{CellRecord} per (system, seed) with the best quantum-PINN
 relative-$L^2$ across the four families on the quantum side and
 the matched classical-PINN result on the classical side. The H1
-verdict module
-(\texttt{src/quantum\_liquid\_neuralode/evaluation/h1\_verdict.py})
-performs the following:
+verdict module (\texttt{h1\_verdict.py} in the
+\texttt{quantum\_liquid\_neuralode.evaluation} package) performs
+the following:
 
 \begin{enumerate}
   \item \emph{Underfit guard}: drops cells where the classical

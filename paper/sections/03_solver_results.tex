@@ -244,3 +244,16 @@ itself. The Lorenz contribution to the verdict is near-zero
 in all four sensitivity points; we treat the Lorenz cells as a
 shared-failure datapoint rather than as discriminating evidence
 for or against H1.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_p3_6_multi_state.pdf}
+\caption{Solver-task per-cell relative-$L^2$ across the four
+quantum-PINN families on the four ODE systems (Lotka--Volterra,
+Van der Pol, Lorenz, FitzHugh--Nagumo) and the matched classical
+PINN baseline. Per-cell values are reported in
+Table~\ref{tab:cell-matrix}; this figure visualizes the same data
+to make the family specialization patterns
+(Section~\ref{sec:solver-failures}) visible at a glance.}
+\label{fig:solver-multistate}
+\end{figure}

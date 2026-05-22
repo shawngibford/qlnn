@@ -344,6 +344,53 @@ def main() -> int:
             sum_check, h_comb["bootstrap"]["delta_diff_mean"],
             tol=0.001)
 
+    print("  --- §1+§3+§7 derived FHN ratios (P8.5 B1) ---")
+    import statistics as _stats
+    fhn_qlnn = []
+    fhn_cls = []
+    for _s in (0, 1, 2):
+        _q = _load(
+            f"results/p3_6_multi_state/te_qpinn_qnn_fitzhugh_nagumo/"
+            f"seed_{_s}/metrics.json")
+        _c = _load(
+            f"results/p7_5_solver_h1/fitzhugh_nagumo_classical_pinn/"
+            f"seed_{_s}/metrics.json")
+        fhn_qlnn.append(float(_q["relative_l2"]))
+        fhn_cls.append(float(_c["relative_l2"]))
+    _qm, _qs = _stats.mean(fhn_qlnn), _stats.stdev(fhn_qlnn)
+    _cm, _cs = _stats.mean(fhn_cls), _stats.stdev(fhn_cls)
+    all_ok &= _check(
+        "FHN te_qpinn_qnn mean relL² (paper: 0.337)", _qm, 0.337, tol=0.005)
+    all_ok &= _check(
+        "FHN cPINN mean relL² (paper: 0.870)", _cm, 0.870, tol=0.005)
+    all_ok &= _check(
+        "FHN std ratio cPINN/QLNN (paper: 24×; ≈ 24.41)",
+        _cs / _qs, 24.41, tol=0.5)
+    all_ok &= _check(
+        "FHN mean ratio cPINN/QLNN (paper: 2.5×; ≈ 2.58)",
+        _cm / _qm, 2.58, tol=0.1)
+
+    print("  --- §6 T3 per-family scalars (P8.5 B1) ---")
+    t3 = _load("results/p7_t3_mechanism/t3_scalars.json")
+    all_ok &= _check(
+        "hardware_efficient Q (paper: 0.796)",
+        t3["hardware_efficient"]["entangling_q"], 0.796, tol=0.01)
+    all_ok &= _check(
+        "data_reuploading KL-to-Haar (paper: 0.195)",
+        t3["data_reuploading"]["expressibility_kl"], 0.195, tol=0.005)
+    all_ok &= _check(
+        "hardware_efficient KL-to-Haar (paper: 0.211)",
+        t3["hardware_efficient"]["expressibility_kl"], 0.211, tol=0.005)
+    all_ok &= _check(
+        "data_reuploading gradient variance (paper: 0.038)",
+        t3["data_reuploading"]["gradient_variance"], 0.038, tol=0.005)
+    all_ok &= _check(
+        "hardware_efficient gradient variance (paper: 0.025)",
+        t3["hardware_efficient"]["gradient_variance"], 0.025, tol=0.005)
+    all_ok &= _check(
+        "brickwall gradient variance (paper: 0.046)",
+        t3["brickwall"]["gradient_variance"], 0.046, tol=0.005)
+
     print("\n=== PIVOT H3 mechanism (P7, tentative trend) ===")
     t3 = _load("results/p7_t3_mechanism/t3_scalars.json")
     # Lock the per-family T3 scalars to 3 sig figs (numerical determinism

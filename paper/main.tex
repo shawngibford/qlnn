@@ -47,6 +47,14 @@
 
 \begin{document}
 
+% Global glue-stretch budget. Two-column revtex with long ansatz
+% names + nested math labels routinely produces 1-95pt overfull
+% boxes that look fine in print but trigger noisy log warnings.
+% Slightly looser inter-word stretch eliminates the cosmetic
+% violations without affecting readability.
+\sloppy
+\emergencystretch=3em
+
 % =====================================================================
 % Title, authors, abstract
 % =====================================================================
