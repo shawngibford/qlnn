@@ -1,4 +1,266 @@
-% Section: Methods — filled in P8 commit 3.
+% Section: Methods — P8 commit 3.
+% Numerical claims verified against:
+%   - ODE_PDE_PRE_REG.md §§ 1-7
+%   - PRE_REG_AMENDMENT.md A1--A11
+%   - src/quantum_liquid_neuralode/evaluation/h1_verdict.py
+%   - src/qlnn_/training/{pde_residual_loss, multi_state_solver,
+%       classical_pinn_solver, p3_8_review_demo, p3_9_pde_matrix}.py
+%   - Per-cell metrics.json (param counts)
+
 \section{Methods}
 \label{sec:methods}
-\noindent\emph{[Section stub. Drafted in P8 commit 3.]}
+
+\subsection{Pre-registration and the falsifiable hypothesis}
+\label{sec:methods-prereg}
+
+The complete pre-registration document (\texttt{ODE\_PDE\_PRE\_REG.md},
+committed 2026-05-19 before any benchmark results were generated)
+states the central hypothesis:
+
+\begin{quote}
+\textbf{H1.} Quantum PINNs achieve a regime-dependent advantage over
+matched classical baselines: $\dsmooth - \dbroad > 0$ with
+paired-bootstrap 95\% confidence interval excluding zero, where
+$\Delta_\text{cell} \equiv \relltwo_\text{classical} -
+\relltwo_\text{QLNN}$ and the mean is taken per regime.
+\end{quote}
+
+The theoretical motivation is the Schuld--Sweke--Meyer
+result~\cite{schuld2021effect} that a data-reuploading parameterized
+quantum circuit realizes a truncated Fourier series in the encoded
+variable, with accessible $K_\text{max}$ proportional to reuploading
+depth. A model whose hypothesis class is a low-order Fourier series
+should exhibit an inductive bias toward smooth periodic dynamics and
+a corresponding difficulty representing broadband or multiscale
+structure. H1 operationalizes this prediction as a comparison
+between two pre-registered regime bins.
+
+The pre-registration locks three additional commitments before
+any result is generated: (i)~mandatory classical baselines
+(capacity-matched cPINN, non-liquid Neural-ODE, plain MLP
+forecaster, and a known-structure skyline); (ii)~banned headline
+metrics that admit persistence-trivial wins (notably one-step MAE
+on autoregressive rollout); (iii)~explicit decision rules under
+which H1 is declared CONFIRMED, FALSIFIED, or INCONCLUSIVE.
+
+Eleven amendments to the pre-registration are documented openly
+in \texttt{PRE\_REG\_AMENDMENT.md} (A1--A11). They were necessary
+because the original pre-registration left some parameter choices
+implicit; each amendment locks a single decision and reports
+whether the outcome was stable under the alternative choice. The
+key amendments are: A1 (skyline threshold = 0.5; sensitivity at
+0.75 reported); A4 (MLP capacity 3.3$\times$ Neural-ODE,
+violating the original ``within factor of 2'' rule, disclosed and
+shown not to affect the verdict sign); A7 (strict-versus-raw
+underfit-guard reporting); A9 (symmetric quantum HPO sensitivity);
+A10 (combined ODE+PDE verdict at $n=18$); A11 (full-ladder
+expansion to $n=24$ + KdV/Kuramoto deferral rationale).
+
+\subsection{Hardness ladder}
+\label{sec:methods-ladder}
+
+We test H1 on eight pre-registered dynamical systems organized
+into a regime-tagged hardness ladder.
+
+\textbf{Smooth/periodic bin} (six pre-reg cells, four taxa, two
+mathematical structures):
+\begin{itemize}
+  \item \lv{} ($\alpha = 1.1, \beta = 0.4, \delta = 0.1,
+        \gamma = 0.4$, $T = 5$) -- 2D predator--prey limit cycle.
+  \item \vdp{} ($\mu = 5$, $T = 10$) -- 2D stiff but periodic
+        relaxation oscillator; pre-registered as borderline
+        smooth.
+  \item Heat equation ($\nu = 0.1$, $T = 1$, periodic
+        on $[0, 2\pi)$) -- analytic reference
+        $u(t,x) = e^{-\nu t}\sin x$.
+  \item Burgers smooth ($\nu = 0.12$, $T = 2$, periodic on
+        $[0, 2\pi)$, IC $\sin x$) -- npz-reference field.
+\end{itemize}
+
+\textbf{Broadband/multiscale bin} (six pre-reg cells, four taxa,
+two mathematical structures):
+\begin{itemize}
+  \item Lorenz ($\sigma = 10, \rho = 28, \beta = 8/3$, $T = 2$)
+        -- 3D chaotic flow.
+  \item \fhn{} ($I = 0.5, \varepsilon = 0.08, a = 0.7, b = 0.8$,
+        $T = 20$) -- 2D fast--slow stiff relaxation.
+  \item \ac{} ($\varepsilon = 0.06$, $T = 8$, periodic on
+        $[0, 2\pi)$) -- sharp two-front equilibrium.
+  \item Burgers shock ($\nu = 0.004$, $T = 2$, periodic on
+        $[0, 2\pi)$, IC $\sin x$) -- near-shock at $t^* \approx 1$.
+\end{itemize}
+
+Two pre-registered systems are mechanism-proven-but-compute-deferred
+(amendment A11): the 12-dimensional Kuramoto coupled-oscillator
+system (per-component scalar circuits scale linearly in state
+dimension, projecting $\approx 7$~hr per cell) and KdV
+($u_t + 6 u u_x + u_{xxx} = 0$). The triple-nested reverse-mode
+autodiff required for the KdV solver was gate-tested
+(\texttt{scripts/run\_p7\_8\_kdv\_gate.py}, result:
+PASS, $u_{xxx}$ values finite and nontrivial, JIT compile
+4.55~s, per-point cost ratio 0.431$\times$ the second-order
+baseline thanks to XLA fusion); the integrated training cost at
+$32 \times 32$ collocation and 2400 steps remains prohibitive
+($\approx 12$~s per gradient step, projecting $\approx 8$~hr
+per seed across all four quantum families plus the classical
+baseline). Both deferrals are queued for the follow-up paper.
+
+\subsection{Quantum-PINN family roster}
+\label{sec:methods-roster}
+
+Four quantum-PINN ansatz families are exercised at all 24 cells.
+Each family is implemented faithfully against its published
+specification; the binding manifest is
+\texttt{refs/CIRCUIT\_SPECS.md}. For solver-task ODEs, each $d$-component
+state is fitted via $d$ independent scalar circuits with $d$
+separate weight pytrees (no entanglement across components); for
+PDEs, each family has a 2D port that encodes $(t, x)$ on split
+qubit registers.
+
+\begin{itemize}
+  \item \textbf{Data-reuploading} (Pérez-Salinas et
+        al.~\cite{perezsalinas2020dataru}): the universal
+        classifier ansatz with interleaved angle-encoding and
+        parameterized $R(\theta)$ blocks plus ring CNOT
+        entanglers. 4 qubits, 5 layers, 60 PQC parameters per
+        scalar circuit.
+  \item \textbf{TE-QPINN/FNN} (Berger et
+        al.~\cite{berger2025teqpinn}): trainable-embedding QPINN
+        with classical FNN encoder feeding angle-encoded rotations.
+        60 PQC parameters and 100 classical FNN parameters per
+        scalar circuit.
+  \item \textbf{TE-QPINN/QNN} (Berger et
+        al.~\cite{berger2025teqpinn}): trainable-embedding QPINN
+        with QNN encoder (zero classical parameters by
+        construction). 84 PQC parameters per scalar circuit.
+  \item \textbf{QCPINN} (Farea et
+        al.~\cite{farea2025qcpinn}): hybrid quantum--classical
+        PINN with classical pre- and post-net. 15 PQC parameters
+        and 706 classical parameters per scalar circuit (the
+        classical-parameter overhead is disclosed openly and
+        flagged at every cell in the per-cell tables in
+        Section~\ref{sec:solver}).
+\end{itemize}
+
+For all four families the 2D PDE port uses split qubit registers:
+$n_t = n_x = 4$ qubits per coordinate axis, 5 hardware-efficient
+layers, ring entanglement. The Chebyshev coordinate feature map
+realizes a tower of Chebyshev polynomials in each axis variable;
+the convention is \texttt{src/qlnn\_/training/pde\_residual\_loss.py}
+\texttt{ChebyshevDQC2DConfig}.
+
+\subsection{Matched classical baselines}
+\label{sec:methods-baselines}
+
+Per pre-registration §6 (mandatory), four classical baselines are
+trained at every applicable cell at matched parameter count
+within a factor of two (except A4-disclosed MLP):
+
+\begin{itemize}
+  \item \textbf{Classical PINN} (cPINN): a small MLP trained with
+        the same Lagaris hard-IC trial solution
+        $u(t, x) = u_0(x) + (t - t_0) \cdot \text{MLP}_\theta(t, x)$
+        and the same physics residual as each quantum-PINN cell.
+        For vector ODE: $u(t) = u_0 + (t - t_0) \cdot \text{MLP}(t)$
+        with output dimension $d$. The classical solver-task control.
+  \item \textbf{Plain non-liquid Neural-ODE}: an MLP cell
+        $h' = W_{\text{out}}\tanh(W_h [h, x, t])$ with no learnable
+        time constants, Diffrax integration, the same residual head
+        as the quantum forecaster. The forecaster-task control.
+  \item \textbf{Plain MLP forecaster}: $y = \text{MLP}(\text{history}, x)$
+        as a capacity-matched non-recurrent forecaster control.
+  \item \textbf{Known-structure skyline}: per pre-reg §6, fits only
+        free coefficients (e.g.~$\nu$, $\rho$) of the ground-truth
+        equation by least squares against the reference trajectory.
+        Used as the underfit/out-of-reach gate.
+\end{itemize}
+
+\subsection{Training protocol}
+\label{sec:methods-train}
+
+All solver-task cells use the Lagaris hard-IC trial solution. The
+ODE form is $u(t) = u_0 + (t - t_0) \cdot (s \cdot
+\text{circuit}(t) + b)$ with $\{s, b\}$ scalar training parameters
+per component; the PDE form is
+$u(t, x) = u_0(x) + (t - t_0) \cdot
+(s \cdot \text{circuit}(t, x) + b)$. The physics-residual loss is
+the mean squared residual over interior collocation points;
+all four quantum-PINN families and the classical PINN share the
+same loss closure, so the comparison differs only in the function
+class of the trial solution.
+
+Per-axis collocation grids: 60 interior points for ODE solvers, and
+either $24{\times}24$, $28{\times}28$, or $32{\times}32{-}64$
+for PDE solvers (the AC and burgers\_shock grids are intentionally
+finer to capture the sharper structures, per A11). Training step
+budgets per system are documented in
+\texttt{CORRECTED\_PDE\_CONFIGS}: 1200 for heat, 1500 for
+burgers\_smooth, 1800 for AC, 2400 for burgers\_shock. ODE step
+budgets follow \texttt{multi\_state\_solver.\_SCALAR\_FAMILIES}:
+1200 (chebyshev\_dqc), 1500 (te\_qpinn\_fnn, qcpinn), 2000
+(te\_qpinn\_qnn).
+
+\subsection{Verdict machinery}
+\label{sec:methods-verdict}
+
+Per cell the trained model is evaluated on an interior 50$\times$50
+grid (PDE) or a 1024-point time grid (ODE), and we record
+relative-$L^2$ error against the reference field. We construct one
+\texttt{CellRecord} per (system, seed) with the best quantum-PINN
+relative-$L^2$ across the four families on the quantum side and
+the matched classical-PINN result on the classical side. The H1
+verdict module
+(\texttt{src/quantum\_liquid\_neuralode/evaluation/h1\_verdict.py})
+performs the following:
+
+\begin{enumerate}
+  \item \emph{Underfit guard}: drops cells where the classical
+        baseline fails to reach an adequacy threshold (its train-side
+        $\relltwo > 0.5$ under A7's strict reading).
+  \item \emph{Skyline guard}: drops cells where the known-structure
+        skyline cannot itself reach the adequacy threshold.
+        At threshold 0.5 (A1), all skyline cells pass.
+  \item \emph{Paired-bootstrap}: resamples the kept cells with
+        replacement, computing per-resample $\dsmooth$ and
+        $\dbroad$, and reports the percentile 95\% CI of
+        $\ddiff = \dsmooth - \dbroad$. Default $n_{\text{iter}} =
+        10{,}000$, $\alpha = 0.05$.
+  \item \emph{Decision rule}: CONFIRMED if the CI excludes zero
+        positively; FALSIFIED if it includes zero or excludes
+        zero negatively; INCONCLUSIVE if the guards drop too
+        many cells to render the bootstrap underpowered.
+\end{enumerate}
+
+The pre-registration commits the framework to mechanical
+application of these rules; no analyst chooses the verdict
+post-hoc.
+
+\subsection{Symmetric HPO sensitivity}
+\label{sec:methods-hpo}
+
+Amendment A9 adds a symmetric quantum-side hyperparameter sweep
+that mirrors the classical-side sweep already in
+\texttt{run\_p7\_5\_hpo\_sensitivity.py}. At three anchor cells
+(\lv{} seed~2, \vdp{} seed~1, Lorenz seed~2), each
+of the four quantum families is retrained at three learning
+rates $\{10^{-3}, 5 \cdot 10^{-3}, 10^{-2}\}$ and two training
+budgets $\{1500, 3000\}$ steps -- 72 retrains in total. The
+``full HPO-best'' verdict reported in Section~\ref{sec:verdict}
+takes the per-cell minimum-$\relltwo$ HPO point on both sides.
+This is the Bowles--Schuld~\cite{bowles2024better} ``tune both
+sides'' sensitivity test.
+
+\subsection{Open-source reproducibility}
+\label{sec:methods-repro}
+
+The repository at
+\url{https://github.com/shawngibford/qlnn} contains the complete
+code, pre-registration, and committed result JSONs.
+\texttt{scripts/reproduce\_paper.sh} regenerates every committed
+result from scratch (estimated wall-clock $\approx$~8~hr on a
+single MacBook Pro M1, parallelizable);
+\texttt{scripts/verify\_paper\_integrity.py} mechanically checks
+every cited number in this paper against its committed JSON file
+and returns non-zero if any number drifts. Tagged GitHub releases
+mark the post-rigor (\texttt{v0.1-prepaper-rigor}) and
+post-airtight-matrix (\texttt{v0.2-airtight-matrix}) checkpoints.
