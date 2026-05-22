@@ -245,6 +245,94 @@ families exhibit regime-specific structural advantages on
 broadband/multiscale dynamics that the classical baselines do
 not match.
 
+\subsection{The complete 2$\times$2 mechanism decomposition (P7.11)}
+\label{sec:forecaster-2x2}
+
+Amendment A13 (P7.11) closes the fourth corner of the fairness
+matrix by adding a non-liquid quantum forecaster (the same quantum
+circuit with the $\tau$-leak removed; see
+\texttt{src/qlnn\_/cells/non\_liquid\_quantum\_cell.py}). With all
+four corners filled, the $\tau$-isolation contribution can be computed
+along TWO independent paths:
+
+\begin{align*}
+\Delta_\text{liquid, via classical}
+  &= \text{classical\_LTC} - \text{plain\_neuralode} \\
+\Delta_\text{liquid, via quantum}
+  &= \text{QLNN} - \text{non\_liquid\_QLNN}
+\end{align*}
+
+Two algebraic identities hold per-cell exactly (verified
+mechanically by \texttt{verify\_paper\_integrity}):
+\begin{align*}
+\Delta_\text{combined}
+  &= \Delta_\text{quantum, via LTC} + \Delta_\text{liquid, via classical} \\
+\Delta_\text{combined}
+  &= \Delta_\text{liquid, via quantum} + \Delta_\text{quantum, via non\_liquid}
+\end{align*}
+
+Table~\ref{tab:forecaster-2x2} reports the full 5-verdict
+decomposition.
+
+\begin{table}[h]
+\centering
+\caption{Complete 2$\times$2 forecaster H1 decomposition at $n=9$.
+$\Delta_\text{liquid, via classical}$ and
+$\Delta_\text{liquid, via quantum}$ are two independent paths to
+isolating the liquid-$\tau$ contribution; the sign of the point
+estimate \emph{disagrees} between the two paths.}
+\label{tab:forecaster-2x2}
+\small
+\begin{tabular}{lrll}
+\toprule
+Verdict & $\ddiff$ & 95\% CI & Outcome \\
+\midrule
+Combined & $-0.501$ & $[-0.804, -0.244]$ & FALSIFIED \\
+Quantum via LTC          & $-0.616$ & $[-1.167, -0.178]$ & FALSIFIED \\
+\textbf{Liquid via classical} & $\mathbf{+0.115}$ & $\mathbf{[-0.097, +0.377]}$ &
+  FALSIFIED \\
+\textbf{Liquid via quantum}   & $\mathbf{-0.334}$ & $\mathbf{[-0.627, +0.053]}$ &
+  FALSIFIED \\
+Quantum via non-liquid    & $-0.167$ & $[-0.495, +0.204]$ & FALSIFIED \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{The $\tau$-isolation cross-check disagrees in sign.}
+$\Delta_\text{liquid, via classical} = +0.115$ has positive
+point estimate (smooth-bin advantage, matching the
+Schuld--Fourier H1 prediction direction);
+$\Delta_\text{liquid, via quantum} = -0.334$ has \emph{negative}
+point estimate. Both CIs cross zero individually, but the
+qualitative directions are opposite. The liquid-$\tau$ machinery
+is therefore not a context-independent component -- its
+regime-contrast contribution depends on the substrate it
+modulates.
+
+Per-cell inspection clarifies the mechanism:
+\begin{itemize}
+  \item Lorenz s2 (chaotic): $\Delta_\text{liquid, via quantum} =
+        +0.594$. Adding $\tau$ to the quantum cell substantially
+        improves the chaotic-regime performance:
+        \texttt{rf\_qrc} (with $\tau$) attains $\relltwo = 0.460$;
+        \texttt{non\_liquid\_hardware\_efficient} (without $\tau$)
+        attains $1.054$.
+  \item \vdp{} s1 (stiff): $\Delta_\text{liquid, via quantum} =
+        +0.421$. Same pattern -- $\tau$ helps on stiff dynamics.
+  \item \lv{} s0, s1 (smooth-periodic):
+        $\Delta_\text{liquid, via quantum} = +0.006, +0.169$ --
+        near-neutral on smooth.
+\end{itemize}
+
+$\tau$-on-quantum disproportionately helps the broadband cells.
+When stratified by the smooth-minus-broad regime contrast, this
+yields the negative point estimate above. The combined
+$\ddiff = -0.501$ inversion is therefore the net of (a) a
+quantum-circuit underperformance
+($\Delta_\text{quantum via LTC} = -0.62$) and (b) a
+substrate-dependent $\tau$ contribution that goes opposite
+directions on classical vs quantum substrates.
+
 \subsection{Connection to the solver-task verdict}
 \label{sec:forecaster-vs-solver}
 

@@ -280,6 +280,70 @@ def main() -> int:
             sum_check, h1_comb["bootstrap"]["delta_diff_mean"],
             tol=0.001)
 
+    print("  --- P7.11 forecaster 2×2 mechanism decomposition (n=9) ---")
+    # Five verdicts. The P7.10 three are also re-checked at the
+    # results/p7_11_decomposition/ path (identical numbers, but
+    # let's gate them at the canonical NEW location too so the
+    # paper's §4.2 table is anchored to the 2×2-complete file set).
+    h_comb = _load("results/p7_11_decomposition/h1_combined.json")
+    h_q_ltc = _load("results/p7_11_decomposition/h1_quantum_via_ltc.json")
+    h_l_cls = _load("results/p7_11_decomposition/h1_liquid_via_classical.json")
+    h_l_q = _load("results/p7_11_decomposition/h1_liquid_via_quantum.json")
+    h_q_nlq = _load("results/p7_11_decomposition/h1_quantum_via_nonliquid.json")
+    all_ok &= _check_str("p7_11 combined outcome",
+                         h_comb["outcome"], "FALSIFIED")
+    all_ok &= _check_str("p7_11 quantum_via_ltc outcome",
+                         h_q_ltc["outcome"], "FALSIFIED")
+    all_ok &= _check_str("p7_11 liquid_via_classical outcome",
+                         h_l_cls["outcome"], "FALSIFIED")
+    all_ok &= _check_str("p7_11 liquid_via_quantum outcome (NEW)",
+                         h_l_q["outcome"], "FALSIFIED")
+    all_ok &= _check_str("p7_11 quantum_via_nonliquid outcome (NEW)",
+                         h_q_nlq["outcome"], "FALSIFIED")
+    if h_l_q["bootstrap"] is not None:
+        b = h_l_q["bootstrap"]
+        all_ok &= _check(
+            "Δ_liquid_via_quantum (paper: -0.3339)",
+            b["delta_diff_mean"], -0.3339, tol=0.005)
+        all_ok &= _check(
+            "Δ_liquid_via_quantum CI low (paper: -0.6274)",
+            b["ci_low"], -0.6274, tol=0.05)
+        all_ok &= _check(
+            "Δ_liquid_via_quantum CI high (paper: +0.0533)",
+            b["ci_high"], 0.0533, tol=0.05)
+    if h_q_nlq["bootstrap"] is not None:
+        b = h_q_nlq["bootstrap"]
+        all_ok &= _check(
+            "Δ_quantum_via_nonliquid (paper: -0.1668)",
+            b["delta_diff_mean"], -0.1668, tol=0.005)
+        all_ok &= _check(
+            "Δ_quantum_via_nonliquid CI low (paper: -0.4950)",
+            b["ci_low"], -0.4950, tol=0.05)
+        all_ok &= _check(
+            "Δ_quantum_via_nonliquid CI high (paper: +0.2039)",
+            b["ci_high"], 0.2039, tol=0.05)
+    # τ-cross-check: Δ_τ_via_classical and Δ_τ_via_quantum
+    # DISAGREE IN SIGN at the point-estimate level.
+    if (h_l_cls["bootstrap"] is not None
+            and h_l_q["bootstrap"] is not None):
+        d_cls = h_l_cls["bootstrap"]["delta_diff_mean"]
+        d_q = h_l_q["bootstrap"]["delta_diff_mean"]
+        all_ok &= _check_str(
+            "τ-cross-check: Δ_τ_via_classical sign (paper: positive)",
+            "positive" if d_cls > 0 else "negative", "positive")
+        all_ok &= _check_str(
+            "τ-cross-check: Δ_τ_via_quantum sign (paper: NEGATIVE — disagrees)",
+            "positive" if d_q > 0 else "negative", "negative")
+    # Second algebraic identity (the P7.11 path): Δ_combined =
+    # Δ_τ_via_quantum + Δ_quantum_via_nonliquid (exact per-cell).
+    if all(d["bootstrap"] is not None for d in (h_comb, h_l_q, h_q_nlq)):
+        sum_check = (h_l_q["bootstrap"]["delta_diff_mean"]
+                     + h_q_nlq["bootstrap"]["delta_diff_mean"])
+        all_ok &= _check(
+            "P7.11 identity Δ_τ_via_q + Δ_q_via_nlq ≈ Δ_combined",
+            sum_check, h_comb["bootstrap"]["delta_diff_mean"],
+            tol=0.001)
+
     print("\n=== PIVOT H3 mechanism (P7, tentative trend) ===")
     t3 = _load("results/p7_t3_mechanism/t3_scalars.json")
     # Lock the per-family T3 scalars to 3 sig figs (numerical determinism

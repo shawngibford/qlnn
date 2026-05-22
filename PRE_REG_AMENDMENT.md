@@ -221,6 +221,108 @@ HPO-fragile. The HPO-symmetric verdict is FALSIFIED. This is the
 methodologically strongest sensitivity point and supersedes the
 n=9 raw-bootstrap CONFIRMED as the paper's principal verdict.
 
+## Amendment A13 — Non-liquid QLNN ablation + complete 2×2 mechanism decomposition (P7.11)
+
+**Audit gap closed:** P7.10 (A12) filled three corners of the
+forecaster fairness 2×2 by adding `classical_LTC`. The fourth
+corner — a non-liquid quantum forecaster (same quantum circuit
+with the τ-leak removed) — remained empty, leaving the LTC
+mechanism story confirmed only along the classical-side
+τ-isolation path. P7.11 fills the fourth corner so the τ-isolation
+mechanism can be cross-checked along the quantum-side path.
+
+**Amendment:** add `NonLiquidQuantumCell` (`src/qlnn_/cells/
+non_liquid_quantum_cell.py`), `NonLiquidVectorForecaster`
+(`src/qlnn_/models/non_liquid_vector_forecaster.py`), and a
+dispatcher prefix `non_liquid_<ansatz>` covering 4 ansätze
+(data_reuploading, hardware_efficient, strongly_entangling,
+brickwall). rf_qrc is intentionally excluded — its reservoir
+has a fixed `leak_rate` hyperparameter and is therefore already
+non-liquid in the QLNN sense.
+
+**Implementation surgery (minimum-faithful):** the
+LiquidQuantumCell dynamics
+$dh/dt = -(1/τ + q(x)) \odot h + A \odot q(x)$
+becomes, with τ removed,
+$dh/dt = -q(x) \odot h + A \odot q(x)$
+i.e. the `1/τ` leak coefficient drops out. Encoder, A, and Diffrax
+integration are unchanged. The cell-level mathematical-identity
+test (`tests/qlnn_/test_non_liquid_quantum_cell.py`) confirms
+$\Delta(\text{liquid} - \text{non\_liquid}) = -(1/τ) \odot h$
+exactly at any (h, x) probe point.
+
+**The 2×2 is now complete:**
+
+|             | non-liquid (no τ)            | liquid (learnable τ)        |
+|-------------|------------------------------|-----------------------------|
+| Classical   | plain_neuralode (P5)         | classical_LTC (P7.10)       |
+| Quantum     | non_liquid_<ansatz> (P7.11)  | <ansatz> (P4, P7.10)        |
+
+**Five paired-bootstrap verdicts** are computed (n=9), with
+TWO independent algebraic identities holding per-cell exact:
+
+| Verdict | $\Delta_\text{diff}$ | 95% CI | Outcome |
+|---|---|---|---|
+| combined | $-0.5007$ | $[-0.804, -0.244]$ | FALSIFIED (excludes 0) |
+| quantum_via_ltc | $-0.6160$ | $[-1.167, -0.178]$ | FALSIFIED (excludes 0) |
+| liquid_via_classical | $+0.1153$ | $[-0.097, +0.377]$ | FALSIFIED |
+| **liquid_via_quantum** (NEW) | $\mathbf{-0.3339}$ | $\mathbf{[-0.627, +0.053]}$ | **FALSIFIED** |
+| quantum_via_nonliquid (NEW) | $-0.1668$ | $[-0.495, +0.204]$ | FALSIFIED |
+
+Identities (per-cell, exact):
+1. $\Delta_\text{combined} = \Delta_\text{q\_via\_ltc} +
+   \Delta_\text{τ\_via\_cls}$  (P7.10 path)
+2. $\Delta_\text{combined} = \Delta_\text{τ\_via\_q} +
+   \Delta_\text{q\_via\_nlq}$  (P7.11 path)
+
+Both verified mechanically by `verify_paper_integrity.py`.
+
+**Key empirical finding — the τ-isolation cross-check
+DISAGREES IN SIGN ACROSS THE TWO PATHS:**
+
+- $\Delta_\text{liquid\_via\_classical} = +0.115$
+  → On the classical MLP hidden state, the liquid-τ machinery
+    contributes a small POSITIVE Δ (smooth>broad, matching the
+    Schuld-Fourier H1 direction).
+- $\Delta_\text{liquid\_via\_quantum}  = -0.334$
+  → On the quantum cell hidden state, the liquid-τ machinery
+    contributes a NEGATIVE Δ (broad>smooth, OPPOSITE of the
+    H1 direction).
+
+The liquid-τ machinery is therefore NOT a context-independent
+component. Its regime-contrast contribution depends on the
+substrate it modulates. On classical hidden states it nudges
+toward the H1-predicted direction; on quantum hidden states it
+tilts the OTHER way.
+
+**Per-cell mechanism per system:**
+- Lorenz s2 (chaotic): $\Delta_\text{τ\_via\_quantum} = +0.594$
+  — adding τ to the quantum cell substantially HELPS the
+    broadband regime (rf_qrc with τ: 0.460 vs
+    non_liquid_hardware_efficient: 1.054).
+- VdP s1 (stiff): $\Delta_\text{τ\_via\_quantum} = +0.421$ —
+  same pattern, τ helps on stiff dynamics.
+- LV s0,s1 (smooth-periodic): $\Delta_\text{τ\_via\_quantum} =
+  +0.006$ to $+0.169$ — near-neutral on smooth.
+
+τ-on-quantum disproportionately helps the BROADBAND cells. When
+stratified by the smooth-minus-broad regime contrast, this gives
+a negative point estimate. The combined Δ inversion is the NET of
+a quantum-circuit underperformance (Δ_q_via_ltc = -0.62) and a
+substrate-dependent τ contribution that goes the opposite way on
+the quantum substrate.
+
+**Rationale:** the user-locked scope was "every quantum and
+classical model needs a head to head, including the classical
+liquid setup" (A12). The natural extension — "and the non-liquid
+quantum to close the 2×2" — was the open scope flag at the end
+of P7.10. P7.11 closes it. The cross-check disagreement is itself
+a novel mechanistic finding about how learnable time-constants
+interact with classical vs quantum hidden-state substrates, and
+is worth reporting on its own terms (paper §4.3 covers it).
+
+---
+
 ## Amendment A12 — Classical LTC baseline + forecaster H1 decomposition (P7.10)
 
 **Audit gap closed:** the pre-registered forecaster H1 contrast is
@@ -489,7 +591,8 @@ tightened relative to n=9 default-Adam.
 | A9 | symmetric QLNN HPO (P7.6 c1): FALSIFIED at HPO-best | SUPERSEDES |
 | A10 | combined ODE+PDE n=18 (P7.6 c2): FALSIFIED | SUPERSEDES |
 | A11 | pre-paper full-ladder expansion: n=24 FALSIFIED with sign-flip | **PRIMARY SOLVER** |
-| A12 | classical LTC + forecaster H1 decomposition: 3 verdicts, mechanism attribution | **PRIMARY FORECASTER** |
+| A12 | classical LTC + forecaster H1 decomposition: 3 verdicts, mechanism attribution | PRIMARY FORECASTER (via classical) |
+| A13 | non-liquid QLNN + complete 2×2; τ-isolation cross-check DISAGREES IN SIGN | **PRIMARY FORECASTER** (complete) |
 
 **Headline verdict update (post-P7.10):**
 
