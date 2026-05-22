@@ -59,6 +59,9 @@ from qlnn_.models.plain_mlp_forecaster import (
 from qlnn_.models.plain_neuralode_forecaster import (
     PlainNeuralODEForecaster, PlainNeuralODEForecasterConfig,
 )
+from qlnn_.models.classical_ltc_forecaster import (
+    ClassicalLTCForecaster, ClassicalLTCForecasterConfig,
+)
 from qlnn_.training.forecaster_training import (
     prepare_windows,
     train_test_split,
@@ -78,7 +81,9 @@ def _simulate(name, *, n_points, seed):
     return simulate(name, n_points=n_points, seed=seed)
 
 
-P5_BASELINE_FAMILIES = ("plain_neuralode", "plain_mlp", "skyline")
+P5_BASELINE_FAMILIES = (
+    "plain_neuralode", "plain_mlp", "skyline", "classical_ltc",
+)
 
 
 # ---------------------------------------------------------------------------
@@ -100,6 +105,37 @@ def _train_plain_neuralode(
         delta_scale_min=cfg.delta_scale_min,
     )
     model = PlainNeuralODEForecaster(fc_cfg, key=jax.random.PRNGKey(seed))
+    trained, history = train_vector_forecaster(
+        model, X_train, Y_train,
+        steps=cfg.train_steps, lr=cfg.learning_rate,
+        log_every=max(1, cfg.train_steps // 5), seed=seed)
+    diff_model, _ = eqx.partition(trained, eqx.is_array)
+    pcount = sum(
+        int(np.asarray(leaf).size)
+        for leaf in jax.tree_util.tree_leaves(diff_model))
+    return trained, history, pcount
+
+
+def _train_classical_ltc(
+    X_train: np.ndarray, Y_train: np.ndarray,
+    *, d: int, cfg: P4SweepConfig, seed: int,
+) -> tuple[Any, list[float], int]:
+    """Train ClassicalLTCForecaster — P7.10 commit 1 LTC-decomposition baseline.
+
+    Mirrors `_train_plain_neuralode` exactly so the only structural
+    difference between the two head-to-head baselines is the
+    `tau_unconstrained` parameter (the LTC's defining feature). This
+    isolates the liquid-τ contribution to the H1 contrast.
+    """
+    fc_cfg = ClassicalLTCForecasterConfig(
+        input_dim=d,
+        hidden_dim=cfg.num_qubits,            # match QLNN hidden dim
+        mlp_hidden=cfg.num_qubits,            # capacity-matched cell
+        step_dt=0.05,
+        delta_scale_init=cfg.delta_scale_init,
+        delta_scale_min=cfg.delta_scale_min,
+    )
+    model = ClassicalLTCForecaster(fc_cfg, key=jax.random.PRNGKey(seed))
     trained, history = train_vector_forecaster(
         model, X_train, Y_train,
         steps=cfg.train_steps, lr=cfg.learning_rate,
@@ -172,6 +208,12 @@ def train_and_rollout_baseline_cell(
         use_jit = True
     elif family == "plain_mlp":
         model, hist, pcount = _train_plain_mlp(
+            X_train_windows, Y_train_targets,
+            d=d, cfg=cfg, seed=seed)
+        adapter = make_vector_forecaster_adapter(model)
+        use_jit = True
+    elif family == "classical_ltc":
+        model, hist, pcount = _train_classical_ltc(
             X_train_windows, Y_train_targets,
             d=d, cfg=cfg, seed=seed)
         adapter = make_vector_forecaster_adapter(model)
