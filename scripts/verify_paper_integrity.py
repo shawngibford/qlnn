@@ -217,6 +217,64 @@ def main() -> int:
             "n=24 n_broad (paper: 12)",
             b["n_broad"], 12, tol=0)
 
+    print("  --- Forecaster LTC decomposition (P7.10, n=9, all-to-all) ---")
+    h1_comb = _load("results/p7_10_forecaster_decomposition/h1_combined.json")
+    h1_q = _load("results/p7_10_forecaster_decomposition/h1_quantum_isolated.json")
+    h1_l = _load("results/p7_10_forecaster_decomposition/h1_liquid_isolated.json")
+    # All three FALSIFIED; the KEY finding is the sign and magnitude of
+    # Δ_quantum vs Δ_liquid.
+    all_ok &= _check_str(
+        "Forecaster combined outcome (paper: FALSIFIED)",
+        h1_comb["outcome"], "FALSIFIED")
+    all_ok &= _check_str(
+        "Forecaster quantum-isolated outcome (paper: FALSIFIED)",
+        h1_q["outcome"], "FALSIFIED")
+    all_ok &= _check_str(
+        "Forecaster liquid-isolated outcome (paper: FALSIFIED)",
+        h1_l["outcome"], "FALSIFIED")
+    if h1_comb["bootstrap"] is not None:
+        b = h1_comb["bootstrap"]
+        all_ok &= _check(
+            "Forecaster combined Δ_diff (paper: -0.3236)",
+            b["delta_diff_mean"], -0.3236, tol=0.005)
+        all_ok &= _check(
+            "Forecaster combined CI low (paper: -0.6612)",
+            b["ci_low"], -0.6612, tol=0.05)
+        all_ok &= _check(
+            "Forecaster combined CI high (paper: +0.0118)",
+            b["ci_high"], 0.0118, tol=0.05)
+    if h1_q["bootstrap"] is not None:
+        b = h1_q["bootstrap"]
+        all_ok &= _check(
+            "Forecaster quantum-isolated Δ_diff (paper: -0.4389)",
+            b["delta_diff_mean"], -0.4389, tol=0.005)
+        all_ok &= _check(
+            "Forecaster quantum-isolated CI low (paper: -1.0170)",
+            b["ci_low"], -1.0170, tol=0.10)
+        all_ok &= _check(
+            "Forecaster quantum-isolated CI high (paper: +0.1044)",
+            b["ci_high"], 0.1044, tol=0.05)
+    if h1_l["bootstrap"] is not None:
+        b = h1_l["bootstrap"]
+        all_ok &= _check(
+            "Forecaster liquid-isolated Δ_diff (paper: +0.1153)",
+            b["delta_diff_mean"], 0.1153, tol=0.005)
+        all_ok &= _check(
+            "Forecaster liquid-isolated CI low (paper: -0.0973)",
+            b["ci_low"], -0.0973, tol=0.05)
+        all_ok &= _check(
+            "Forecaster liquid-isolated CI high (paper: +0.3772)",
+            b["ci_high"], 0.3772, tol=0.05)
+    # Decomposition algebraic identity check (per-cell so should be ~0
+    # exact, modulo float64 precision).
+    if all(d["bootstrap"] is not None for d in (h1_comb, h1_q, h1_l)):
+        sum_check = (h1_q["bootstrap"]["delta_diff_mean"]
+                     + h1_l["bootstrap"]["delta_diff_mean"])
+        all_ok &= _check(
+            "Decomposition identity Δ_q + Δ_τ ≈ Δ_combined",
+            sum_check, h1_comb["bootstrap"]["delta_diff_mean"],
+            tol=0.001)
+
     print("\n=== PIVOT H3 mechanism (P7, tentative trend) ===")
     t3 = _load("results/p7_t3_mechanism/t3_scalars.json")
     # Lock the per-family T3 scalars to 3 sig figs (numerical determinism
