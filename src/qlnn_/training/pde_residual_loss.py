@@ -178,18 +178,28 @@ def make_pde_residual_loss(
     ic_fn: Callable[[jnp.ndarray], jnp.ndarray],
     *,
     t0: float, t1: float, x0: float, x1: float,
+    need_uxxx: bool = False,
 ):
     """Build the PDE-residual loss for any equation expressible as
-    `r(t, x, u, u_t, u_x, u_xx) = 0`.
+    `r(t, x, u, u_t, u_x, u_xx) = 0`, or
+    `r(t, x, u, u_t, u_x, u_xx, u_xxx) = 0` when `need_uxxx=True`
+    (e.g. KdV).
 
     Args:
       circuit : `f(t̃, x̃, w) → scalar` returned by `build_chebyshev_dqc_2d`.
-      pde_residual : `r(t, x, u, u_t, u_x, u_xx) → scalar` — the PDE's
-          residual function (e.g. for heat: `lambda t,x,u,ut,ux,uxx:
-          ut - nu*uxx`). Takes physical-space (t, x) and derivatives;
-          coordinate mapping is handled inside the closure.
+      pde_residual : `r(t, x, u, u_t, u_x, u_xx[, u_xxx]) → scalar` — the
+          PDE's residual function. With `need_uxxx=False` (default), the
+          signature is the 2nd-order form (heat, burgers, AC). With
+          `need_uxxx=True`, the residual is called with an additional
+          `u_xxx` argument (KdV).
       ic_fn : `u₀(x)` — the initial condition u(t=t0, x).
       t0, t1, x0, x1 : physical-domain bounds.
+      need_uxxx : whether to compute the third spatial derivative via
+          triple-nested reverse-mode autodiff. P7.8 mechanism gate at
+          `scripts/run_p7_8_kdv_gate.py` confirmed `jacrev³` produces
+          finite non-trivial values at the canonical Chebyshev-DQC 2D
+          circuit shape (4 t-qubits, 4 x-qubits, 5 layers) and at
+          ~0.5× the per-point cost of `jacrev²` (XLA optimizations).
 
     Returns:
       `(loss_fn, u_of_tx)` where:
@@ -210,14 +220,23 @@ def make_pde_residual_loss(
     du_dt = jax.jacrev(u_of_tx, argnums=0)
     du_dx = jax.jacrev(u_of_tx, argnums=1)
     # Spatial second derivative: reverse-over-reverse (the convention).
-    # This is THE mechanism the gate is testing.
+    # This is THE mechanism the original P3.7 gate tested.
     d2u_dx2 = jax.jacrev(du_dx, argnums=1)
+    if need_uxxx:
+        # KdV-specific: third spatial derivative via triple-nested
+        # reverse-mode autodiff. Gate-tested at scripts/run_p7_8_kdv_gate.py.
+        d3u_dx3 = jax.jacrev(d2u_dx2, argnums=1)
+    else:
+        d3u_dx3 = None  # not used; kept for static dispatch
 
     def _point_residual(t, x, p):
         u = u_of_tx(t, x, p)
         ut = du_dt(t, x, p)
         ux = du_dx(t, x, p)
         uxx = d2u_dx2(t, x, p)
+        if need_uxxx:
+            uxxx = d3u_dx3(t, x, p)
+            return pde_residual(t, x, u, ut, ux, uxx, uxxx)
         return pde_residual(t, x, u, ut, ux, uxx)
 
     def loss(p, tx_colloc):

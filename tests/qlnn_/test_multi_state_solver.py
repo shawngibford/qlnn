@@ -32,21 +32,28 @@ SMOKE_STEPS = 60
 SMOKE_COLLOC = 10
 
 
-def test_all_three_vector_systems_registered():
-    assert set(VECTOR_ODES) == {"lotka_volterra", "van_der_pol", "lorenz"}
+def test_all_vector_systems_registered():
+    # P7.8 expansion: FHN added to bring ODE solver coverage to 4/5
+    # pre-reg systems (Kuramoto deferred to follow-up paper).
+    assert set(VECTOR_ODES) == {
+        "lotka_volterra", "van_der_pol", "lorenz", "fitzhugh_nagumo",
+    }
 
 
 def test_systems_dimensions_match_synthetic_ode():
-    """LV/VdP are 2D, Lorenz is 3D — matches the canonical sources."""
+    """LV/VdP/FHN are 2D, Lorenz is 3D — matches the canonical sources."""
     assert VECTOR_ODES["lotka_volterra"].dim == 2
     assert VECTOR_ODES["van_der_pol"].dim == 2
     assert VECTOR_ODES["lorenz"].dim == 3
+    assert VECTOR_ODES["fitzhugh_nagumo"].dim == 2
 
 
 def test_regime_tags_match_pre_registration():
     """H1 partition lives in ODE_PDE_PRE_REG.md §2 — bind it in code."""
     assert VECTOR_ODES["lotka_volterra"].regime == "smooth_periodic"
     assert VECTOR_ODES["lorenz"].regime == "broadband_multiscale"
+    # FHN is BROADBAND/MULTISCALE per pre-reg §4 (fast-slow stiff cycle).
+    assert VECTOR_ODES["fitzhugh_nagumo"].regime == "broadband_multiscale"
 
 
 def test_per_component_pytree_has_d_independent_blocks():

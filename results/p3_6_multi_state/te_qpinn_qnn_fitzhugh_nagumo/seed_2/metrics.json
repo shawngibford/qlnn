@@ -1,0 +1,21 @@
+{
+  "family": "te_qpinn_qnn",
+  "system": "fitzhugh_nagumo",
+  "seed": 2,
+  "dim": 2,
+  "regime": "broadband_multiscale",
+  "steps": 2000,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 168,
+  "classical_params": 0,
+  "per_component_pqc_params": 84,
+  "config_str": "per-component: n=4, L_var=5, K_embed=3; dim=2",
+  "final_loss": 0.14367179572582245,
+  "mae": 0.2514154783168358,
+  "mae_per_component": [
+    0.3940938452883621,
+    0.10873711134530968
+  ],
+  "relative_l2": 0.32901547152015714
+}

@@ -43,6 +43,14 @@ OUT = REPO_ROOT / "results" / "p7_5_solver_h1"
 VERDICT_DIR = REPO_ROOT / "results" / "p7_5_solver_h1"
 
 P36_SYSTEMS = ("lotka_volterra", "van_der_pol", "lorenz")
+# P7.8 expansion: FHN added to VECTOR_ODES. When invoked with
+# --systems fitzhugh_nagumo, this script trains the classical-PINN
+# solver baseline on FHN and writes to results/p7_5_solver_h1/
+# fitzhugh_nagumo_classical_pinn/seed_N/, matching the existing
+# (LV/VdP/Lorenz) layout. The H1 verdict aggregation reads them
+# uniformly.
+P7_8_EXTRA_SYSTEMS = ("fitzhugh_nagumo",)
+ALL_SYSTEMS = P36_SYSTEMS + P7_8_EXTRA_SYSTEMS
 
 
 def _git_prov() -> dict:
@@ -85,7 +93,7 @@ def _write_seed(r: dict, base: Path) -> None:
 def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--systems", nargs="+", default=list(P36_SYSTEMS),
-                    choices=list(P36_SYSTEMS))
+                    choices=list(ALL_SYSTEMS))
     ap.add_argument("--seeds", nargs="+", type=int, default=[0, 1, 2])
     ap.add_argument("--steps", type=int, default=1500,
                     help="Optax training steps for classical PINN solver")

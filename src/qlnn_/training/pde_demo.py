@@ -52,7 +52,7 @@ class PDEBench:
     t1: float
     x0: float
     x1: float
-    pde_residual: Callable         # rhs(t,x,u,ut,ux,uxx) → scalar
+    pde_residual: Callable         # rhs(t,x,u,ut,ux,uxx[,uxxx]) → scalar
     ic_fn: Callable[[jnp.ndarray], jnp.ndarray]
     steps: int                     # training step budget
     n_t_colloc: int
@@ -60,7 +60,12 @@ class PDEBench:
     description: str
     has_analytic: bool             # if True, reference comes from analytic_ref(t,x)
     analytic_ref: Callable | None  # u(t,x) for closed-form references
-    npz_basename: str | None       # for {burgers_smooth, allen_cahn} reference fields
+    npz_basename: str | None       # for npz-backed references
+    # P7.8: KdV-class PDEs need u_xxx (triple-nested autodiff). The
+    # residual function then takes 7 args instead of 6. P3.7 gate
+    # established jacrev² works; P7.8 KdV gate established jacrev³
+    # works at the canonical 4+4 qubit, 5-layer Chebyshev-DQC config.
+    needs_uxxx: bool = False
 
 
 # --- heat (analytic reference) ---------------------------------------------
@@ -81,14 +86,23 @@ def _heat_analytic(t, x):
     return jnp.exp(-_HEAT_NU * t) * jnp.sin(x)
 
 
-# --- burgers_smooth (npz reference) ----------------------------------------
+# --- burgers_smooth + burgers_shock (npz references) -----------------------
 
-
+# Two viscosity values matched to the committed npz field generators
+# (data/pde/burgers_smooth.npz at nu=0.12; data/pde/burgers_shock.npz at
+# nu=0.004 → sharp gradients near the inviscid shock time t*≈1). Same
+# equation + IC; only the viscosity parameter differs. The shock regime
+# is tagged BROADBAND/MULTISCALE per pre-reg §4.
 _BURGERS_NU = 0.12
+_BURGERS_SHOCK_NU = 0.004
 
 
 def _burgers_residual(t, x, u, ut, ux, uxx):
     return ut + u * ux - _BURGERS_NU * uxx
+
+
+def _burgers_shock_residual(t, x, u, ut, ux, uxx):
+    return ut + u * ux - _BURGERS_SHOCK_NU * uxx
 
 
 def _burgers_ic(x):
@@ -104,6 +118,29 @@ _AC_EPS = 0.06
 def _allen_cahn_residual(t, x, u, ut, ux, uxx):
     # u_t = ε² u_xx + u − u³;  written as residual u_t − rhs = 0.
     return ut - ((_AC_EPS ** 2) * uxx + u - u ** 3)
+
+
+# --- kdv (npz reference) ---------------------------------------------------
+# Korteweg-de Vries: u_t + 6 u u_x + u_xxx = 0  (canonical form)
+# Periodic domain x ∈ [0, 40), T = 5.
+# Reference at data/pde/kdv.npz: 1-soliton sech² IC (c=4, centered x0=20).
+#   u_soliton(t, x) = (c/2) · sech²( √c/2 · (x − x0 − c·t) )  (modulo periodicity)
+# Pre-reg §4 PDE BROADBAND/MULTISCALE bin.
+
+
+def _kdv_residual(t, x, u, ut, ux, uxx, uxxx):
+    """KdV residual: u_t + 6·u·u_x + u_xxx."""
+    return ut + 6.0 * u * ux + uxxx
+
+
+_KDV_C = 4.0
+_KDV_X0 = 20.0
+
+
+def _kdv_ic(x):
+    """Exact 1-soliton sech² initial condition (matches kdv.npz)."""
+    arg = jnp.sqrt(_KDV_C) / 2.0 * (x - _KDV_X0)
+    return (_KDV_C / 2.0) * (1.0 / jnp.cosh(arg)) ** 2
 
 
 def _allen_cahn_ic(x, Lx=2.0 * jnp.pi, eps=_AC_EPS):
@@ -150,6 +187,24 @@ PDE_BENCH: dict[str, PDEBench] = {
         analytic_ref=None,
         npz_basename="burgers_smooth.npz",
     ),
+    "burgers_shock": PDEBench(
+        name="burgers_shock",
+        regime="broadband_multiscale",
+        t0=0.0, t1=2.0, x0=0.0, x1=2.0 * float(jnp.pi),
+        pde_residual=_burgers_shock_residual,
+        ic_fn=_burgers_ic,
+        # Sharper gradient near t* ≈ 1 (inviscid shock time at IC=sin(x))
+        # → finer collocation grid + extra train steps. Matches the
+        # allen_cahn-style budget.
+        steps=2400,
+        n_t_colloc=32, n_x_colloc=64,
+        description=(f"Burgers shock: u_t + u·u_x = {_BURGERS_SHOCK_NU}·u_xx,"
+                     f" u(0,x)=sin(x); reference = data/pde/"
+                     f"burgers_shock.npz"),
+        has_analytic=False,
+        analytic_ref=None,
+        npz_basename="burgers_shock.npz",
+    ),
     "allen_cahn": PDEBench(
         name="allen_cahn",
         regime="broadband_multiscale",
@@ -164,6 +219,28 @@ PDE_BENCH: dict[str, PDEBench] = {
         has_analytic=False,
         analytic_ref=None,
         npz_basename="allen_cahn.npz",
+    ),
+    "kdv": PDEBench(
+        name="kdv",
+        regime="broadband_multiscale",
+        t0=0.0, t1=5.0, x0=0.0, x1=40.0,
+        pde_residual=_kdv_residual,
+        ic_fn=_kdv_ic,
+        # KdV with c=4 soliton over T=5 propagates ~20 units; the
+        # domain is 40 units so the soliton crosses ~half the box.
+        # u_xxx (triple-nested autodiff) is gate-tested PASS at
+        # results/p7_8_kdv_gate/gate_result.json. Per-point cost ratio
+        # jacrev³/jacrev² ≈ 0.5× thanks to XLA fusion, so train cost
+        # is dominated by collocation count (32×32 = 1024 points).
+        steps=2400,
+        n_t_colloc=32, n_x_colloc=32,
+        description=("KdV: u_t + 6·u·u_x + u_xxx = 0; "
+                     "1-soliton sech² IC (c=4, x0=20); "
+                     "periodic on [0, 40); reference = data/pde/kdv.npz"),
+        has_analytic=False,
+        analytic_ref=None,
+        npz_basename="kdv.npz",
+        needs_uxxx=True,
     ),
 }
 

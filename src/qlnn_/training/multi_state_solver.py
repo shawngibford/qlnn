@@ -78,6 +78,14 @@ def _lorenz_rhs(t, u):
                       x * y - p["beta"] * z])
 
 
+def _fhn_rhs(t, u):
+    sys = synthetic_ode.get_system("fitzhugh_nagumo")
+    p = sys.params
+    v, w = u[0], u[1]
+    return jnp.array([v - v ** 3 / 3.0 - w + p["I"],
+                      p["eps"] * (v + p["a"] - p["b"] * w)])
+
+
 VECTOR_ODES: dict[str, VectorODESystem] = {
     "lotka_volterra": VectorODESystem(
         name="lotka_volterra", dim=2,
@@ -108,6 +116,21 @@ VECTOR_ODES: dict[str, VectorODESystem] = {
         rhs_jax=_lorenz_rhs,
         regime="broadband_multiscale",
         description="Lorenz σ=10, ρ=28, β=8/3 — H1 BROADBAND/CHAOTIC",
+    ),
+    "fitzhugh_nagumo": VectorODESystem(
+        name="fitzhugh_nagumo", dim=2,
+        # synthetic_ode canonical y0=[-1.0, 1.0]; I=0.5, eps=0.08,
+        # a=0.7, b=0.8. Relaxation-oscillator period ≈ 35 time units
+        # at these params; T=20 covers the active phase plus the
+        # nonlinear fast-switching layer that defines the H1
+        # BROADBAND/MULTISCALE tag (pre-reg §4).
+        u0=np.array([-1.0, 1.0]),
+        t0=0.0, t1=20.0,
+        rhs_jax=_fhn_rhs,
+        regime="broadband_multiscale",
+        description=("FitzHugh-Nagumo relaxation oscillator, "
+                     "I=0.5, ε=0.08, a=0.7, b=0.8 — "
+                     "H1 BROADBAND/MULTISCALE (fast-slow stiff cycle)"),
     ),
 }
 

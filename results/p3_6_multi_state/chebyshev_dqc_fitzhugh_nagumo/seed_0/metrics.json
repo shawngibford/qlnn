@@ -1,0 +1,21 @@
+{
+  "family": "chebyshev_dqc",
+  "system": "fitzhugh_nagumo",
+  "seed": 0,
+  "dim": 2,
+  "regime": "broadband_multiscale",
+  "steps": 1200,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 120,
+  "classical_params": 0,
+  "per_component_pqc_params": 60,
+  "config_str": "per-component: n=4, L=5; dim=2",
+  "final_loss": 0.34417760372161865,
+  "mae": 0.4719062765572144,
+  "mae_per_component": [
+    0.535613120951983,
+    0.4081994321624456
+  ],
+  "relative_l2": 0.5311260657814072
+}

@@ -106,6 +106,23 @@ CORRECTED_PDE_CONFIGS: dict[str, CorrectedPDEConfig] = {
                        "width √2·ε ≈ 0.085; >10× the 28×28 resolution that "
                        "P3.7 used. Tests whether 'broadband failure' was "
                        "sub-Nyquist aliasing vs a real regime property")),
+    # P7.8 expansion: BROADBAND PDE bin gets burgers_shock + KdV (if
+    # mechanism gate passes for u_xxx). burgers_shock has sharp gradients
+    # near t* ≈ 1 → matched the AC-style sub-Nyquist resolution config.
+    "burgers_shock": CorrectedPDEConfig(
+        name="burgers_shock", n_t_colloc=32, n_x_colloc=64, steps=2400,
+        audit_reason=("ν=0.004 with IC=sin(x) → near-shock at t*≈1; "
+                       "matched the AC-style high-resolution config "
+                       "(Δx=2π/64 ≈ 0.098) plus 33% more steps for the "
+                       "broader frequency content")),
+    "kdv": CorrectedPDEConfig(
+        name="kdv", n_t_colloc=32, n_x_colloc=32, steps=2400,
+        audit_reason=("KdV needs u_xxx (triple-nested autodiff); P7.8 "
+                       "mechanism gate confirmed jacrev³ works at this "
+                       "circuit shape (results/p7_8_kdv_gate/). "
+                       "Per-point cost ratio jacrev³/jacrev² ≈ 0.5× "
+                       "(XLA fusion). Same budget as burgers_shock; "
+                       "domain x∈[0,40], T=5, 1-soliton sech² IC")),
 }
 
 
@@ -119,6 +136,7 @@ def _train_pde_one(
     pde_residual: Callable, ic_fn: Callable,
     *, t0, t1, x0, x1, n_t_colloc, n_x_colloc,
     steps: int, lr: float = 0.02, seed: int = 0,
+    need_uxxx: bool = False,
 ) -> tuple[dict, list[float]]:
     """Shared train loop used by both quantum and classical PINN PDE
     runs. Identical to `pde_residual_loss.train_pde_solver`'s loop,
@@ -132,7 +150,7 @@ def _train_pde_one(
 
     loss_fn, u_of_tx = make_pde_residual_loss(
         circuit, pde_residual, ic_fn,
-        t0=t0, t1=t1, x0=x0, x1=x1)
+        t0=t0, t1=t1, x0=x0, x1=x1, need_uxxx=need_uxxx)
     opt = optax.adam(lr)
     opt_state = opt.init(p)
     loss_and_grad = jax.jit(jax.value_and_grad(loss_fn))
@@ -196,7 +214,8 @@ def train_one_pde_quantum(
         circuit, weights_init, bench.pde_residual, bench.ic_fn,
         t0=bench.t0, t1=bench.t1, x0=bench.x0, x1=bench.x1,
         n_t_colloc=cc.n_t_colloc, n_x_colloc=cc.n_x_colloc,
-        steps=cc.steps, seed=seed)
+        steps=cc.steps, seed=seed,
+        need_uxxx=bench.needs_uxxx)
 
     t_eval, x_eval, u_pred = _eval_pde_field(
         u_of_tx, p, bench.t0, bench.t1, bench.x0, bench.x1)
@@ -245,7 +264,8 @@ def train_one_pde_classical(
         circuit, weights_init, bench.pde_residual, bench.ic_fn,
         t0=bench.t0, t1=bench.t1, x0=bench.x0, x1=bench.x1,
         n_t_colloc=cc.n_t_colloc, n_x_colloc=cc.n_x_colloc,
-        steps=cc.steps, seed=seed)
+        steps=cc.steps, seed=seed,
+        need_uxxx=bench.needs_uxxx)
 
     t_eval, x_eval, u_pred = _eval_pde_field(
         u_of_tx, p, bench.t0, bench.t1, bench.x0, bench.x1)

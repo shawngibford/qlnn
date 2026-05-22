@@ -165,6 +165,7 @@ def _train_pde_one_generic(
     pde_residual: Callable, ic_fn: Callable,
     *, t0, t1, x0, x1, n_t_colloc, n_x_colloc,
     steps: int, lr: float = 0.02,
+    need_uxxx: bool = False,
 ) -> tuple[dict, list[float], Callable]:
     """Shared train loop — accepts any {w, s, b} pytree.
 
@@ -181,7 +182,7 @@ def _train_pde_one_generic(
 
     loss_fn, u_of_tx = make_pde_residual_loss(
         circuit, pde_residual, ic_fn,
-        t0=t0, t1=t1, x0=x0, x1=x1)
+        t0=t0, t1=t1, x0=x0, x1=x1, need_uxxx=need_uxxx)
     opt = optax.adam(lr)
     opt_state = opt.init(p)
     loss_and_grad = jax.jit(jax.value_and_grad(loss_fn))
@@ -218,7 +219,7 @@ def train_one_cell(
         circuit, p0, bench.pde_residual, bench.ic_fn,
         t0=bench.t0, t1=bench.t1, x0=bench.x0, x1=bench.x1,
         n_t_colloc=cc.n_t_colloc, n_x_colloc=cc.n_x_colloc,
-        steps=cc.steps)
+        steps=cc.steps, need_uxxx=bench.needs_uxxx)
 
     t_eval, x_eval, u_pred = _eval_pde_field(
         u_of_tx, p, bench.t0, bench.t1, bench.x0, bench.x1)

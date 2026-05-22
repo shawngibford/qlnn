@@ -1,0 +1,21 @@
+{
+  "family": "qcpinn",
+  "system": "fitzhugh_nagumo",
+  "seed": 0,
+  "dim": 2,
+  "regime": "broadband_multiscale",
+  "steps": 1500,
+  "lr": 0.02,
+  "n_colloc": 60,
+  "pqc_params": 30,
+  "classical_params": 1412,
+  "per_component_pqc_params": 15,
+  "config_str": "per-component: n=5, L=1, Cascade; dim=2",
+  "final_loss": 0.317938894033432,
+  "mae": 0.8589862015509209,
+  "mae_per_component": [
+    1.2574225622456827,
+    0.4605498408561591
+  ],
+  "relative_l2": 1.2126478564828604
+}
