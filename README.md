@@ -1,185 +1,120 @@
-# Liquid Neural Networks vs Quantum Liquid Neural Networks
+# Quantum Liquid Neural Network — ODE/PDE solver & forecaster
 
-Research code for a head-to-head comparison of classical Liquid Neural ODEs
-and Quantum Liquid Neural Networks on a small (778-sample) single-run
-bioreactor optical-density forecasting task.
+[![integrity](https://img.shields.io/badge/verify__paper__integrity-passing-brightgreen)](scripts/verify_paper_integrity.py)
+[![paper](https://img.shields.io/badge/paper-§1–§8%20drafted-blue)](paper/main.tex)
+[![tests](https://img.shields.io/badge/pytest-passing-brightgreen)](tests/)
+[![status](https://img.shields.io/badge/status-supplement%20%2B%20polish-orange)](HANDOFF.md)
 
-**Three pre-registered claims** (`hypothesis.md` v2):
+Research code and paper draft for a controlled benchmark of **Quantum
+Liquid Neural Networks (QLNNs) as both a physics-informed solver and a
+data-driven forecaster for ODEs and PDEs**. Literature-grounded starting
+circuits (Kyriienko DQC, Schuld data-reuploading, Lubasch multi-copy,
+Berger TE-QPINN, QCPINN, RF-QRC), strong matched classical baselines
+including a non-liquid Neural-ODE control, a pre-registered falsifiable
+inductive-bias hypothesis, and a mechanistic trainability
+characterization. Every number in the paper draft is gated by
+`scripts/verify_paper_integrity.py` against committed JSONs (exit code
+0 required for any commit to land).
 
-1. **Reproducibility** — at matched parameter count the QLNN's seed-to-seed
-   variance is at least 2× tighter than the classical baseline's.
-2. **Expressivity** — at matched parameter count the QLNN reaches a higher
-   normalized effective dimension (Abbas et al. 2021, Eq. 4).
-3. **Sample efficiency** — the QLNN matches or beats the classical at a
-   smaller training-data fraction.
+---
 
-All three carry empirical support — see `PAPER_SUMMARY.md` for the final
-verdicts, headline tables, and statistical analyses.
+## ✋ Start here (new contributors / colleagues)
 
-> **Scope.** All claims are *within-run extrapolation* on a single
-> fermentation trajectory. Population-level claims (cross-run, cross-organism,
-> cross-process) require additional data and are explicitly out of scope.
+In order:
+
+1. **[`NEXT_AGENT_PICKUP.md`](NEXT_AGENT_PICKUP.md)** — one-line state
+   + one-command sanity check.
+2. **[`HANDOFF.md`](HANDOFF.md)** — operational pickup detail (what is
+   done, what is in flight, what's next).
+3. **[`paper/main.tex`](paper/main.tex)** — the 15-page paper draft
+   (§1 Intro through §8 Conclusions); build with `bash paper/build.sh`.
+4. **[`ODE_PDE_PRE_REG.md`](ODE_PDE_PRE_REG.md)** + **[`PRE_REG_AMENDMENT.md`](PRE_REG_AMENDMENT.md)**
+   — pre-registration that locks the science; amendments are
+   disclosed (no silent moves).
+
+## Repository map (current, post-archive cleanup)
+
+| Path | Purpose |
+|---|---|
+| `paper/main.tex` + `paper/supplement.tex` | The paper draft and supplement (LaTeX). |
+| `paper/figures/` | Publication figures (PNG + PDF) regenerated from on-disk results. |
+| `refs/CIRCUIT_SPECS.md` + `refs/_speccard_*.md` + `refs/_check_*.md` | PDF-grounded circuit specifications and dual-check files for every literature ansatz. The faithfulness gate that precedes any new ansatz implementation. |
+| `src/qlnn_/circuits/` | Registered quantum ansatz families: `data_reuploading`, `hardware_efficient`, `strongly_entangling`, `brickwall`, `qcpinn`, `rf_qrc`, `te_qpinn`, plus the `pde_2d/` subpackage. |
+| `src/qlnn_/cells/` | `liquid_quantum_cell` + `non_liquid_quantum_cell` (the mandatory non-liquid baseline that isolates the quantum-vs-liquid confound). |
+| `src/quantum_liquid_neuralode/data_processing/` | ODE systems (`synthetic_ode.py`) and PDE systems (`pde_systems.py`). |
+| `scripts/` | Trainers, summarizers, figure builders, integrity gates, and the SOTA-circuit search harnesses. |
+| `configs/` | YAML configs for every training run. |
+| `results/` | Frozen per-phase result tables and per-seed artifacts. The `results/*table*.md` files are the canonical headline numbers; never edited by hand. |
+| **`archive/`** | **Legacy documents from the pre-pivot bioreactor-OD program.** See [`archive/README.md`](archive/README.md) for a legend. Preserved for reproducibility; not part of the current paper. |
+
+## Methodology rigor
+
+- **Pre-registration before analysis.** Hypothesis, tasks, metrics,
+  baselines, and decision rules are locked in `ODE_PDE_PRE_REG.md`
+  before any experiment that informs the headline. Subsequent
+  methodological choices are disclosed in `PRE_REG_AMENDMENT.md`.
+- **Integrity-gated numbers.** `scripts/verify_paper_integrity.py` exits
+  0 on every committed headline; the paper LaTeX references results
+  through this gate, so a mismatch fails the build.
+- **5 seeds** per cell; mean ± ddof=1 std, 95% t-CI, and paired-bootstrap
+  p-values reported for every comparison.
+- **Equal HPO budget** between classical and quantum baselines
+  (documented per-cell). The non-liquid Neural-ODE baseline is mandatory
+  and isolates the quantum-vs-liquid confound that the project identity
+  otherwise introduces.
+- **Provenance** per run (git SHA + data SHA-256 + package versions +
+  platform) in each `provenance.json`.
+- `jax_enable_x64` intentionally off (Diffrax dtype-promotion
+  constraint); reverse-mode `jax.jacrev` required through Diffrax
+  `custom_vjp`.
 
 ## Stack
 
-Hybrid by design:
+PyTorch + torchdiffeq for the classical Liquid-ODE baseline; JAX +
+Equinox + Diffrax + PennyLane for the QLNN. Shared data, evaluation,
+and bootstrap modules keep head-to-head numbers bit-identical
+comparable. PennyLane device = `default.qubit` with the JAX interface
+(effective `diff_method = backprop`) — the only configuration that
+composes through the nested Diffrax + `jax.jacrev` autodiff path at
+the qubit counts used here.
 
-- **PyTorch + torchdiffeq** — classical Liquid Neural ODE
-  (`src/quantum_liquid_neuralode/`). MPS-friendly. Adaptive `dopri5` or
-  fixed-step `euler` / `rk4`.
-- **JAX + Equinox + Diffrax + PennyLane** — QLNN
-  (`src/qlnn_/`). Quantum feature encoder + Liquid Quantum Cell, integrated
-  by Diffrax. PennyLane `default.qubit` with the JAX interface.
-
-Both stacks share the same data preprocessing, evaluation protocol,
-metrics module, and per-seed bootstrap utility so head-to-head numbers are
-strictly comparable.
-
-## Locked evaluation protocol
-
-- Dataset: `data/raw/qZETA_data_copy.csv` (777 rows after the canonical
-  cleaning), SHA-256 recorded in every `provenance.json`.
-- Chronological 70/15/15 train/val/test split.
-- Window size 24, stride 1.
-- OD scaling: train-only MinMax fit (closes the test-set-max leak caught
-  during code review); predictions clipped to `[0, 3.8]` in raw OD space at
-  evaluation time as a domain prior.
-- Horizon ablation at h ∈ {1, 3, 6, 12} hours. **h = 3 is the discriminating
-  regime** — at h=1 the dataset's lag-6 autocorrelation (~0.99) lets
-  persistence capture 90% of the variance; at h=3 persistence drops below
-  R² = 0.
-- Metrics: MAE_raw, RMSE_raw, R²_raw, MSE_norm, plus ΔOD-R²_raw (which makes
-  persistence look as weak as it actually is).
-- 5 seeds per cell; mean ± 95% t-distribution CI (ddof=1, Bessel-corrected).
-- Head-to-head statistical test: paired bootstrap over test windows
-  (n_iter = 10⁴, two-sided) with Stouffer's Z-method to combine seed-level
-  p-values.
-
-## Setup (Python 3.11)
+## Setup & reproduction
 
 ```bash
 python3.11 -m venv .venv
 .venv/bin/python -m pip install -U pip
-.venv/bin/python -m pip install -e ".[dev]"
+.venv/bin/python -m pip install -e ".[dev]"   # add ".[dev,search]" for Optuna
 
-.venv/bin/python -m pytest       # 131 tests pass
+# One-command sanity check (run this first when joining):
+PYTHONPATH=src .venv/bin/python -m pytest -q                          # full suite must pass
+PYTHONPATH=src .venv/bin/python scripts/verify_paper_integrity.py    # must exit 0
+
+# Rebuild figures from on-disk results (no training):
+PYTHONPATH=src .venv/bin/python scripts/make_paper_figures.py
+PYTHONPATH=src .venv/bin/python scripts/make_diagnostic_figures.py
+
+# Build the paper:
+bash paper/build.sh
+bash paper/build_supplement.sh
 ```
 
-## Reproducing the paper numbers
+To rebuild a phase from scratch see `scripts/reproduce_paper.sh` and
+the per-phase notes in `results/*/README.md`.
 
-Every numerical claim in `PAPER_SUMMARY.md` is regenerated by:
+## Honest limitations
 
-```bash
-# Phase A/B/C: classical baseline + horizon ablation + param-matched sweep
-bash scripts/run_horizon_sweep.sh
-bash scripts/run_param_sweep.sh
-.venv/bin/python scripts/train_baseline.py --config configs/baseline_euler_fast.yaml \
-    --output-dir results/baseline_classical_euler
-.venv/bin/python scripts/train_baseline.py --config configs/baseline.yaml \
-    --output-dir results/baseline_classical_dopri5
-.venv/bin/python scripts/train_baseline.py --config configs/baseline_physics.yaml \
-    --output-dir results/baseline_classical_physics
-.venv/bin/python scripts/train_baseline.py --config configs/baseline_euler_fixed_od.yaml \
-    --output-dir results/baseline_classical_euler_fixed_od
+The current paper draft is the result of a **deliberate pivot** away
+from an earlier bioreactor-OD program that was honestly reassessed as
+a rigorous null on an n=1 dataset (preserved in `archive/` with its
+integrity check still green for continuity). The current program
+addresses that limitation with a controlled hardness ladder, matched
+baselines including a non-liquid control, and a falsifiable
+inductive-bias hypothesis whose verdict — confirm, falsify, or
+regime-dependent map — is publishable either way because the
+pre-registered question and method are the contribution.
 
-# QLNN runs
-.venv/bin/python scripts/train_qlnn.py --config configs/qlnn_hybrid.yaml \
-    --output-dir results/qlnn_hybrid_h1
-.venv/bin/python scripts/train_qlnn.py --config configs/horizon/qlnn_hybrid_h3.yaml \
-    --output-dir results/qlnn_hybrid_h3
-.venv/bin/python scripts/train_qlnn.py --config configs/horizon/qlnn_hybrid_h3_physics.yaml \
-    --output-dir results/qlnn_hybrid_h3_physics
+## Citation & contact
 
-# Step 5 — effective dimension (Claim 2)
-.venv/bin/python scripts/run_effective_dimension.py
-
-# Step 6 — sample-efficiency sweep (Claim 3)
-bash scripts/run_sample_efficiency.sh
-
-# Aggregate paper-ready tables
-.venv/bin/python scripts/summarize_baselines.py \
-    --runs results/baseline_classical_euler results/baseline_classical_dopri5 \
-           results/baseline_classical_physics results/baseline_classical_euler_fixed_od \
-    --labels "Euler" "dopri5" "+physics" "Euler fixed [0,3.8] OD (leak sensitivity)" \
-    --output results/baseline_classical_table
-.venv/bin/python scripts/summarize_horizon_sweep.py --runs \
-    results/horizon_sweep/euler_h1 results/horizon_sweep/euler_h3 \
-    results/horizon_sweep/euler_h6 results/horizon_sweep/euler_h12 \
-    --label "Liquid-ODE (Euler)" --output results/horizon_sweep_table
-.venv/bin/python scripts/summarize_param_sweep.py --qlnn-run results/qlnn_hybrid_h3
-.venv/bin/python scripts/summarize_sample_efficiency.py
-
-# Per-cell paired-bootstrap p-values
-.venv/bin/python scripts/run_paired_comparison.py \
-    --reference-run results/qlnn_hybrid_h3 --candidate-run persistence \
-    --metric mae --split test
-```
-
-Every result directory carries a `provenance.json` (git SHA + data
-SHA-256 + Python/package versions + platform) so the numbers in any
-committed result can be traced back to the exact code and data that
-produced them.
-
-## Package layout
-
-```
-src/
-    quantum_liquid_neuralode/           # PyTorch — classical
-        models/
-            liquid_cell.py               # Continuous-time RNN cell — returns dh/dt
-            forecaster.py                # LiquidODForecaster, swappable solver
-        training/
-            losses.py                    # Physics losses (logistic-growth residual)
-            trainer.py                   # Reusable training loop + multi-seed
-        data_processing/
-            qzeta.py                     # Canonical loader
-            windowing.py                 # Splits, MinMax, sliding-window builder
-        evaluation/
-            metrics.py                   # MAE / RMSE / R² + ΔOD metrics + t-CI
-            baselines.py                 # Persistence + linear extrapolation
-            bootstrap.py                 # Paired bootstrap with Stouffer's Z
-        diagnostics/
-            effective_dimension.py       # Empirical Fisher + Abbas Eq. 4 (PyTorch)
-        utils/
-            provenance.py                # write_provenance() — git SHA + data SHA
-            mps.py                       # Device selection
-
-    qlnn_/                              # JAX + Equinox + PennyLane — quantum
-        circuits/reuploading.py          # Data-reuploading PQC
-        encoders/quantum_feature_encoder.py    # Linear → angles → PQC → ⟨Z⟩
-        cells/liquid_quantum_cell.py     # Liquid CT-RNN with quantum vector field
-        models/qlnn_forecaster.py        # Full hybrid forecaster (Diffrax)
-        training/
-            losses.py                    # JAX port of logistic-growth residual
-            trainer.py                   # Optax-driven multi-seed trainer
-        diagnostics/
-            effective_dimension.py       # Empirical Fisher + Abbas Eq. 4 (JAX)
-```
-
-## Document trail
-
-- `PAPER_SUMMARY.md` — single source of paper-ready numbers and verdicts.
-- `hypothesis.md` (v2) — pre-registration of the three claims. v1 included
-  a QWGAN-GP synthetic-data-lift claim that was explicitly dropped after
-  the Phase A/B/C audit (see § "Deviations from v1").
-- `STEP5_MONOTONICITY_NOTE.md` — corrected sanity-check criterion for
-  Claim 2's empirical-Fisher monotonicity check (the original pre-reg
-  conflated full-rank and rank-deficient asymptotic behaviors).
-- `STEP6_PLAN.md` — historical design doc for the sample-efficiency
-  sweep, kept for provenance; the sweep ran successfully and the results
-  are in `results/sample_efficiency/`.
-- `REVIEW_*.md` — four peer-review-style audit documents from the
-  parallel-reviewer pass that gated Phase A through C
-  (`REVIEW_step1_classical.md`, `REVIEW_step23_quantum.md`,
-  `REVIEW_methodology.md`, `REVIEW_integration.md`,
-  `REVIEW_SYNTHESIS.md`).
-
-## Spec
-
-`spec.md` is the historical implementation roadmap (pre-QWGAN-drop).
-`PAPER_SUMMARY.md` supersedes it for the current paper position.
-
-## License / status
-
-Research code. Not for production. The codebase is feature-complete for
-the v2 paper; only the writeup remains.
+Research code (no production claims). Citation: see `paper/main.tex`
+once the supplement is finalized. For author contact see the top-level
+commit history.
