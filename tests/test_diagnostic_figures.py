@@ -15,13 +15,14 @@ import pytest
 mod = importlib.import_module("scripts.make_diagnostic_figures")
 
 
-def test_t1_registry_is_seven_callables():
-    assert len(mod.T1) == 7
+def test_t1_registry_is_eight_callables():
+    assert len(mod.T1) == 8
     assert all(callable(fn) for fn in mod.T1)
     names = {fn.__name__ for fn in mod.T1}
     assert names == {
         "fig_learning_curves", "fig_forecast_trajectory",
         "fig_pred_vs_actual", "fig_residual_analysis",
+        "fig_qq_analysis",
         "fig_paired_bootstrap", "fig_seed_strip",
         "fig_all_circuit_diagrams",
     }

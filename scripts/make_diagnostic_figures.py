@@ -277,7 +277,8 @@ def fig_residual_analysis():
         ax.set_xlabel("test window index"); ax.set_ylabel("residual (raw OD)")
         ax.grid(True, alpha=0.3)
 
-        # (b) histogram + normal QQ
+        # (b) histogram + Normal PDF overlay (NOT a Q-Q plot — that lives
+        # in fig_qq_analysis below, with Shapiro and two-sample KS tests)
         ax = axes[r, 1]
         ax.hist(res, bins=20, color=col, alpha=0.55, edgecolor="black",
                 linewidth=0.4, density=True)
@@ -311,6 +312,118 @@ def fig_residual_analysis():
                  "missed dynamics (h=3, seed-mean)", y=1.01)
     fig.tight_layout()
     _save(fig, "fig_residual_analysis")
+
+
+# ---------------------------------------------------------------------------
+# T1.4b — proper Q-Q analysis (replaces the misnamed "QQ" mention in the
+# residual histogram). Built as reusable helpers so the SAME panels can be
+# reapplied to PDE-solver residuals or rollout-forecaster residuals when
+# the post-pivot results land — pass any (label, residuals) pairs in.
+# ---------------------------------------------------------------------------
+def _qq_panel_vs_normal(ax, res, label, color):
+    """Per-stack Q-Q vs standard Normal.
+
+    Standardizes residuals to (residual − mean)/std (ddof=1), sorts, and
+    plots against the theoretical Normal quantiles at plotting positions
+    (i−0.5)/n. The y=x reference line corresponds to perfect normality
+    under that standardization. Shapiro–Wilk W and p are annotated.
+    Skips silently with a printed note if scipy is unavailable.
+    """
+    try:
+        from scipy.stats import norm, shapiro
+    except ImportError:
+        ax.text(0.5, 0.5, "scipy required for Q-Q", ha="center", va="center")
+        return
+    res = np.asarray(res, dtype=float)
+    n = len(res)
+    if n < 3 or res.std(ddof=1) == 0:
+        ax.text(0.5, 0.5, "insufficient data", ha="center", va="center")
+        return
+    sorted_std = np.sort((res - res.mean()) / res.std(ddof=1))
+    theo = norm.ppf((np.arange(1, n + 1) - 0.5) / n)
+    ax.plot(theo, sorted_std, marker="o", linestyle="",
+            markersize=4, color=color, alpha=0.85)
+    lo = min(theo[0], sorted_std[0]); hi = max(theo[-1], sorted_std[-1])
+    ax.plot([lo, hi], [lo, hi], "k--", linewidth=1, alpha=0.7, label="y = x (Normal)")
+    W, p = shapiro(res)
+    ax.set_title(f"{label} — Q-Q vs Normal\nShapiro W={W:.3f}, p={p:.3g}")
+    ax.set_xlabel("Normal theoretical quantile")
+    ax.set_ylabel("standardized residual quantile")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="upper left", frameon=True, fontsize=8)
+
+
+def _two_sample_qq(ax, res_a, label_a, res_b, label_b, color):
+    """Two-sample Q-Q: empirical quantiles of `res_a` vs `res_b`.
+
+    Points on the 45° line ⇒ the two empirical distributions are
+    functionally identical (in distribution, not pointwise). The
+    two-sample Kolmogorov–Smirnov statistic D and p-value are annotated;
+    p > 0.05 ⇒ we cannot reject equality at the conventional level.
+    """
+    try:
+        from scipy.stats import ks_2samp
+    except ImportError:
+        ax.text(0.5, 0.5, "scipy required for KS", ha="center", va="center")
+        return
+    a = np.asarray(res_a, dtype=float); b = np.asarray(res_b, dtype=float)
+    n = min(len(a), len(b))
+    if n < 3:
+        ax.text(0.5, 0.5, "insufficient data", ha="center", va="center")
+        return
+    qs = (np.arange(1, n + 1) - 0.5) / n
+    qa = np.quantile(a, qs); qb = np.quantile(b, qs)
+    ax.plot(qa, qb, marker="o", linestyle="", markersize=4,
+            color=color, alpha=0.85)
+    lo = min(qa[0], qb[0]); hi = max(qa[-1], qb[-1])
+    ax.plot([lo, hi], [lo, hi], "k--", linewidth=1, alpha=0.7, label="y = x")
+    D, p = ks_2samp(a, b)
+    ax.set_title(
+        f"Two-sample Q-Q: {label_a} vs {label_b}\n"
+        f"KS D={D:.3f}, p={p:.3g}  "
+        f"({'cannot reject' if p > 0.05 else 'reject'} H₀ equal distributions)"
+    )
+    ax.set_xlabel(f"{label_a} residual quantile")
+    ax.set_ylabel(f"{label_b} residual quantile")
+    ax.grid(True, alpha=0.3)
+    ax.legend(loc="upper left", frameon=True, fontsize=8)
+
+
+def fig_qq_analysis():
+    """Proper Q-Q diagnostic for the canonical comparison (h=3, seed-mean
+    residuals). Three panels: per-stack Q-Q vs Normal (with Shapiro p) +
+    two-sample Q-Q (classical vs QLNN, with KS p). Built on the
+    reusable `_qq_panel_vs_normal` / `_two_sample_qq` helpers so the
+    same panels can be dropped into post-pivot residual analyses.
+    """
+    if not (_exists(CLASSICAL_RUN) and _exists(QLNN_RUN)):
+        print("SKIP fig_qq_analysis: reference runs missing")
+        return
+    cseeds = _seed_dirs(CLASSICAL_RUN); qseeds = _seed_dirs(QLNN_RUN)
+    cp = [p for p in (_preds(CLASSICAL_RUN, s) for s in cseeds) if p is not None]
+    qp = [p for p in (_preds(QLNN_RUN, s) for s in qseeds) if p is not None]
+    if not cp or not qp:
+        print("SKIP fig_qq_analysis: no per-seed predictions on disk")
+        return
+    yt_c = _to_raw(cp[0]["test_y_true_norm"], CLASSICAL_RUN)
+    yp_c = np.stack([_to_raw(p["test_y_pred_norm"], CLASSICAL_RUN)
+                     for p in cp]).mean(0)
+    res_c = yp_c - yt_c
+    yt_q = _to_raw(qp[0]["test_y_true_norm"], QLNN_RUN)
+    yp_q = np.stack([_to_raw(p["test_y_pred_norm"], QLNN_RUN)
+                     for p in qp]).mean(0)
+    res_q = yp_q - yt_q
+
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4.6))
+    _qq_panel_vs_normal(axes[0], res_c, "Classical H=4", C_CLASSICAL)
+    _qq_panel_vs_normal(axes[1], res_q, "QLNN 4q/3L", C_QLNN)
+    _two_sample_qq(axes[2], res_c, "Classical H=4",
+                   res_q, "QLNN 4q/3L", "#444444")
+    fig.suptitle(
+        "Q-Q analysis — per-stack normality + distributional equality "
+        "between stacks (h=3, seed-mean residuals)", y=1.03, fontsize=11)
+    fig.tight_layout()
+    _save(fig, "fig_qq_analysis")
 
 
 # ---------------------------------------------------------------------------
@@ -907,8 +1020,8 @@ def fig_fisher_spectrum():
 
 T1 = [
     fig_learning_curves, fig_forecast_trajectory, fig_pred_vs_actual,
-    fig_residual_analysis, fig_paired_bootstrap, fig_seed_strip,
-    fig_all_circuit_diagrams,
+    fig_residual_analysis, fig_qq_analysis, fig_paired_bootstrap,
+    fig_seed_strip, fig_all_circuit_diagrams,
 ]
 
 T3 = [
