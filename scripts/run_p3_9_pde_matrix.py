@@ -37,6 +37,10 @@ from qlnn_.training.p3_9_pde_matrix import (
     summarize,
     train_one_cell,
 )
+from qlnn_.training.pde_demo import PDE_BENCH
+from quantum_liquid_neuralode.data_processing.pde_systems import (
+    assert_dataset_hash,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 OUT = REPO_ROOT / "results" / "p3_9_pde_matrix"
@@ -109,6 +113,13 @@ def main() -> None:
     print(f"  pdes     : {args.pdes}", flush=True)
     print(f"  families : {families}", flush=True)
     print(f"  seeds    : {args.seeds}", flush=True)
+
+    # P6 G4: gate on per-system PDE field hashes BEFORE any training
+    # consumes the .npz references. Analytic-only PDEs (heat) have
+    # npz_basename=None in PDE_BENCH and are skipped.
+    for _pde_name in args.pdes:
+        if PDE_BENCH[_pde_name].npz_basename is not None:
+            assert_dataset_hash(_pde_name)
 
     groups: dict[str, list[dict]] = {}
     for pde_name in args.pdes:

@@ -39,7 +39,11 @@ from qlnn_.training.p3_8_review_demo import (
     train_one_pde_classical,
     train_one_pde_quantum,
 )
+from qlnn_.training.pde_demo import PDE_BENCH
 from qlnn_.training.solver_demo import FAMILIES as SCALAR_FAMILIES
+from quantum_liquid_neuralode.data_processing.pde_systems import (
+    assert_dataset_hash,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 OUT = REPO_ROOT / "results" / "p3_8_review"
@@ -128,6 +132,12 @@ def main() -> None:
 
     # PDE re-runs: quantum + classical pair
     if not args.skip_pde:
+        # P6 G4: gate on per-system PDE field hashes BEFORE any training
+        # consumes the .npz references. Analytic-only PDEs (heat) have
+        # npz_basename=None in PDE_BENCH and are skipped.
+        for _pde_name in args.pdes:
+            if PDE_BENCH[_pde_name].npz_basename is not None:
+                assert_dataset_hash(_pde_name)
         for pde_name in args.pdes:
             for seed in args.seeds:
                 # Quantum

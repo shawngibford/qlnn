@@ -38,7 +38,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+import warnings
 from dataclasses import dataclass, field
+from pathlib import Path
 from typing import Callable
 
 import numpy as np
@@ -389,3 +391,83 @@ def make_pde_npz(name: str, path: str) -> dict:
             {kk: vv.tolist() for kk, vv in inv.items()}),
     )
     return meta
+
+
+# ---------------------------------------------------------------------------
+# Dataset hash gate (P6 G4): never silently train on a drifted PDE field.
+# ---------------------------------------------------------------------------
+
+
+class DatasetHashMismatchError(ValueError):
+    """Raised when an on-disk PDE field's recomputed provenance hash does
+    not match the SHA256 recorded in `data/pde/manifest.json`.
+
+    Carries the system name, the npz path, the expected hash (from the
+    manifest), and the actual hash (recomputed from the loaded arrays
+    via `_provenance_hash`)."""
+
+
+_DEFAULT_PDE_DIR = Path(__file__).resolve().parents[3] / "data" / "pde"
+_DEFAULT_MANIFEST = _DEFAULT_PDE_DIR / "manifest.json"
+
+
+def assert_dataset_hash(name: str,
+                         manifest_path: str | Path | None = None,
+                         pde_dir: str | Path | None = None) -> None:
+    """Verify the on-disk PDE field for `name` still matches the manifest.
+
+    Recomputes the provenance hash of `{pde_dir}/{name}.npz` via the same
+    `_provenance_hash(name, t, x, U, params)` algorithm used to populate
+    the manifest, then compares against the manifest's recorded `sha256`.
+
+    Behavior:
+      - Match  -> return (no-op).
+      - Mismatch -> raise `DatasetHashMismatchError` with both hashes
+        and the offending path.
+      - `name` not in manifest -> emit a `UserWarning` (one line) and
+        return; this lets new systems be onboarded before they are
+        locked into the manifest.
+
+    `manifest_path` defaults to `<repo>/data/pde/manifest.json`;
+    `pde_dir` defaults to its parent directory.
+    """
+    mp = Path(manifest_path) if manifest_path is not None else _DEFAULT_MANIFEST
+    base = Path(pde_dir) if pde_dir is not None else mp.parent
+
+    with open(mp, "r") as fh:
+        manifest = json.load(fh)
+
+    if name not in manifest:
+        warnings.warn(
+            f"[assert_dataset_hash] WARN: '{name}' not in {mp}; "
+            f"skipping hash check (allow-new-system path).",
+            stacklevel=2,
+        )
+        return
+
+    expected = manifest[name].get("sha256")
+    if expected is None:
+        warnings.warn(
+            f"[assert_dataset_hash] WARN: '{name}' has no sha256 in "
+            f"{mp}; skipping hash check.",
+            stacklevel=2,
+        )
+        return
+
+    npz_path = base / f"{name}.npz"
+    with np.load(npz_path) as d:
+        u = np.asarray(d["u"], dtype=np.float64)
+        x = np.asarray(d["x"], dtype=np.float64)
+        t = np.asarray(d["t"], dtype=np.float64)
+        meta = json.loads(str(d["meta_json"]))
+
+    params = meta.get("params", {})
+    actual = _provenance_hash(name, t, x, u, params)
+    if actual != expected:
+        raise DatasetHashMismatchError(
+            f"PDE dataset hash mismatch for '{name}' at {npz_path}:\n"
+            f"  expected (manifest): {expected}\n"
+            f"  actual   (recomputed): {actual}\n"
+            f"The .npz on disk has drifted from {mp}. Regenerate via "
+            f"scripts/generate_pde_data.py or restore the committed file."
+        )

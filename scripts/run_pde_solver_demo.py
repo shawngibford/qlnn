@@ -30,6 +30,9 @@ from qlnn_.training.pde_demo import (
     summarize_pde_seeds,
     train_one_pde,
 )
+from quantum_liquid_neuralode.data_processing.pde_systems import (
+    assert_dataset_hash,
+)
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 OUT = REPO_ROOT / "results" / "p3_7_pde_solver"
@@ -93,6 +96,14 @@ def main() -> None:
     print(f"  pdes  : {args.pdes}")
     print(f"  seeds : {args.seeds}")
     print(f"  out   : {out}")
+
+    # P6 G4: gate on per-system PDE field hashes BEFORE any training
+    # consumes the .npz references. Only the npz-backed PDEs (i.e. the
+    # ones whose reference field comes from data/pde/) are checked;
+    # analytic-reference PDEs (heat) have no on-disk artifact to drift.
+    for _pde_name in args.pdes:
+        if PDE_BENCH[_pde_name].npz_basename is not None:
+            assert_dataset_hash(_pde_name)
 
     # Loop directly so each completed run is WRITTEN + PRINTED before
     # moving to the next — avoids ~20+ min of silent accumulation that
