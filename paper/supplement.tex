@@ -135,7 +135,13 @@ quantum family is bolded.
 
 \begin{table*}[t]
 \centering
-\caption{Solver-task ODE per-cell error. Bold = per-row best quantum.}
+\caption{Solver-task ODE per-cell relative-$L^2$ error
+(PDEBench / FNO convention). Each row corresponds to one
+(system, ansatz, qubits, depth) configuration evaluated at a
+single random seed; each column reports one of the four
+quantum families plus the classical PINN baseline at the
+matched training budget. Bold marks the per-row best quantum
+entry.}
 \label{sup:tab:solver-ode}
 \footnotesize
 \setlength{\tabcolsep}{4pt}
@@ -164,7 +170,14 @@ Lorenz & 2 & 0.9966 & 0.9946 & \textbf{0.9773} & 0.9943 & 0.9957 \\
 
 \begin{table*}[t]
 \centering
-\caption{Solver-task PDE per-cell error.}
+\caption{Solver-task PDE per-cell relative-$L^2$ error
+(PDEBench / FNO convention). Each row corresponds to one
+(system, ansatz, qubits, depth) configuration evaluated at a
+single random seed; each column reports one of the four
+2D-port quantum families plus the classical PINN baseline at
+the matched training budget. Bold marks the per-row best
+quantum entry; ``---'' marks runs that diverged with no finite
+$L^2$ measurement.}
 \label{sup:tab:solver-pde}
 \footnotesize
 \setlength{\tabcolsep}{4pt}
@@ -343,6 +356,11 @@ updated $7 \to 8$ callables). No headline number is touched and
 \section{Reproduction and audit}
 \label{sup:repro}
 
+All scripts and data referenced below ship with the open-source
+release at \url{https://github.com/shawngibford/qlnn}; the
+specific commit/tag anchors are listed in \S\ref{sup:repro}
+under ``GitHub release tags''.
+
 \subsection{One-command reproduction}
 
 The entire benchmark regenerates from scratch via:
@@ -402,7 +420,12 @@ summarizes the headline status of each amendment.
 flags PRIMARY = canonical headline verdict; SUPERSEDED = the
 amendment is documented but a later amendment takes precedence
 for the paper's narrative; DISCLOSED = methodological choice
-made open without superseding.}
+made open without superseding. Note: A14 (Q-Q residual
+diagnostics, see \S\ref{sup:qq-diagnostics}) is a post-hoc
+amendment introduced after the pre-registration set was
+locked, and is intentionally not part of the pre-registered
+A1--A13 record; it is documented in
+\texttt{PRE\_REG\_AMENDMENT.md}.}
 \label{sup:tab:amendments}
 \small
 \begin{tabular}{lll}
@@ -444,6 +467,7 @@ verified); the full sweep is the follow-up paper's first compute
 item.
 
 \paragraph{KdV (Korteweg--de Vries, $u_t + 6 u u_x + u_{xxx} = 0$).}
+\label{sup:kdv-gate}
 Third-order spatial derivative requires triple-nested
 reverse-mode autodiff (\texttt{jacrev}$^3$) through the QNode.
 The mechanism gate at \texttt{scripts/run\_p7\_8\_kdv\_gate.py}
