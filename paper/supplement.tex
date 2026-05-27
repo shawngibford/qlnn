@@ -201,6 +201,32 @@ Burgers shock & 2 & 0.4168 & \textbf{0.1630} & 0.4473 & 0.2553 & 0.1270 \\
 \end{tabular}
 \end{table*}
 
+\subsection{Multi-family solver matrix}
+\label{sup:multi-family-solver}
+
+The \S2.1 and \S2.2 tables aggregate per-cell relative-$L^2$
+numerically across the ODE and PDE solver matrices. For readers who
+want the visual cross-check, this subsection adds two figures: the
+peer-review audit iteration that drove the audit-corrected
+configurations, and the multi-family quantum-PINN matrix
+visualization spanning four SOTA ansatz families on three PDEs from
+the hardness ladder. Both figures source data directly from the
+JSONs underpinning the tables above.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_p3_8_review_iteration.pdf}
+\caption{Peer-review audit iteration on the solver hardness ladder. Row~0: quantum chebyshev\_dqc\_2d vs.\ a capacity-matched classical MLP-PINN baseline (log-scale relative-$L^2$) on heat, smooth Burgers, and Allen--Cahn at audit-corrected configurations (1200--1800 training steps; $64\times32$ collocation for Allen--Cahn). Row~1: per-system loss trajectories (seed 0) diagnosing convergence vs.\ saturation. Row~2: periodic-boundary-condition violation $\max_t \lVert u(\cdot,t) - u(\cdot,t)|_{\text{periodic}}\rVert / \max\lVert u\rVert$; both quantum and classical PINNs exceed the 5\% design target (relative violation $\approx 0.6$--$1.6$), confirming the audit prediction that the Lagaris initial-condition ansatz does not implicitly enforce periodicity. Row~3: four quantum families (chebyshev\_dqc, te\_qpinn\_fnn, te\_qpinn\_qnn, qcpinn) on Lorenz extended to $T=5$ ($\approx 5.5$ Lyapunov times) against a predict-mean baseline (replacing the predict-zero floor of P3.6). Source: \texttt{results/p3\_8\_review/}.}
+\label{sup:fig:p3-8-audit-review}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_p3_9_pde_matrix.pdf}
+\caption{Multi-family solver matrix: four SOTA quantum-PINN families (chebyshev\_dqc, qcpinn, TE-QPINN with FNN encoding, TE-QPINN with QNN encoding) compared against a classical MLP-PINN baseline on three PDEs from the hardness ladder (heat, smooth Burgers, Allen--Cahn; $n=3$ seeds per cell). Row~0: relative-$L^2$ accuracy with 95\% CI (log scale); QCPINN and TE-QPINN-FNN reach sub-1\% error on heat but degrade on the broader systems. Row~1: training-loss trajectories. Row~2: periodic-BC violation. Row~3: trainable-scalar accounting (PQC parameters in cool, classical-wrapper parameters in warm), quantifying the classical capacity bundled into the hybrid ans\"atze. \emph{Note:} shock Burgers, the fourth member of the pre-registered PDE ladder, is not shown in this matrix --- coverage is limited to the three smooth/standard systems; the shock-Burgers cells remain queued for the P6 unified-matrix sweep. Sources: \texttt{results/p3\_8\_review/}, \texttt{results/p3\_9\_pde\_matrix/}.}
+\label{sup:fig:p3-9-pde-matrix}
+\end{figure*}
+
 \subsection{Forecaster-task complete 2$\times$2 matrix ($n=9$)}
 \label{sup:forecaster}
 
