@@ -221,6 +221,64 @@ HPO-fragile. The HPO-symmetric verdict is FALSIFIED. This is the
 methodologically strongest sensitivity point and supersedes the
 n=9 raw-bootstrap CONFIRMED as the paper's principal verdict.
 
+## Amendment A14 — Post-hoc Q-Q residual diagnostics (P8 polish)
+
+**Audit gap closed:** the residual-distribution panel in
+`fig_residual_analysis` (committed earlier as a T1 reviewer-diagnostic)
+labels its middle column as `# histogram + normal QQ` in the source
+but the implementation is a histogram with a fitted Normal PDF
+overlay, not a Q-Q plot. No genuine quantile-quantile analysis existed
+anywhere in the figure set, and the Normal overlay was actively
+misleading because both stacks' residuals are clearly non-Normal.
+
+**Amendment:** P8 polish adds two reusable, dataset-agnostic helpers in
+`scripts/make_diagnostic_figures.py` —
+`_qq_panel_vs_normal(ax, residuals, label, color)` and
+`_two_sample_qq(ax, res_a, label_a, res_b, label_b, color)` — plus a
+new figure `fig_qq_analysis` that applies them to the canonical
+(Classical H=4 vs QLNN 4q/3L) residuals at h=3. The misleading
+in-source comment in `fig_residual_analysis` is corrected to
+"histogram + Normal PDF overlay (NOT a Q-Q plot — that lives in
+`fig_qq_analysis` below, with Shapiro and two-sample KS tests)". The
+T1 registry test is updated 7 → 8 callables.
+
+**Results on the canonical comparison (seed-mean residuals at h=3):**
+
+| Test | Classical H=4 | QLNN 4q/3L |
+|---|---|---|
+| Shapiro–Wilk W | 0.892 | 0.885 |
+| Shapiro–Wilk p | 1.64×10⁻⁵ | 8.91×10⁻⁶ |
+| Two-sample KS D | — | — (D = 0.085) |
+| Two-sample KS p | — | — (p = 0.964) |
+
+Interpretation: both per-stack distributions are clearly non-Normal
+(Shapiro rejects normality at α = 0.05 by ≥ 4 orders of magnitude on
+each); the two-sample KS test cannot reject the null that the two
+distributions are equal (p = 0.964).
+
+**Rationale:** This is a post-hoc *diagnostic*, not a new headline
+claim. Concretely it does two things: (a) it corrects a labelling
+defect in the diagnostic figure suite (the "QQ" naming was wrong;
+nothing in the figure set was a real Q-Q plot); (b) it quantifies the
+visually-suggested "the two histograms look identical" observation
+with a formal Kolmogorov–Smirnov test that yields p = 0.964 — i.e.
+*statistical* indistinguishability of the two error distributions at
+h=3. This is consistent with, and supportive of, the project's honest
+"both near persistence at h=3" verdict that is already documented in
+`archive/PAPER_SUMMARY.md`; the amendment adds a defensible numerical
+backing to it. Neither helper is yet applied to post-pivot solver or
+forecaster residuals — that is a small, mechanical follow-up the next
+contributor can perform by calling the same helpers with new
+`(residuals, label)` arrays. No locked headline number is touched;
+`scripts/verify_paper_integrity.py` still exits 0.
+
+`scripts/verify_paper_integrity.py`: PASS (no change to integrity).
+`pytest tests/test_diagnostic_figures.py`: 7 PASS (registry-count
+assertion updated 7 → 8 in the same commit). Full numerical table and
+figure appear in `paper/supplement.tex` §3.2 ("Q-Q residual diagnostics").
+
+---
+
 ## Amendment A13 — Non-liquid QLNN ablation + complete 2×2 mechanism decomposition (P7.11)
 
 **Audit gap closed:** P7.10 (A12) filled three corners of the

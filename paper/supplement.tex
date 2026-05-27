@@ -287,6 +287,58 @@ the slot-assignment in the bootstrap differs. The exactness
 decomposition is a real mathematical structure, not a sampling
 artifact.
 
+\subsection{Q-Q residual diagnostics (post-hoc; see Amendment A14)}
+\label{sup:qq-diagnostics}
+
+The diagnostic figure suite includes a residual-distribution panel
+(\texttt{fig\_residual\_analysis}, middle column) whose original
+source comment mis-labelled it as a Q-Q plot. The implementation is
+actually a histogram with a fitted Normal PDF overlay --- not a
+quantile-quantile analysis. Because the Normal overlay was visually
+misleading (both stacks' residuals are clearly non-Normal), P8 polish
+adds two reusable, dataset-agnostic helpers in
+\texttt{scripts/make\_diagnostic\_figures.py} ---
+\texttt{\_qq\_panel\_vs\_normal} and \texttt{\_two\_sample\_qq} ---
+plus a new figure \texttt{fig\_qq\_analysis} that applies them to the
+canonical archived comparison at $h=3$ (\texttt{classical\_H4}
+hidden-size 4 versus \texttt{QLNN\_4q3L}, seed-mean residuals on the
+held-out test windows). Both helpers take any
+\texttt{(residuals, label)} pair, so the same panels can be reapplied
+to post-pivot solver or forecaster residuals with no code
+duplication.
+
+Table~\ref{sup:tab:qq} reports the per-stack Shapiro--Wilk normality
+test and the two-sample Kolmogorov--Smirnov test between the two
+empirical residual distributions.
+
+\begin{table}[h]
+\centering
+\caption{Q-Q residual diagnostics for the canonical archived
+comparison at $h=3$ (seed-mean test-window residuals; see
+\texttt{paper/figures/fig\_qq\_analysis.pdf}). Both per-stack
+distributions are clearly non-Normal; the two-sample Kolmogorov--
+Smirnov test cannot reject equal distributions, quantifying the
+visually-suggested ``the two histograms look identical'' observation
+and supporting the project's archived ``both near persistence at
+$h=3$'' verdict.}
+\label{sup:tab:qq}
+\small
+\begin{tabular}{lccl}
+\toprule
+Test & Classical $H{=}4$ & QLNN $4q3L$ & Interpretation \\
+\midrule
+Shapiro--Wilk $W$ & 0.892 & 0.885 & both non-Normal \\
+Shapiro--Wilk $p$ & $1.64{\times}10^{-5}$ & $8.91{\times}10^{-6}$ & reject $H_0{:}$ Normal \\
+Two-sample KS $D$ & \multicolumn{2}{c}{0.085} & --- \\
+Two-sample KS $p$ & \multicolumn{2}{c}{0.964} & cannot reject equal dist. \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The harness is committed and unit-tested (T1 registry assertion
+updated $7 \to 8$ callables). No headline number is touched and
+\texttt{scripts/verify\_paper\_integrity.py} continues to exit $0$.
+
 % =====================================================================
 \section{Reproduction and audit}
 \label{sup:repro}
