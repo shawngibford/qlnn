@@ -14,8 +14,15 @@ mechanically-applied decision-rule outcome per pre-reg \S7.
 
 Table~\ref{tab:master-verdicts} reports every verdict produced
 during the program, ordered by the order in which they were
-introduced. Each row is a self-contained sensitivity point with
+introduced (Figure~\ref{fig:h1-verdict}). Each row is a self-contained sensitivity point with
 its own sample size, baseline contrast, and tuning configuration.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_p5_h1_verdict.pdf}
+\caption{Pre-registered $H_1$ forecaster verdict, visualized. Top: per-system relative-$L^2$ for QLNN best vs.\ matched Neural-ODE, MLP, known-structure skyline, and persistence floor across the three smooth/periodic and three broadband/chaotic systems of the hardness ladder. Middle: per-cell $\Delta = \text{Neural-ODE} - \text{QLNN}$ stratified by regime (blue: smooth/periodic, $\bar\Delta_{\text{smooth}} = -0.128$; orange: broadband/chaotic, $\bar\Delta_{\text{broad}} = +0.289$). Bottom: the test statistic $\Delta_{\text{smooth}} - \Delta_{\text{broad}} = -0.417$ with paired-bootstrap 95\% CI $[-0.787,\,-0.046]$ over $n=6$ cells. The CI excludes zero in the negative direction; per pre-registration \S7, the verdict is \textsc{falsified} on the matched-capacity forecaster contrast. Source: \texttt{results/p5\_h1\_verdict/h1\_analysis.json}.}
+\label{fig:h1-verdict}
+\end{figure*}
 
 \begin{table*}[t]
 \centering
