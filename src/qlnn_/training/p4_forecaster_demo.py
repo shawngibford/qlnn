@@ -384,6 +384,33 @@ def train_and_rollout_one_cell(
         adapter, history0, sampled_dt,
         family=family, ref_test=Y_test_traj, cfg=cfg, system=system)
 
+    # 6b. Train-side autoregressive rollout — used by the A6 underfit
+    # guard in the H1 aggregator. We mirror the test-rollout protocol
+    # but start from the TRAIN trajectory's initial window and roll
+    # forward the same `n_steps` (clipped to the train trajectory
+    # length). Pre-reg A6 defines underfit as train-side relative-L2
+    # exceeding the A1 threshold (0.5).
+    n_steps_train = min(rollout_result["rollout_steps"],
+                        Y_train_traj.shape[0] - cfg.window_length)
+    train_relL2 = None
+    if n_steps_train >= 1:
+        history0_train = jnp.asarray(
+            Y_train_traj[:cfg.window_length], dtype=jnp.float32)
+        if family == "rf_qrc":
+            traj_train = autoregressive_rollout_python_loop(
+                adapter, history0_train,
+                n_steps=n_steps_train, dt=sampled_dt)
+        else:
+            adapter_jit = jax.jit(adapter)
+            traj_train = autoregressive_rollout(
+                adapter_jit, history0_train,
+                n_steps=n_steps_train, dt=sampled_dt)
+        pred_train = np.asarray(traj_train, dtype=np.float64)
+        ref_train = np.asarray(
+            Y_train_traj[cfg.window_length:cfg.window_length + n_steps_train],
+            dtype=np.float64)
+        train_relL2 = float(relative_l2_error(pred_train, ref_train))
+
     # 7. Persistence floor baseline (for figure context, not H1).
     pers_adapter = make_persistence_adapter()
     pers_traj = autoregressive_rollout_python_loop(
@@ -406,6 +433,7 @@ def train_and_rollout_one_cell(
             "rollout_steps", "dt_step", "relative_l2",
             "vpt_step", "vpt_time", "vpt_lyapunov",
             "spectral_error", "invariant_drift_final")},
+        "train_relative_l2": train_relL2,
         "persistence_floor_relative_l2": float(pers_relL2),
         # Arrays for figure / npz:
         "u_pred": rollout_result["u_pred"],
@@ -451,6 +479,12 @@ def summarize_p4(results: list[dict]) -> dict[str, Any]:
         "persistence_floor_relative_l2": _t_ci95(
             [r["persistence_floor_relative_l2"] for r in results]),
     }
+    # Pre-reg A6: report train-side relative-L2 aggregate when the
+    # per-cell field is populated (None for legacy cells; skipped).
+    train_vals = [r["train_relative_l2"] for r in results
+                  if r.get("train_relative_l2") is not None]
+    if train_vals:
+        metrics["train_relative_l2"] = _t_ci95(train_vals)
     # vpt_lyapunov only for chaotic systems
     if r0.get("vpt_lyapunov") is not None:
         metrics["vpt_lyapunov"] = _t_ci95(

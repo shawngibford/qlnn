@@ -48,6 +48,11 @@ OUT = REPO_ROOT / "results" / "p7_10_forecaster_decomposition"
 P4_PATH = REPO_ROOT / "results" / "p4_forecaster_rollout"
 P5_PATH = REPO_ROOT / "results" / "p5_matched_baselines"
 
+# Pre-reg amendment A1 — train-side relative-L2 adequacy threshold.
+# Cells whose train_relative_l2 exceeds this are excluded from H1
+# aggregation by the A6 underfit guard.
+A1_UNDERFIT_THRESHOLD = 0.5
+
 SYSTEMS = ("lotka_volterra", "van_der_pol", "lorenz")
 REGIME = {
     "lotka_volterra": "smooth_periodic",
@@ -61,23 +66,39 @@ QLNN_FAMILIES = (
 )
 
 
-def _best_qlnn_forecaster(system: str, seed: int) -> tuple[float | None, str | None]:
-    best, best_fam = None, None
+def _best_qlnn_forecaster(
+    system: str, seed: int,
+) -> tuple[float | None, str | None, float | None]:
+    """Return (best_relL2, best_family, best_family_train_relL2).
+
+    `train_relative_l2` is the A6 underfit-guard input; legacy cells
+    lack the field and contribute None (the aggregator then disables
+    the underfit guard for that cell and emits a WARN).
+    """
+    best, best_fam, best_train = None, None, None
     for fam in QLNN_FAMILIES:
         p = P4_PATH / f"{system}_{fam}" / f"seed_{seed}" / "metrics.json"
         if not p.exists():
             continue
-        v = float(json.loads(p.read_text())["relative_l2"])
+        m = json.loads(p.read_text())
+        v = float(m["relative_l2"])
         if best is None or v < best:
             best, best_fam = v, fam
-    return best, best_fam
+            t = m.get("train_relative_l2")
+            best_train = (None if t is None else float(t))
+    return best, best_fam, best_train
 
 
-def _baseline_relL2(system: str, baseline: str, seed: int) -> float | None:
+def _baseline_relL2(
+    system: str, baseline: str, seed: int,
+) -> tuple[float | None, float | None]:
+    """Return (relL2, train_relL2) for the baseline cell; None if missing."""
     p = P5_PATH / f"{system}_{baseline}" / f"seed_{seed}" / "metrics.json"
     if not p.exists():
-        return None
-    return float(json.loads(p.read_text())["relative_l2"])
+        return None, None
+    m = json.loads(p.read_text())
+    t = m.get("train_relative_l2")
+    return float(m["relative_l2"]), (None if t is None else float(t))
 
 
 def _git_prov() -> dict:
@@ -100,18 +121,37 @@ def main() -> None:
     print(f"P7.10 forecaster decomposition — start {start}", flush=True)
 
     per_cell = []
+    legacy_warn_count = 0
     print("\nPer-cell data:", flush=True)
     for system in SYSTEMS:
         for seed in (0, 1, 2):
-            qlnn_v, qlnn_fam = _best_qlnn_forecaster(system, seed)
-            ne_v = _baseline_relL2(system, "plain_neuralode", seed)
-            ltc_v = _baseline_relL2(system, "classical_ltc", seed)
-            sk_v = _baseline_relL2(system, "skyline", seed)
+            qlnn_v, qlnn_fam, qlnn_train_v = _best_qlnn_forecaster(
+                system, seed)
+            ne_v, ne_train_v = _baseline_relL2(
+                system, "plain_neuralode", seed)
+            ltc_v, ltc_train_v = _baseline_relL2(
+                system, "classical_ltc", seed)
+            sk_v, _ = _baseline_relL2(system, "skyline", seed)
             if any(v is None for v in (qlnn_v, ne_v, ltc_v)):
                 print(f"  [{system:<15} seed={seed}] MISSING "
                       f"(qlnn={qlnn_v}, ne={ne_v}, ltc={ltc_v}) — SKIP",
                       flush=True)
                 continue
+            # A6 WARN-skip path: legacy cells (pre-G6) lack
+            # train_relative_l2 in metrics.json. h1_verdict's
+            # apply_guards then disables the underfit check for that
+            # cell (qlnn_train_relL2=None / neuralode_train_relL2=None
+            # → guard skipped per the existing logic).
+            if qlnn_train_v is None:
+                legacy_warn_count += 1
+                print(f"  WARN [{system}_seed{seed} qlnn={qlnn_fam}] "
+                      f"missing train_relative_l2 — A6 underfit guard "
+                      f"SKIPPED for this cell", flush=True)
+            if ne_train_v is None:
+                legacy_warn_count += 1
+                print(f"  WARN [{system}_seed{seed} plain_neuralode] "
+                      f"missing train_relative_l2 — A6 underfit guard "
+                      f"SKIPPED for this cell", flush=True)
             d_combined = ne_v - qlnn_v
             d_quantum = ltc_v - qlnn_v
             d_liquid = ne_v - ltc_v
@@ -120,8 +160,11 @@ def main() -> None:
                 "regime": REGIME[system],
                 "qlnn_best_family": qlnn_fam,
                 "qlnn_relL2": qlnn_v,
+                "qlnn_train_relL2": qlnn_train_v,
                 "neuralode_relL2": ne_v,
+                "neuralode_train_relL2": ne_train_v,
                 "classical_ltc_relL2": ltc_v,
+                "classical_ltc_train_relL2": ltc_train_v,
                 "skyline_relL2": sk_v,
                 "delta_combined": d_combined,
                 "delta_quantum_isolated": d_quantum,
@@ -131,6 +174,12 @@ def main() -> None:
                   f"({qlnn_v:.4f}) ne={ne_v:.4f} ltc={ltc_v:.4f}  "
                   f"Δ_comb={d_combined:+.4f}  Δ_q={d_quantum:+.4f}  "
                   f"Δ_τ={d_liquid:+.4f}", flush=True)
+
+    if legacy_warn_count:
+        print(f"\nA6 underfit-guard summary: {legacy_warn_count} cells "
+              f"missing train_relative_l2 (legacy pre-G6) — guard "
+              f"skipped on those cells; activates once re-run.",
+              flush=True)
 
     if len(per_cell) < 3:
         print(f"\n  TOO FEW CELLS ({len(per_cell)}) — verdict skipped",
@@ -143,6 +192,7 @@ def main() -> None:
 
     def _verdict(records, name):
         v = h1_verdict(records, n_iter=10000,
+                       underfit_threshold=A1_UNDERFIT_THRESHOLD,
                        skyline_threshold=10.0, seed=0)
         out_path = OUT / f"h1_{name}.json"
         out_path.write_text(json.dumps(v, indent=2) + "\n")
@@ -167,6 +217,8 @@ def main() -> None:
         CellRecord(system=r["system"], seed=r["seed"],
                    qlnn_relL2=r["qlnn_relL2"],
                    neuralode_relL2=r["neuralode_relL2"],
+                   qlnn_train_relL2=r.get("qlnn_train_relL2"),
+                   neuralode_train_relL2=r.get("neuralode_train_relL2"),
                    skyline_relL2=r["skyline_relL2"])
         for r in per_cell
     ]
@@ -174,6 +226,8 @@ def main() -> None:
         CellRecord(system=r["system"], seed=r["seed"],
                    qlnn_relL2=r["qlnn_relL2"],
                    neuralode_relL2=r["classical_ltc_relL2"],
+                   qlnn_train_relL2=r.get("qlnn_train_relL2"),
+                   neuralode_train_relL2=r.get("classical_ltc_train_relL2"),
                    skyline_relL2=r["skyline_relL2"])
         for r in per_cell
     ]
@@ -181,6 +235,8 @@ def main() -> None:
         CellRecord(system=r["system"], seed=r["seed"],
                    qlnn_relL2=r["classical_ltc_relL2"],
                    neuralode_relL2=r["neuralode_relL2"],
+                   qlnn_train_relL2=r.get("classical_ltc_train_relL2"),
+                   neuralode_train_relL2=r.get("neuralode_train_relL2"),
                    skyline_relL2=r["skyline_relL2"])
         for r in per_cell
     ]

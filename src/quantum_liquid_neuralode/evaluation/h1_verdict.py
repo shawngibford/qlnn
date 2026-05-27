@@ -328,6 +328,7 @@ def h1_verdict(
                 "kept_smooth": n_smooth_kept,
                 "kept_broad": n_broad_kept,
                 "excluded_underfit": exclusions["underfit"],
+                "excluded_cells_a6": exclusions["underfit"],  # pre-reg A6 alias
                 "excluded_skyline_out_of_reach":
                     exclusions["skyline_out_of_reach"],
             },
@@ -372,6 +373,7 @@ def h1_verdict(
             "kept_smooth": n_smooth_kept,
             "kept_broad": n_broad_kept,
             "excluded_underfit": exclusions["underfit"],
+            "excluded_cells_a6": exclusions["underfit"],  # pre-reg A6 alias
             "excluded_skyline_out_of_reach":
                 exclusions["skyline_out_of_reach"],
         },

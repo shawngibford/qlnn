@@ -76,6 +76,11 @@ OUT = REPO_ROOT / "results" / "p7_11_decomposition"
 P4_PATH = REPO_ROOT / "results" / "p4_forecaster_rollout"
 P5_PATH = REPO_ROOT / "results" / "p5_matched_baselines"
 
+# Pre-reg amendment A1 — train-side relative-L2 adequacy threshold.
+# Cells whose train_relative_l2 exceeds this are excluded from H1
+# aggregation by the A6 underfit guard.
+A1_UNDERFIT_THRESHOLD = 0.5
+
 SYSTEMS = ("lotka_volterra", "van_der_pol", "lorenz")
 REGIME = {
     "lotka_volterra": "smooth_periodic",
@@ -98,24 +103,39 @@ NON_LIQUID_QLNN_FAMILIES = (
 )
 
 
-def _best_relL2(system: str, seed: int,
-                families: tuple) -> tuple[float | None, str | None]:
-    best, best_fam = None, None
+def _best_relL2(
+    system: str, seed: int, families: tuple,
+) -> tuple[float | None, str | None, float | None]:
+    """Return (best_relL2, best_family, best_family_train_relL2).
+
+    Legacy cells (pre-G6) lack `train_relative_l2`; we return None for
+    that slot and the aggregator's A6 underfit guard skips the cell
+    with a WARN.
+    """
+    best, best_fam, best_train = None, None, None
     for fam in families:
         p = P4_PATH / f"{system}_{fam}" / f"seed_{seed}" / "metrics.json"
         if not p.exists():
             continue
-        v = float(json.loads(p.read_text())["relative_l2"])
+        m = json.loads(p.read_text())
+        v = float(m["relative_l2"])
         if best is None or v < best:
             best, best_fam = v, fam
-    return best, best_fam
+            t = m.get("train_relative_l2")
+            best_train = (None if t is None else float(t))
+    return best, best_fam, best_train
 
 
-def _baseline_relL2(system: str, baseline: str, seed: int) -> float | None:
+def _baseline_relL2(
+    system: str, baseline: str, seed: int,
+) -> tuple[float | None, float | None]:
+    """Return (relL2, train_relL2). train_relL2 may be None on legacy cells."""
     p = P5_PATH / f"{system}_{baseline}" / f"seed_{seed}" / "metrics.json"
     if not p.exists():
-        return None
-    return float(json.loads(p.read_text())["relative_l2"])
+        return None, None
+    m = json.loads(p.read_text())
+    t = m.get("train_relative_l2")
+    return float(m["relative_l2"]), (None if t is None else float(t))
 
 
 def _git_prov() -> dict:
@@ -138,19 +158,32 @@ def main() -> None:
     print(f"P7.11 forecaster 2×2 decomposition — start {start}", flush=True)
 
     per_cell = []
+    legacy_warn_count = 0
     print("\nPer-cell data (LQ=liquid quantum best, NLQ=non-liquid quantum best):",
           flush=True)
     for system in SYSTEMS:
         for seed in (0, 1, 2):
-            lq_v, lq_fam = _best_relL2(system, seed, QLNN_FAMILIES)
-            nlq_v, nlq_fam = _best_relL2(system, seed, NON_LIQUID_QLNN_FAMILIES)
-            ne_v = _baseline_relL2(system, "plain_neuralode", seed)
-            ltc_v = _baseline_relL2(system, "classical_ltc", seed)
-            sk_v = _baseline_relL2(system, "skyline", seed)
+            lq_v, lq_fam, lq_train = _best_relL2(
+                system, seed, QLNN_FAMILIES)
+            nlq_v, nlq_fam, nlq_train = _best_relL2(
+                system, seed, NON_LIQUID_QLNN_FAMILIES)
+            ne_v, ne_train = _baseline_relL2(system, "plain_neuralode", seed)
+            ltc_v, ltc_train = _baseline_relL2(system, "classical_ltc", seed)
+            sk_v, _ = _baseline_relL2(system, "skyline", seed)
             if any(v is None for v in (lq_v, nlq_v, ne_v, ltc_v)):
                 print(f"  [{system:<15} seed={seed}] MISSING — SKIP",
                       flush=True)
                 continue
+            # A6 WARN-skip path for legacy cells lacking train_relative_l2.
+            for label, t in (("liquid_qlnn=" + str(lq_fam), lq_train),
+                             ("non_liquid_qlnn=" + str(nlq_fam), nlq_train),
+                             ("plain_neuralode", ne_train),
+                             ("classical_ltc", ltc_train)):
+                if t is None:
+                    legacy_warn_count += 1
+                    print(f"  WARN [{system}_seed{seed} {label}] missing "
+                          f"train_relative_l2 — A6 underfit guard SKIPPED",
+                          flush=True)
             # Per-cell deltas (algebraic identities documented above).
             d_combined = ne_v - lq_v
             d_quantum_via_ltc = ltc_v - lq_v
@@ -162,10 +195,14 @@ def main() -> None:
                 "regime": REGIME[system],
                 "liquid_qlnn_best_family": lq_fam,
                 "liquid_qlnn_relL2": lq_v,
+                "liquid_qlnn_train_relL2": lq_train,
                 "non_liquid_qlnn_best_family": nlq_fam,
                 "non_liquid_qlnn_relL2": nlq_v,
+                "non_liquid_qlnn_train_relL2": nlq_train,
                 "plain_neuralode_relL2": ne_v,
+                "plain_neuralode_train_relL2": ne_train,
                 "classical_ltc_relL2": ltc_v,
+                "classical_ltc_train_relL2": ltc_train,
                 "skyline_relL2": sk_v,
                 "delta_combined": d_combined,
                 "delta_quantum_via_ltc": d_quantum_via_ltc,
@@ -185,6 +222,12 @@ def main() -> None:
                   f"Δ_q_via_nlq={d_quantum_via_nonliquid:+.3f}",
                   flush=True)
 
+    if legacy_warn_count:
+        print(f"\nA6 underfit-guard summary: {legacy_warn_count} cells "
+              f"missing train_relative_l2 (legacy pre-G6) — guard "
+              f"skipped on those cells; activates once re-run.",
+              flush=True)
+
     if len(per_cell) < 3:
         print(f"\n  TOO FEW CELLS ({len(per_cell)}) — verdict skipped",
               flush=True)
@@ -195,6 +238,7 @@ def main() -> None:
 
     def _verdict(records, name):
         v = h1_verdict(records, n_iter=10000,
+                       underfit_threshold=A1_UNDERFIT_THRESHOLD,
                        skyline_threshold=10.0, seed=0)
         out_path = OUT / f"h1_{name}.json"
         out_path.write_text(json.dumps(v, indent=2) + "\n")
@@ -214,10 +258,22 @@ def main() -> None:
     # per cell as the Δ; we re-label each verdict's "QLNN"-slot and
     # "Neural-ODE"-slot accordingly.
     def _records(qlnn_key: str, neuralode_key: str) -> list[CellRecord]:
+        # Map the relL2 key → its sibling train_relL2 key so the A6
+        # underfit guard sees the matching train value per pairing.
+        train_key_map = {
+            "liquid_qlnn_relL2": "liquid_qlnn_train_relL2",
+            "non_liquid_qlnn_relL2": "non_liquid_qlnn_train_relL2",
+            "plain_neuralode_relL2": "plain_neuralode_train_relL2",
+            "classical_ltc_relL2": "classical_ltc_train_relL2",
+        }
+        q_train_key = train_key_map[qlnn_key]
+        n_train_key = train_key_map[neuralode_key]
         return [
             CellRecord(system=r["system"], seed=r["seed"],
                        qlnn_relL2=r[qlnn_key],
                        neuralode_relL2=r[neuralode_key],
+                       qlnn_train_relL2=r.get(q_train_key),
+                       neuralode_train_relL2=r.get(n_train_key),
                        skyline_relL2=r["skyline_relL2"])
             for r in per_cell
         ]

@@ -89,7 +89,7 @@ def _write_seed(r: dict, base: Path) -> None:
         "system", "family", "seed",
         "n_train_points", "n_test_points",
         "trainable_params", "sampled_dt", "rollout_steps",
-        "dt_step", "relative_l2",
+        "dt_step", "relative_l2", "train_relative_l2",
         "vpt_step", "vpt_time", "vpt_lyapunov",
         "spectral_error", "invariant_drift_final",
         "persistence_floor_relative_l2")}
@@ -145,9 +145,12 @@ def main() -> None:
                 groups.setdefault(key, []).append(r)
                 vpt_lyap = ("-" if r["vpt_lyapunov"] is None
                             else f"{r['vpt_lyapunov']:.2f}")
+                train_rl2 = ("-" if r.get("train_relative_l2") is None
+                             else f"{r['train_relative_l2']:.4f}")
                 print(
                     f"  [{system:<14} {family:<20}] seed={seed}  "
                     f"relL2={r['relative_l2']:.4f}  "
+                    f"train_relL2={train_rl2}  "
                     f"vpt={r['vpt_step']}step  "
                     f"vpt_lyap={vpt_lyap}  "
                     f"spec={r['spectral_error']:.4f}  "
