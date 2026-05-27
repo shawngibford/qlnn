@@ -247,6 +247,53 @@ families exhibit regime-specific structural advantages on
 broadband/multiscale dynamics that the classical baselines do
 not match.
 
+\paragraph{Residual-distribution diagnostic on the Lorenz cell.}
+The per-cell magnitudes in Section~\ref{sec:forecaster-percell-decomp}
+quantify \emph{how badly} each stack fails on Lorenz; a
+distribution-level diagnostic separates whether the two stacks fail in
+the \emph{same way} or in distinguishable ways. Pooling the per-seed
+held-out residuals
+$r = u_{\text{pred}} - u_{\text{ref}}$ across the three seeds for the
+QLNN (\texttt{strongly\_entangling}) forecaster and the non-liquid
+plain Neural-ODE baseline (each yields $1800$ residuals from the
+$200\,\text{step}\times 3\,\text{state}\times 3\,\text{seed}$ rollout
+budget) and applying the Q-Q harness of
+Amendment~A14 (Supplement~\ref{sup:qq-diagnostics}) gives
+Shapiro--Wilk per-stack normality $W=0.978,\ p=5.5\times 10^{-16}$
+(Neural-ODE) and $W=0.916,\ p=2.0\times 10^{-30}$ (QLNN), and a
+two-sample Kolmogorov--Smirnov test of $D=0.183,\ p=7.7\times 10^{-27}$
+between the two distributions
+(Figure~\ref{fig:qq-forecaster-lorenz}). Neither residual
+distribution is Normal; more importantly, the two distributions are
+\emph{distinguishable at very high significance}. The QLNN's heavier
+upper tail (residuals to $\approx{+}60$ vs the Neural-ODE's
+$\approx{+}35$) means the two stacks share the same broadband
+failure regime but fail differently within it --- the
+distributional shape, not just the magnitude, carries the
+quantum-vs-non-liquid contrast. This complements (rather than
+modifies) the verdicts of the preceding per-cell decomposition.
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_qq_forecaster_lorenz.pdf}
+\caption{Q-Q residual diagnostic on the Lorenz forecaster cell.
+\textit{Left:} non-liquid Neural-ODE residuals vs standard Normal,
+Shapiro $W{=}0.978$, $p{=}5.5{\times}10^{-16}$. \textit{Middle:}
+QLNN \texttt{strongly\_entangling} residuals vs standard Normal,
+$W{=}0.916$, $p{=}2.0{\times}10^{-30}$ --- pronounced
+S-shape with heavy right tail. \textit{Right:} two-sample Q-Q of
+the two empirical distributions, Kolmogorov--Smirnov $D{=}0.183$,
+$p{=}7.7{\times}10^{-27}$ --- distributions are distinguishable at
+very high significance, and the points depart systematically from
+$y{=}x$ in the upper tail (the QLNN's worst-case residuals are
+markedly larger). Built via the reusable
+\texttt{\_qq\_panel\_vs\_normal} and \texttt{\_two\_sample\_qq}
+helpers added in Amendment~A14; the harness is dataset-agnostic and
+applies unchanged to any other (model, system) cell with on-disk
+\texttt{field.npz} artifacts.}
+\label{fig:qq-forecaster-lorenz}
+\end{figure}
+
 \subsection{The complete 2$\times$2 mechanism decomposition (P7.11)}
 \label{sec:forecaster-2x2}
 

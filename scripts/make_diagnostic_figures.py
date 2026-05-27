@@ -427,6 +427,53 @@ def fig_qq_analysis():
 
 
 # ---------------------------------------------------------------------------
+# T1.4c — POST-PIVOT Q-Q: chaotic-system forecaster residuals
+# (QLNN strongly_entangling vs the mandatory non-liquid Neural-ODE
+# baseline on Lorenz). Reuses the helpers above; result feeds paper §4.
+# ---------------------------------------------------------------------------
+def _load_field_residuals(glob_pattern: str) -> np.ndarray | None:
+    """Per-seed-concatenated (u_pred − u_ref) residual vector. Returns
+    None when no `field.npz` matches the pattern."""
+    import glob
+    paths = sorted(glob.glob(str(ROOT / glob_pattern)))
+    if not paths:
+        return None
+    out = []
+    for p in paths:
+        d = np.load(p)
+        out.append((d["u_pred"] - d["u_ref"]).ravel())
+    return np.concatenate(out)
+
+
+def fig_qq_forecaster_lorenz():
+    """Post-pivot Q-Q diagnostic on the canonical forecaster Lorenz
+    cell: QLNN (strongly_entangling) vs the mandatory non-liquid plain
+    Neural-ODE baseline. Per-seed (3 seeds) field residuals are
+    concatenated within each stack. Cited from paper §4 (Forecaster
+    results) — see also Amendment A14 and supplement §3.2.
+    """
+    qlnn = _load_field_residuals(
+        "results/p4_forecaster_rollout/lorenz_strongly_entangling/seed_*/field.npz")
+    base = _load_field_residuals(
+        "results/p5_matched_baselines/lorenz_plain_neuralode/seed_*/field.npz")
+    if qlnn is None or base is None:
+        print("SKIP fig_qq_forecaster_lorenz: post-pivot Lorenz field "
+              "artifacts not present on this checkout")
+        return
+    fig, axes = plt.subplots(1, 3, figsize=(15, 4.6))
+    _qq_panel_vs_normal(axes[0], base, "Neural-ODE (non-liquid)", C_CLASSICAL)
+    _qq_panel_vs_normal(axes[1], qlnn, "QLNN strongly_entangling", C_QLNN)
+    _two_sample_qq(axes[2], base, "Neural-ODE", qlnn,
+                   "QLNN strongly_entangling", "#444444")
+    fig.suptitle(
+        "Q-Q analysis — Lorenz forecaster residuals: QLNN vs non-liquid "
+        "Neural-ODE baseline (3 seeds × 200 steps × 3 states each)",
+        y=1.03, fontsize=11)
+    fig.tight_layout()
+    _save(fig, "fig_qq_forecaster_lorenz")
+
+
+# ---------------------------------------------------------------------------
 # T1.5 — paired-bootstrap distributions (sample-efficiency regime)
 # ---------------------------------------------------------------------------
 def fig_paired_bootstrap():
@@ -1020,8 +1067,8 @@ def fig_fisher_spectrum():
 
 T1 = [
     fig_learning_curves, fig_forecast_trajectory, fig_pred_vs_actual,
-    fig_residual_analysis, fig_qq_analysis, fig_paired_bootstrap,
-    fig_seed_strip, fig_all_circuit_diagrams,
+    fig_residual_analysis, fig_qq_analysis, fig_qq_forecaster_lorenz,
+    fig_paired_bootstrap, fig_seed_strip, fig_all_circuit_diagrams,
 ]
 
 T3 = [
