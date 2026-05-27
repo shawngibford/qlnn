@@ -86,6 +86,22 @@ def _fhn_rhs(t, u):
                       p["eps"] * (v + p["a"] - p["b"] * w)])
 
 
+# Kuramoto: pull seed-0 omega + theta0 from synthetic_ode at module load
+# so the JAX rhs is a pure function of (t, u) and the IC matches the
+# canonical reference integrator bit-for-bit.
+_KURAMOTO_REF = synthetic_ode.get_system("kuramoto")
+_KURAMOTO_OMEGA = jnp.asarray(_KURAMOTO_REF.params["omega"])
+_KURAMOTO_K = float(_KURAMOTO_REF.params["K"])
+_KURAMOTO_N = int(len(_KURAMOTO_OMEGA))
+
+
+def _kuramoto_rhs(t, u):
+    # u = phases theta_i ∈ ℝ^N. Mirrors synthetic_ode._kuramoto exactly.
+    diff = u[None, :] - u[:, None]          # theta_j - theta_i
+    coupling = (_KURAMOTO_K / _KURAMOTO_N) * jnp.sin(diff).sum(axis=1)
+    return _KURAMOTO_OMEGA + coupling
+
+
 VECTOR_ODES: dict[str, VectorODESystem] = {
     "lotka_volterra": VectorODESystem(
         name="lotka_volterra", dim=2,
@@ -131,6 +147,23 @@ VECTOR_ODES: dict[str, VectorODESystem] = {
         description=("FitzHugh-Nagumo relaxation oscillator, "
                      "I=0.5, ε=0.08, a=0.7, b=0.8 — "
                      "H1 BROADBAND/MULTISCALE (fast-slow stiff cycle)"),
+    ),
+    "kuramoto": VectorODESystem(
+        name="kuramoto", dim=_KURAMOTO_N,
+        # 12-D coupled phase oscillators, K=2.0, omega ~ N(0,1).
+        # Synthetic ref integrates with dt=0.02 and sample_every=4 →
+        # one "step" of the reference = 0.08 time units. T=1.0 here
+        # covers ~12 reference samples — enough phase-drift dynamics
+        # to discriminate solver families without paying full kuramoto
+        # cycles (per A11 the kuramoto sweep is M3 compute territory,
+        # not M0; this VECTOR_ODES entry just unblocks the dispatcher).
+        u0=np.asarray(_KURAMOTO_REF.y0),
+        t0=0.0, t1=1.0,
+        rhs_jax=_kuramoto_rhs,
+        regime="smooth_periodic",
+        description=("Kuramoto N=12 coupled phase oscillators, K=2.0, "
+                     "omega~N(0,1) seed=0 — H1 SMOOTH/PERIODIC "
+                     "(high-dimensional periodic synchronization)"),
     ),
 }
 
