@@ -39,8 +39,8 @@ def main() -> int:
     all_ok = True
 
     print("=== Claim 1 (reproducibility): σ_classical_H4 / σ_QLNN ratio ===")
-    c = _load("results/param_sweep/euler_h3_hidden4/seeds_summary.json")
-    q = _load("results/qlnn_hybrid_h3/seeds_summary.json")
+    c = _load("archive/results/param_sweep/euler_h3_hidden4/seeds_summary.json")
+    q = _load("archive/results/qlnn_hybrid_h3/seeds_summary.json")
     ratio = c["test"]["mae_raw"]["std"] / q["test"]["mae_raw"]["std"]
     # H-08 fix: tightened tol from 0.1 to 0.05. The committed numbers give
     # ratio = 3.80; we want the check to FAIL if regressions push the ratio
@@ -49,7 +49,7 @@ def main() -> int:
     all_ok &= _check("ratio (paper: 3.77)", ratio, 3.77, tol=0.05)
 
     print("\n=== Claim 2 (expressivity): Δd_norm ===")
-    ed = _load("results/effective_dimension/effective_dimension.json")
+    ed = _load("archive/results/effective_dimension/effective_dimension.json")
     all_ok &= _check("classical d_norm (paper: 8.0290)",
                      ed["classical_H4"]["aggregate"]["mean"], 8.0290, tol=0.001)
     all_ok &= _check("QLNN d_norm (paper: 9.5144)",
@@ -70,8 +70,8 @@ def main() -> int:
         100: (0.2594, 0.2655),
     }
     for pct, (paper_c, paper_q) in expected_mae.items():
-        c = _load(f"results/sample_efficiency/classical_h4_h3_pct{pct}/seeds_summary.json")
-        q = _load(f"results/sample_efficiency/qlnn_h3_pct{pct}/seeds_summary.json")
+        c = _load(f"archive/results/sample_efficiency/classical_h4_h3_pct{pct}/seeds_summary.json")
+        q = _load(f"archive/results/sample_efficiency/qlnn_h3_pct{pct}/seeds_summary.json")
         all_ok &= _check(f"pct={pct} classical MAE",
                          c["test"]["mae_raw"]["mean"], paper_c)
         all_ok &= _check(f"pct={pct} QLNN MAE",
@@ -85,8 +85,8 @@ def main() -> int:
         12: (-977.0226, -999.8978),
     }
     for h, (paper_pers, paper_lo) in expected_horizon.items():
-        s = _load(f"results/horizon_sweep/euler_h{h}/seeds_summary.json")
-        b = _load(f"results/horizon_sweep/euler_h{h}/baselines.json")
+        s = _load(f"archive/results/horizon_sweep/euler_h{h}/seeds_summary.json")
+        b = _load(f"archive/results/horizon_sweep/euler_h{h}/baselines.json")
         all_ok &= _check(f"h={h} persistence R²",
                          b["persistence"]["test"]["r2_raw"], paper_pers,
                          tol=max(0.01, abs(paper_pers) * 0.01))
