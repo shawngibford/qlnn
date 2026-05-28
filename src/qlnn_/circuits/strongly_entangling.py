@@ -8,10 +8,28 @@ entanglement, providing strong mixing on a small qubit budget.
 Registered as ``"strongly_entangling"``. Supported ``AnsatzConfig.params``:
 
     encoding    : "rx" | "ry"               (default "rx")
-    ranges      : list[int] | None          (default None — PennyLane's default 1..n-1)
+    ranges      : list[int] | None          (default: long-range — see below)
     device_name : str                       (default "default.qubit")
 
 Weight shape: ``(num_layers, num_qubits, 3)`` — PennyLane's template signature.
+
+**Aliasing fix (2026-05-28).** Prior behavior was ``ranges=None`` →
+PennyLane's per-layer fallback ``r = l mod num_qubits``. At the project's
+forecaster config (num_qubits=3, num_layers=1) this gives layer-0 r = 0,
+which PennyLane silently rewrites to r=1 (nearest-neighbor ring CNOT) —
+making this circuit's unitary BIT-IDENTICAL to ``data_reuploading`` at
+that config. Audit report (2026-05-28) confirmed 16-digit identical
+relL² across all P4 forecaster cells.
+
+The fix: when ``ranges`` is left unset, default to long-range
+``r = num_qubits - 1`` on every layer. This realizes the "strongly
+entangling" name — every layer's CNOT spans the maximum non-trivial
+range, distinct from data-reuploading's nearest-neighbor pattern. At
+num_qubits=3 this gives r=2 (skip-one CNOT); at larger n it gives the
+longest-range entangler available.
+
+Callers who want PennyLane's per-layer-modulo behavior can still pass
+explicit ranges (e.g. ``params={"ranges": [1, 2, 1]}``).
 """
 
 from __future__ import annotations
@@ -53,10 +71,42 @@ class StronglyEntanglingConfig:
                     )
 
 
+def _default_long_range_ranges(num_qubits: int, num_layers: int) -> list[int]:
+    """Default ranges for StronglyEntanglingLayers when caller leaves it
+    unset: every layer uses the maximum non-trivial range r = n-1.
+
+    This is the aliasing-fix described in the module docstring. PennyLane's
+    own fallback (r = l mod n) reduces to nearest-neighbor (r=1) at small
+    configs and produces a unitary identical to data_reuploading's ring
+    CNOT. Explicit r = n-1 gives a genuinely distinct entangling pattern
+    (skip-(n-2) CNOT) at every n ≥ 3.
+
+    Validation in StronglyEntanglingConfig requires 1 <= r < num_qubits,
+    so n=2 cannot use r=1 (which is the only valid range there); in that
+    degenerate case the long-range default equals the only-possible
+    default, with no behavior change.
+    """
+    if num_qubits < 2:
+        # n=1 has no valid range at all; PennyLane's template is a no-op
+        # entangler. Return [] so the validator accepts the empty tuple.
+        return []
+    r = num_qubits - 1
+    return [r] * num_layers
+
+
 def _build_qnode(cfg: StronglyEntanglingConfig) -> Callable:
     dev = qml.device(cfg.device_name, wires=cfg.num_qubits)
     encode_gate = qml.RX if cfg.encoding == "rx" else qml.RY
-    ranges = list(cfg.ranges) if cfg.ranges is not None else None
+    # Aliasing fix: if caller didn't supply explicit ranges, fall back to
+    # max-range CNOT per layer rather than PennyLane's `l mod n` default
+    # (which aliases data_reuploading at n=3, L=1). See module docstring.
+    if cfg.ranges is None:
+        ranges: list[int] | None = _default_long_range_ranges(
+            cfg.num_qubits, cfg.num_layers)
+        if not ranges:                    # degenerate n=1 case
+            ranges = None
+    else:
+        ranges = list(cfg.ranges)
 
     @qml.qnode(dev, interface="jax")
     def circuit(inputs: jnp.ndarray, weights: jnp.ndarray) -> jnp.ndarray:
