@@ -1,9 +1,9 @@
 # Quantum Liquid Neural Network — ODE/PDE solver & forecaster
 
 [![integrity](https://img.shields.io/badge/verify__paper__integrity-passing-brightgreen)](scripts/verify_paper_integrity.py)
-[![paper](https://img.shields.io/badge/paper-§1–§8%20drafted-blue)](paper/main.tex)
-[![tests](https://img.shields.io/badge/pytest-passing-brightgreen)](tests/)
-[![status](https://img.shields.io/badge/status-supplement%20%2B%20polish-orange)](HANDOFF.md)
+[![paper](https://img.shields.io/badge/paper-main%2017pp%20%2B%20supp%207pp-blue)](paper/main.tex)
+[![tests](https://img.shields.io/badge/pytest-508%20passing-brightgreen)](tests/)
+[![status](https://img.shields.io/badge/status-M3%20compute%20pending-orange)](NEXT_AGENT_PICKUP.md)
 
 Research code and paper draft for a controlled benchmark of **Quantum
 Liquid Neural Networks (QLNNs) as both a physics-informed solver and a
@@ -26,8 +26,9 @@ In order:
    + one-command sanity check.
 2. **[`HANDOFF.md`](HANDOFF.md)** — operational pickup detail (what is
    done, what is in flight, what's next).
-3. **[`paper/main.tex`](paper/main.tex)** — the 15-page paper draft
+3. **[`paper/main.tex`](paper/main.tex)** — the 17-page paper draft
    (§1 Intro through §8 Conclusions); build with `bash paper/build.sh`.
+   Supplement: `bash paper/build_supplement.sh` (7 pages).
 4. **[`ODE_PDE_PRE_REG.md`](ODE_PDE_PRE_REG.md)** + **[`PRE_REG_AMENDMENT.md`](PRE_REG_AMENDMENT.md)**
    — pre-registration that locks the science; amendments are
    disclosed (no silent moves).
@@ -41,11 +42,11 @@ In order:
 | `refs/CIRCUIT_SPECS.md` + `refs/_speccard_*.md` + `refs/_check_*.md` | PDF-grounded circuit specifications and dual-check files for every literature ansatz. The faithfulness gate that precedes any new ansatz implementation. |
 | `src/qlnn_/circuits/` | Registered quantum ansatz families: `data_reuploading`, `hardware_efficient`, `strongly_entangling`, `brickwall`, `qcpinn`, `rf_qrc`, `te_qpinn`, plus the `pde_2d/` subpackage. |
 | `src/qlnn_/cells/` | `liquid_quantum_cell` + `non_liquid_quantum_cell` (the mandatory non-liquid baseline that isolates the quantum-vs-liquid confound). |
-| `src/quantum_liquid_neuralode/data_processing/` | ODE systems (`synthetic_ode.py`) and PDE systems (`pde_systems.py`). |
-| `scripts/` | Trainers, summarizers, figure builders, integrity gates, and the SOTA-circuit search harnesses. |
+| `src/quantum_liquid_neuralode/data_processing/` | ODE systems (`synthetic_ode.py`), PDE systems (`pde_systems.py`), shared windowing utilities. OD-era loaders archived. |
+| `scripts/` | Post-pivot runners (`run_p<n>_*.py`), figure builders (`make_p<n>_*.py`), the M3 staging wrapper (`run_p6_group.sh`), and the integrity gate. |
 | `configs/` | YAML configs for every training run. |
-| `results/` | Frozen per-phase result tables and per-seed artifacts. The `results/*table*.md` files are the canonical headline numbers; never edited by hand. |
-| **`archive/`** | **Legacy documents from the pre-pivot bioreactor-OD program.** See [`archive/README.md`](archive/README.md) for a legend. Preserved for reproducibility; not part of the current paper. |
+| `results/` | Post-pivot per-phase result tables and per-seed artifacts. OD-era frozen results live in `archive/results/` and are still verified by the integrity gate. |
+| **`archive/`** | **All pre-pivot bioreactor-OD artifacts** — `archive/{figures, results, scripts, src, tests, docs}/` + the 14 legacy `*.md` documents. Preserved for reproducibility and integrity-gate continuity; not part of the active ODE/PDE program. See [`PURGE_PLAN.md`](PURGE_PLAN.md) for the 2026-05-27 disposition table. |
 
 ## Methodology rigor
 

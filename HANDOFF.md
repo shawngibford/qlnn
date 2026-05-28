@@ -1,3 +1,71 @@
+# ⏯️ PICK UP HERE — M3 compute next (kuramoto + KdV solver sweep, 14-16 hr)
+
+**Read `NEXT_AGENT_PICKUP.md` first** — it has the one-command sanity
+check + the exact `run_p7_8_h1_kuramoto_kdv.py --confirm` invocation.
+The rest of this file documents history; the current pickup state is
+captured below + in `NEXT_AGENT_PICKUP.md`.
+
+---
+
+## 🚦 CURRENT STATE (commit `019e771`, 2026-05-27 evening)
+
+**Branch:** `claude/upbeat-elbakyan-68b56a` (pushed to
+https://github.com/shawngibford/qlnn).
+**Worktree:** `.claude/worktrees/upbeat-elbakyan-68b56a/`.
+**Repo root:** `/Users/shawngibford/dev/phd/qlnn/`.
+
+**What changed since `ad65b33` (2026-05-22 → today, 27 commits):**
+
+1. **Paper polish** (5 commits, `c808f26` → `99d7f3b`) — Q-Q residual
+   diagnostics on archived OD + post-pivot Lorenz; supplement §3.2
+   landed; main paper PRX-Quantum checklist sweep; conflicts-of-
+   interest line; dead `abbas2021power` bib entry removed; supplement
+   §2.3 multi-family solver matrix; **headline `fig:h1-verdict`
+   3-panel forecaster bootstrap CI bar added to §5**. Paper now 17pp
+   main + 7pp supplement.
+2. **M0 prep** (5 commits, `517bbce` → `be5a41b`) — `P6_LAUNCH_PLAN.md`
+   v0.2 with corrected architecture; G4 per-system PDE dataset hash
+   assertion + 4 tests; G6 forecaster underfit-guard (pre-reg
+   amendment A6) + 6 tests; G7 `scripts/run_p6_group.sh` shell
+   wrapper with explicit go/no-go between system groups; G8
+   `scripts/run_p7_8_h1_kuramoto_kdv.py` scaffold that refuses to
+   start without `--confirm`.
+3. **OD purge** (8 commits, `77e0044` → `78113c7`) — moved 26 OD-era
+   figures + 16 result dirs + 31 scripts + 4 src modules + 7 tests
+   to `archive/`. **Integrity gate patched** (lines 42-95) to load
+   OD-frozen claims from `archive/results/` paths. Active surface is
+   now **ODE/PDE only**; the agent-inspection contamination that kept
+   surfacing OD-era figures is solved.
+4. **M3 prep** (1 commit, `019e771`) — Kuramoto registered in
+   `VECTOR_ODES` at `src/qlnn_/training/multi_state_solver.py`
+   (one-line blocker called out in the G8 commit). `--dry-run` of
+   the kuramoto+KdV runner now produces a clean 30-cell plan.
+
+**Smoke verification (transient, NOT committed):**
+- M1 (1 cell, lotka_volterra forecaster, seed 0): `relL2 = 0.577`
+  vs persistence floor `0.884`. G6 field `train_relative_l2 = 0.485`
+  populated correctly.
+- M2 (6 cells, lotka_volterra + van_der_pol × 3 seeds): all cells
+  green; one van_der_pol seed showed the known rollout-blowup mode
+  (relL2 = 8.35, consistent with prior P4 stiff-system behavior).
+
+**Gates green:** `verify_paper_integrity.py` exit 0 (gate paths
+patched); `pytest` 508 tests; `paper/build.sh` 17pp clean;
+`paper/build_supplement.sh` 7pp clean.
+
+**M3 (compute, 14-16 hr) is the next milestone.** Multi-day; needs
+a fresh-context session and a human watching the box. M5 (verdict
+refresh + paper update) follows. M4 (matched HPO across 810 cells,
+~1-2 weeks) is **deferred to follow-up paper** per user decision
+2026-05-27.
+
+---
+
+## Legacy 2026-05-22 pickup state (below)
+
+> Preserved for context. The "supplement is the only remaining work"
+> framing has been superseded — supplement is done; M3 compute is next.
+
 # ⏯️ PICK UP HERE — Paper body §1–§8 complete; only the supplement remains
 
 **Read this first.** The paper draft is at HEAD `ad65b33` with 15 pages

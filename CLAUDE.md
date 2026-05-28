@@ -10,10 +10,12 @@ archived (still gated by `verify_paper_integrity.py` for continuity,
 but `PAPER_SUMMARY.md` and the 3-OD-claims framing are superseded by
 `ODE_PDE_PRE_REG.md` + `PRE_REG_AMENDMENT.md` + `paper/main.tex`).
 
-**Current state (commit `ad65b33`, 2026-05-22):**
+**Current state (commit `019e771`, 2026-05-27):**
 
-- **Paper at 15 pages, all body sections §1–§8 drafted** in
-  `paper/sections/`. Supplement is the only remaining work.
+- **Paper complete:** main 17pp + supplement 7pp, all integrity-gated.
+  Headline `fig:h1-verdict` (3-panel forecaster bootstrap CI bar) in
+  §5; supplement §2.3 multi-family solver matrix + §3.2 Q-Q residual
+  diagnostics; PRX-Quantum revtex4-2 with `apsrev4-2.bst`.
 - **PRIMARY SOLVER verdict (n=24): FALSIFIED** with Δ_diff=−0.084,
   CI [−0.278, +0.061]. Point-estimate sign FLIPPED from +0.032 at n=18
   when broadband bin was expanded with FHN + burgers_shock (P7.8).
@@ -26,14 +28,29 @@ but `PAPER_SUMMARY.md` and the 3-OD-claims framing are superseded by
   in sign between the two paths. The liquid-τ machinery is
   substrate-dependent: positive Δ on classical MLP (matches H1
   prediction), negative Δ on quantum cell (opposite of H1).
+- **OD-era artifacts fully purged from the active surface (2026-05-27).**
+  26 figures + 16 result dirs + 31 scripts + 4 src modules + 7 tests
+  moved to `archive/`. Integrity gate patched to read OD-frozen
+  numbers from `archive/results/`. Active surface is now ODE/PDE
+  only. See `PURGE_PLAN.md` for the disposition table.
+- **M0 prep complete (2026-05-27):** dataset-hash assertion, forecaster
+  underfit-guard (A6), group go/no-go wrapper, kuramoto+KdV M3 runner
+  scaffold all wired. See `P6_LAUNCH_PLAN.md` v0.2.
+- **M1+M2 smoke verified post-purge pipeline GREEN:** Lotka-Volterra
+  forecaster cells beat persistence floor; G6 `train_relative_l2`
+  field populates correctly in `metrics.json`.
+- **M3 (kuramoto + KdV solver compute, 14-16 hr) is unblocked.**
+  Kuramoto registered in `VECTOR_ODES`; KdV mechanism gate already
+  passed; runner refuses to start without `--confirm`.
 - **GitHub:** branch `claude/upbeat-elbakyan-68b56a` pushed; tags
   `v0.1-prepaper-rigor`, `v0.2-airtight-matrix`.
-- **13 pre-reg amendments** (A1–A13) in `PRE_REG_AMENDMENT.md`.
+- **14 pre-reg amendments** (A1–A14) in `PRE_REG_AMENDMENT.md`.
 - **`scripts/verify_paper_integrity.py`** mechanically gates 16+ H1
-  outcomes + 2 algebraic identities; exit-0 at HEAD.
+  outcomes + 2 algebraic identities + OD-frozen claims; exit-0 at HEAD.
 
-**Next agent: pick up at `paper/supplement.tex` drafting.** See
-`HANDOFF.md` for the precise step-by-step.
+**Next agent: pick up M3 in a fresh-context session.** See
+`NEXT_AGENT_PICKUP.md` for the one-command sanity check + the exact
+`run_p7_8_h1_kuramoto_kdv.py --confirm` invocation.
 
 **Worktree path:**
 `/Users/shawngibford/dev/phd/qlnn/.claude/worktrees/upbeat-elbakyan-68b56a/`
