@@ -101,7 +101,14 @@ class P4SweepConfig:
     # VectorForecaster hyperparams (same across the 4 quantum ansätze)
     num_qubits: int = 3
     num_layers: int = 1
-    train_steps: int = 200
+    # A19 (2026-05-28): raised 200 → 2000 for cross-task parity with the
+    # SOLVER side (uniform 2000 per A15). All 5 forecaster model classes
+    # (LiquidQ, NonLiquidQ, ClassicalLTC, PlainNeuralODE, PlainMLP)
+    # consume this single value through P4SweepConfig.train_steps via
+    # `train_vector_forecaster(..., steps=cfg.train_steps, ...)`, so the
+    # raise is symmetric across quantum and classical sides simultaneously.
+    # See PRE_REG_AMENDMENT A19.
+    train_steps: int = 2000
     learning_rate: float = 5e-3
     delta_scale_init: float = 0.1
     delta_scale_min: float = 0.01

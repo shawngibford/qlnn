@@ -221,6 +221,86 @@ HPO-fragile. The HPO-symmetric verdict is FALSIFIED. This is the
 methodologically strongest sensitivity point and supersedes the
 n=9 raw-bootstrap CONFIRMED as the paper's principal verdict.
 
+## Amendment A19 — Cross-task budget parity: forecaster step budget raised 200 → 2000 (2026-05-28)
+
+**Audit gap closed (third pass):** the first two passes of A15
+equalized step budgets WITHIN the SOLVER task (QLNN families to each
+other, then QLNN to classical PINN — all at 2000 steps). The third
+pass extends the same fairness principle ACROSS tasks: the FORECASTER
+side was running at 200 steps (per A3) — uniform across its 5 model
+classes (LiquidQ, NonLiquidQ, ClassicalLTC, PlainNeuralODE, PlainMLP)
+but an order of magnitude lower than the solver-side 2000.
+
+The user directive (2026-05-28): "we need a matched budget for ALL
+models." The most defensible reading is cross-task as well as
+cross-side parity.
+
+**Amendment:** raise the forecaster step budget from 200 → **2000**.
+Concretely:
+
+| Side                          | File                                 | Was   | Now |
+|---|---|---:|---:|
+| All 5 forecaster sides (cfg)  | p4_forecaster_demo.P4SweepConfig.train_steps | 200 | 2000 |
+| Function default               | forecaster_training.train_vector_forecaster | 1000 | 2000 |
+| P7.6 QLNN HPO lower bound      | scripts/run_p7_6_qlnn_hpo.py --train-steps-list | [1500, 3000] | [2000, 3000] |
+
+The forecaster-cell internal parity audit (carried out in the same
+session) confirms that beyond the budget, the liquid / non-liquid /
+classical-LTC / plain-Neural-ODE cells are already structurally
+symmetric:
+
+- Hidden dimension Q=4 across all 5 cells.
+- τ machinery: identical softplus + tau_min=0.1 + tau_init=1.0
+  parameterization in LiquidQuantumCell.tau() and
+  ClassicalLTCCell.tau().
+- τ-axis adds exactly 4 params on both the quantum side
+  (LiquidQ vs NonLiquidQ) and the classical side (LTC vs PlainNODE).
+- Drive-term parameter counts within 10 % (MLP ~56 vs encoder + circuit
+  + A ~60).
+- Diffrax ODE solver with step_dt=0.05 across all 4 ODE-based cells.
+
+The drive-form axis (MLP vs A ⊙ q(x)) is the central experimental
+question of the paper, not a fairness asymmetry to equalize.
+
+**Rationale:** The original 200-step budget was justified historically
+by forecaster training-cost concerns. The 2026-05-28 smokes show the
+loss converges fast on this task at all 5 model classes; 2000 steps
+is comfortably above the convergence point and matches the solver
+side. After this raise, the entire experiment runs at uniform 2000
+steps everywhere it matters:
+
+- Solver QLNN families: 2000 ✓
+- Solver classical PINN: 2000 ✓
+- PDE QLNN families: per-PDE config (1200/1500/1800/2400) ✓ (symmetric
+  within each PDE across QLNN and classical PINN; varies across PDEs
+  for physics reasons documented in CORRECTED_PDE_CONFIGS)
+- Forecaster all 5 model classes: 2000 ✓ (this amendment)
+
+**Consequences:** All forecaster cells must be re-run. The affected
+result directories are:
+
+- `results/p4_forecaster_rollout/` — 45 cells (post-A18 brickwall
+  removal: 36 cells)
+- `results/p5_h1_verdict/` — full matched-baseline matrix
+- `results/p7_10_forecaster_decomposition/` — classical LTC + 2×2
+  matrix
+- `results/p7_11_decomposition/` — non-liquid QLNN + complete 2×2 +
+  τ-cross-check
+
+The integrity gate's locked PRIMARY FORECASTER number (Δ_combined =
+−0.501, CI [−0.804, −0.244]) will be re-computed. The FALSIFIED
+verdict is not expected to change qualitatively (the CI is comfortably
+away from zero on the negative side and the 10× budget raise can only
+*improve* the quantum families' relL² — the H1 contrast remains
+classical-driven).
+
+Per-cell wall-clock on the forecaster side is short (smokes show
+seconds per cell at the small Q=4 size), so the full re-run is a
+modest ~1-3 hour add-on to the broader M3 sweep budget. Already
+folded into the ADVISOR_BRIEF.md Anvil-allocation case.
+
+---
+
 ## Amendment A18 — brickwall removed from empirical forecaster sweep (2026-05-28 audit)
 
 **Audit gap closed:** the `brickwall` forecaster ansatz scores BEST on
@@ -874,6 +954,7 @@ tightened relative to n=9 default-Adam.
 | A16 | un-alias strongly_entangling from data_reuploading (PennyLane fallback at n=3,L=1 was bit-identical to ring-CNOT); audit-driven fix | DISCLOSED + re-run required |
 | A17 | qcpinn quantum-parameter sweep — three step-wise variants (qcpinn_balanced/quantum/full_q) along Q/(Q+C) ratio axis; addresses the qcpinn 706-classical-param confound | DISCLOSED + 72 new cells |
 | A18 | brickwall removed from empirical forecaster sweep — at n=3,L=1 qubit 2 is structurally disconnected, the circuit cannot represent 3D dynamics; T3 mechanism scalars retained as untrained-circuit data | DISCLOSED + 9 cells removed |
+| A19 | cross-task budget parity — forecaster step budget raised 200 → 2000 to match solver-side uniform 2000; closes the cross-task gap A15's first two passes left open | DISCLOSED + forecaster re-runs |
 
 **Headline verdict update (post-P7.10):**
 

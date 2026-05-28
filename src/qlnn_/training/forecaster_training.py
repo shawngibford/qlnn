@@ -138,7 +138,11 @@ def train_vector_forecaster(
     X_windows: jnp.ndarray,
     Y_targets: jnp.ndarray,
     *,
-    steps: int = 1000,
+    # A19 (2026-05-28): default 1000 → 2000 for cross-task parity with
+    # the SOLVER side (uniform 2000 per A15). Demo configs always pass
+    # cfg.train_steps explicitly, so this default only matters for direct
+    # callers / unit tests.
+    steps: int = 2000,
     lr: float = 1e-3,
     batch_size: int | None = None,
     log_every: int = 0,
