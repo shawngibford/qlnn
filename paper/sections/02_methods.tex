@@ -43,18 +43,33 @@ metrics that admit persistence-trivial wins (notably one-step MAE
 on autoregressive rollout); (iii)~explicit decision rules under
 which H1 is declared CONFIRMED, FALSIFIED, or INCONCLUSIVE.
 
-Eleven amendments to the pre-registration are documented openly
-in \texttt{PRE\_REG\_AMENDMENT.md} (A1--A11). They were necessary
+Nineteen amendments to the pre-registration are documented openly
+in \texttt{PRE\_REG\_AMENDMENT.md} (A1--A19). They were necessary
 because the original pre-registration left some parameter choices
 implicit; each amendment locks a single decision and reports
 whether the outcome was stable under the alternative choice. The
-key amendments are: A1 (skyline threshold = 0.5; sensitivity at
-0.75 reported); A4 (MLP capacity 3.3$\times$ Neural-ODE,
-violating the original ``within factor of 2'' rule, disclosed and
-shown not to affect the verdict sign); A7 (strict-versus-raw
-underfit-guard reporting); A9 (symmetric quantum HPO sensitivity);
-A10 (combined ODE+PDE verdict at $n=18$); A11 (full-ladder
-expansion to $n=24$ + KdV/Kuramoto deferral rationale).
+key amendments from the original analysis pass are: A1 (skyline
+threshold = 0.5; sensitivity at 0.75 reported); A4 (MLP capacity
+3.3$\times$ Neural-ODE, violating the original ``within factor of
+2'' rule, disclosed and shown not to affect the verdict sign); A7
+(strict-versus-raw underfit-guard reporting); A9 (symmetric
+quantum HPO sensitivity); A10 (combined ODE+PDE verdict at
+$n=18$); A11 (full-ladder expansion to $n=24$ + KdV/Kuramoto
+deferral rationale). Amendments A15--A19 were filed 2026-05-28
+during an internal audit that surfaced (a) cross-side
+training-budget parity across all solver models, (b) a PennyLane
+\texttt{StronglyEntanglingLayers} fallback that silently aliased
+\texttt{data\_reuploading} at the project's qubit count, (c) a
+\texttt{qcpinn} quantum-attribution sub-experiment with three
+step-wise variants, (d) \texttt{brickwall}'s structural
+connectivity deficit at small qubit count (removed from the
+empirical sweep; T3 mechanism scalars retained as
+untrained-circuit diagnostic data), and (e) cross-task
+forecaster/solver training-step budget parity. The verdict
+refresh under the A15--A19 configuration is deferred to a
+supplementary compute campaign; the verdicts reported in this
+manuscript reflect the configuration locked at the time of
+analysis.
 
 \subsection{Hardness ladder}
 \label{sec:methods-ladder}
