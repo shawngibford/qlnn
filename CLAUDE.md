@@ -2,58 +2,76 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## ⚠️ PROJECT HAS PIVOTED — read HANDOFF.md FIRST
+## Where to start
 
-The repository is now a **QLNN ODE/PDE solver+forecaster benchmark
-paper** (PRX Quantum target). The original bioreactor-OD work is
-archived (still gated by `verify_paper_integrity.py` for continuity,
-but `PAPER_SUMMARY.md` and the 3-OD-claims framing are superseded by
-`ODE_PDE_PRE_REG.md` + `PRE_REG_AMENDMENT.md` + `paper/main.tex`).
+This is a **QLNN ODE/PDE solver+forecaster benchmark paper** (PRX
+Quantum target). Read in this order:
 
-**Current state (commit `019e771`, 2026-05-27):**
+1. [`ADVISOR_BRIEF.md`](ADVISOR_BRIEF.md) — plain-language narrative
+   of the work, the headline finding, and the case for Anvil HPC.
+2. [`NEXT_STEPS.md`](NEXT_STEPS.md) — five-phase timeline (ACCESS
+   allocation → Anvil setup → audit re-runs → paper refresh → submit).
+3. [`paper/main.pdf`](paper/) — the 17-page draft + 7-page supplement.
+4. [`PRE_REG_AMENDMENT.md`](PRE_REG_AMENDMENT.md) — the 19
+   pre-registration amendments (A1-A19) documenting every methodological
+   choice and deviation.
+5. [`ODE_PDE_PRE_REG.md`](ODE_PDE_PRE_REG.md) — the original
+   pre-registration (foundational; do not modify without a corresponding
+   amendment).
 
-- **Paper complete:** main 17pp + supplement 7pp, all integrity-gated.
-  Headline `fig:h1-verdict` (3-panel forecaster bootstrap CI bar) in
-  §5; supplement §2.3 multi-family solver matrix + §3.2 Q-Q residual
-  diagnostics; PRX-Quantum revtex4-2 with `apsrev4-2.bst`.
-- **PRIMARY SOLVER verdict (n=24): FALSIFIED** with Δ_diff=−0.084,
-  CI [−0.278, +0.061]. Point-estimate sign FLIPPED from +0.032 at n=18
-  when broadband bin was expanded with FHN + burgers_shock (P7.8).
-- **PRIMARY FORECASTER verdict (n=9): FALSIFIED** with complete 2×2
-  mechanism decomposition: Δ_combined=−0.501 (CI excludes 0
-  negatively), Δ_quantum_via_LTC=−0.616, Δ_τ_via_classical=+0.115,
-  Δ_τ_via_quantum=−0.334, Δ_quantum_via_nonliquid=−0.167. Both
-  algebraic identities hold per-cell exactly.
-- **THE MAJOR NEW FINDING:** the τ-isolation cross-check DISAGREES
-  in sign between the two paths. The liquid-τ machinery is
-  substrate-dependent: positive Δ on classical MLP (matches H1
-  prediction), negative Δ on quantum cell (opposite of H1).
-- **OD-era artifacts fully purged from the active surface (2026-05-27).**
-  26 figures + 16 result dirs + 31 scripts + 4 src modules + 7 tests
-  moved to `archive/`. Integrity gate patched to read OD-frozen
-  numbers from `archive/results/`. Active surface is now ODE/PDE
-  only. See `PURGE_PLAN.md` for the disposition table.
-- **M0 prep complete (2026-05-27):** dataset-hash assertion, forecaster
-  underfit-guard (A6), group go/no-go wrapper, kuramoto+KdV M3 runner
-  scaffold all wired. See `P6_LAUNCH_PLAN.md` v0.2.
-- **M1+M2 smoke verified post-purge pipeline GREEN:** Lotka-Volterra
-  forecaster cells beat persistence floor; G6 `train_relative_l2`
-  field populates correctly in `metrics.json`.
-- **M3 (kuramoto + KdV solver compute, 14-16 hr) is unblocked.**
-  Kuramoto registered in `VECTOR_ODES`; KdV mechanism gate already
-  passed; runner refuses to start without `--confirm`.
-- **GitHub:** branch `claude/upbeat-elbakyan-68b56a` pushed; tags
-  `v0.1-prepaper-rigor`, `v0.2-airtight-matrix`.
-- **14 pre-reg amendments** (A1–A14) in `PRE_REG_AMENDMENT.md`.
-- **`scripts/verify_paper_integrity.py`** mechanically gates 16+ H1
-  outcomes + 2 algebraic identities + OD-frozen claims; exit-0 at HEAD.
+## Current state (master HEAD, post-2026-05-28 audit session)
 
-**Next agent: pick up M3 in a fresh-context session.** See
-`NEXT_AGENT_PICKUP.md` for the one-command sanity check + the exact
-`run_p7_8_h1_kuramoto_kdv.py --confirm` invocation.
+- **Paper draft complete and integrity-gated:** main 17pp + supplement 7pp.
+  Headline `fig:h1-verdict` lives in §5.
+- **Two PRIMARY verdicts, both FALSIFIED**:
+  - Solver-task H1 (n=24): Δ_diff ≈ −0.084 (CI includes 0; sign
+    flipped from +0.032 at n=18 when broadband bin expanded).
+  - Forecaster-task H1 (n=9): Δ_combined ≈ −0.501 (CI excludes 0
+    negatively). Complete 2×2 mechanism decomposition with both
+    algebraic identities holding per-cell exactly.
+- **The major new finding** — the τ-isolation cross-check disagrees
+  in sign between the two decomposition paths. The liquid-τ machinery
+  is **substrate-dependent**: positive Δ on classical MLP hidden state,
+  negative Δ on quantum cell hidden state. This is the headline
+  *mechanism* result and the seed of a follow-up paper.
+- **2026-05-28 audit session** added five amendments (A15-A19) that
+  close every reviewer-fairness concern:
+  - A15 — uniform 2000-step training budget across ALL solver models
+    (QLNN families AND classical PINN).
+  - A16 — un-aliased strongly_entangling from data_reuploading
+    (PennyLane fallback was producing bit-identical outputs at n=3, L=1).
+  - A17 — qcpinn quantum-parameter sweep (3 step-wise variants along
+    PQC/(PQC+classical) ratio: 2% → 24% → 45% → 87%).
+  - A18 — brickwall removed from empirical forecaster sweep (qubit 2
+    structurally disconnected at n=3, L=1; T3 mechanism scalars kept
+    as untrained-circuit diagnostic data).
+  - A19 — cross-task budget parity (forecaster step budget raised
+    200 → 2000 to match the solver side).
+- **M3 runner wired:** `scripts/run_p7_8_h1_kuramoto_kdv.py` has a
+  resumable, error-isolated `_execute()` dispatcher. Integration smoke
+  passed (cell 0 — kuramoto chebyshev_dqc seed 0 — relL² 0.0014).
+- **Refined compute estimates** from the 2026-05-28 smokes:
+  ~0.8 hr/kuramoto-cell, ~1.1 hr/KdV-cell. Combined re-run budget for
+  all five A15-A19-driven workloads + M3 ≈ 200 cells / ~145 CPU-hours.
+  Embarrassingly parallel.
+- **Blocked on:** Phase A of NEXT_STEPS.md — ACCESS allocation for
+  Purdue Anvil HPC. Requires advisor letter on institutional letterhead.
+- **Integrity gate exit-0** throughout the session. Locked numbers
+  will refresh once the audit-driven re-runs land (Phase D of
+  NEXT_STEPS.md).
+- **GitHub:** `master` is the current branch (consolidated 2026-05-28).
 
-**Worktree path:**
-`/Users/shawngibford/dev/phd/qlnn/.claude/worktrees/upbeat-elbakyan-68b56a/`
+## What NOT to do
+
+- **Do not** launch the M3 sweep or any audit re-runs on the laptop
+  — wait for the Anvil allocation. The runner is wired and ready to
+  fire with `--confirm`, but the compute belongs on GPU.
+- **Do not** modify `verify_paper_integrity.py`'s locked numbers
+  until Phase D — the current numbers gate the *current* committed
+  results, and the refresh is M5's job.
+- **Do not** touch the pre-registration (`ODE_PDE_PRE_REG.md`)
+  without a corresponding amendment entry in `PRE_REG_AMENDMENT.md`.
+- **Do not** push to `main` on GitHub (placeholder). Push to `master`.
 
 ---
 

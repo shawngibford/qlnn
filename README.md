@@ -2,8 +2,9 @@
 
 [![integrity](https://img.shields.io/badge/verify__paper__integrity-passing-brightgreen)](scripts/verify_paper_integrity.py)
 [![paper](https://img.shields.io/badge/paper-main%2017pp%20%2B%20supp%207pp-blue)](paper/main.tex)
-[![tests](https://img.shields.io/badge/pytest-508%20passing-brightgreen)](tests/)
-[![status](https://img.shields.io/badge/status-M3%20compute%20pending-orange)](NEXT_AGENT_PICKUP.md)
+[![tests](https://img.shields.io/badge/pytest-502%20passing-brightgreen)](tests/)
+[![status](https://img.shields.io/badge/status-post--audit%20re--runs%20pending%20(Anvil)-orange)](NEXT_STEPS.md)
+[![amendments](https://img.shields.io/badge/pre--reg%20amendments-A1--A19-blue)](PRE_REG_AMENDMENT.md)
 
 Research code and paper draft for a controlled benchmark of **Quantum
 Liquid Neural Networks (QLNNs) as both a physics-informed solver and a
@@ -18,20 +19,27 @@ characterization. Every number in the paper draft is gated by
 
 ---
 
-## ✋ Start here (new contributors / colleagues)
+## ✋ Start here (new contributors / colleagues / advisors)
 
 In order:
 
-1. **[`NEXT_AGENT_PICKUP.md`](NEXT_AGENT_PICKUP.md)** — one-line state
-   + one-command sanity check.
-2. **[`HANDOFF.md`](HANDOFF.md)** — operational pickup detail (what is
-   done, what is in flight, what's next).
+1. **[`ADVISOR_BRIEF.md`](ADVISOR_BRIEF.md)** — single-page,
+   plain-language narrative of the work and the headline finding,
+   plus the case for running the remaining compute on Purdue's Anvil
+   HPC via an ACCESS allocation.
+2. **[`NEXT_STEPS.md`](NEXT_STEPS.md)** — five-phase timeline from
+   here to *PRX Quantum* submission, with explicit gates between
+   phases. The single blocker is Phase A (ACCESS allocation —
+   advisor letter required).
 3. **[`paper/main.tex`](paper/main.tex)** — the 17-page paper draft
    (§1 Intro through §8 Conclusions); build with `bash paper/build.sh`.
    Supplement: `bash paper/build_supplement.sh` (7 pages).
 4. **[`ODE_PDE_PRE_REG.md`](ODE_PDE_PRE_REG.md)** + **[`PRE_REG_AMENDMENT.md`](PRE_REG_AMENDMENT.md)**
-   — pre-registration that locks the science; amendments are
-   disclosed (no silent moves).
+   — pre-registration that locks the science; 19 amendments are
+   disclosed openly (no silent moves). A15-A19 landed 2026-05-28 and
+   close every reviewer-fairness concern an audit could surface.
+5. **[`CLAUDE.md`](CLAUDE.md)** — operational guidance for the
+   coding agent (current state, what not to do, where the runners are).
 
 ## Repository map (current, post-archive cleanup)
 
@@ -46,7 +54,7 @@ In order:
 | `scripts/` | Post-pivot runners (`run_p<n>_*.py`), figure builders (`make_p<n>_*.py`), the M3 staging wrapper (`run_p6_group.sh`), and the integrity gate. |
 | `configs/` | YAML configs for every training run. |
 | `results/` | Post-pivot per-phase result tables and per-seed artifacts. OD-era frozen results live in `archive/results/` and are still verified by the integrity gate. |
-| **`archive/`** | **All pre-pivot bioreactor-OD artifacts** — `archive/{figures, results, scripts, src, tests, docs}/` + the 14 legacy `*.md` documents. Preserved for reproducibility and integrity-gate continuity; not part of the active ODE/PDE program. See [`PURGE_PLAN.md`](PURGE_PLAN.md) for the 2026-05-27 disposition table. |
+| **`archive/`** | **All pre-pivot bioreactor-OD artifacts** plus superseded pivot-era planning docs (`archive/superseded-2026-05-28/`). Preserved for reproducibility and integrity-gate continuity; not part of the active program. |
 
 ## Methodology rigor
 
