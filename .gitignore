@@ -77,3 +77,5 @@ refs/
 !results/p7_8_solver_h1_n24/
 !results/p7_10_forecaster_decomposition/
 !results/p7_11_decomposition/
+
+.jax_compilation_cache/

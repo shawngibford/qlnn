@@ -123,6 +123,22 @@ CORRECTED_PDE_CONFIGS: dict[str, CorrectedPDEConfig] = {
                        "Per-point cost ratio jacrev³/jacrev² ≈ 0.5× "
                        "(XLA fusion). Same budget as burgers_shock; "
                        "domain x∈[0,40], T=5, 1-soliton sech² IC")),
+    # === Heat IC-robustness variants (experiment branch) ============
+    # Same operator + BC + domain + collocation budget as heat. Only
+    # the IC changes. Lets train_one_cell / train_one_pde_classical
+    # dispatch on the same matrix infrastructure as the original PDEs.
+    "heat_multifreq": CorrectedPDEConfig(
+        name="heat_multifreq", n_t_colloc=24, n_x_colloc=24, steps=1200,
+        audit_reason="heat IC variant: sin(x) + 0.5·sin(3x) + 0.25·sin(5x)"),
+    "heat_highfreq": CorrectedPDEConfig(
+        name="heat_highfreq", n_t_colloc=24, n_x_colloc=24, steps=1200,
+        audit_reason="heat IC variant: single high-freq mode sin(8x)"),
+    "heat_gaussian": CorrectedPDEConfig(
+        name="heat_gaussian", n_t_colloc=24, n_x_colloc=24, steps=1200,
+        audit_reason="heat IC variant: Gaussian bump centred at π, σ=0.5"),
+    "heat_step": CorrectedPDEConfig(
+        name="heat_step", n_t_colloc=24, n_x_colloc=24, steps=1200,
+        audit_reason="heat IC variant: discontinuous square wave on [π/2,3π/2]"),
 }
 
 

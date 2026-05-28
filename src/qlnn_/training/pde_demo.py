@@ -170,11 +170,16 @@ def _heat_fourier_reference(
     k = jnp.fft.fftfreq(n_grid, d=1.0 / n_grid)
 
     def ref(t, x):
-        # Damping factor per mode: exp(-ν·k²·t).
-        damping = jnp.exp(-_HEAT_NU * (k ** 2) * t)
-        # Σ_k a_k · damping_k · exp(ikx). Take real part — the IC is
-        # real so the imaginary part is roundoff noise.
-        return jnp.real(jnp.sum(a_hat * damping * jnp.exp(1j * k * x)))
+        # Broadcasting works for any input shape: append a trailing
+        # mode axis to (t, x) so k broadcasts onto it, then reduce
+        # over the mode axis only.
+        t_e = jnp.asarray(t)[..., None]            # (..., 1)
+        x_e = jnp.asarray(x)[..., None]            # (..., 1)
+        damping = jnp.exp(-_HEAT_NU * (k ** 2) * t_e)   # (..., n_modes)
+        phase = jnp.exp(1j * k * x_e)                   # (..., n_modes)
+        # Take real part — the IC is real so the imaginary part is
+        # roundoff noise. Reduce over the mode axis only.
+        return jnp.real(jnp.sum(a_hat * damping * phase, axis=-1))
 
     return ref
 
