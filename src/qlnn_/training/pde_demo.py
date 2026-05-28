@@ -86,6 +86,117 @@ def _heat_analytic(t, x):
     return jnp.exp(-_HEAT_NU * t) * jnp.sin(x)
 
 
+# === Heat IC variants (experiment/bc-ic-robustness branch) ===========
+# Co-author's idea: keep the heat PDE + periodic BC, vary the IC, see
+# whether quantum-vs-classical ordering across families is robust to IC
+# choice. Heat on a periodic domain has a closed-form Fourier-series
+# analytic solution for any L^2 IC:
+#     u(t, x) = Σ_n a_n · exp(-ν·n²·t) · ψ_n(x)
+# where {ψ_n} is the Fourier basis on [0, 2π]. For ICs that are pure
+# sums of sines/cosines, the analytic form is closed in elementary
+# functions (no numerical FFT). For Gaussian / step ICs, see the
+# `_heat_fourier_reference` helper below.
+
+# Variant 1: multi-frequency sum — moderate-broadband IC built from
+# the first three odd modes. Per-mode decay rates differ by 9× and
+# 25× so the high-frequency component damps fast → late-time behavior
+# is smooth, early-time has structure. Tests whether the solver can
+# resolve multi-scale temporal dynamics within a single IC.
+def _heat_multifreq_ic(x):
+    return (jnp.sin(x) + 0.5 * jnp.sin(3.0 * x)
+            + 0.25 * jnp.sin(5.0 * x))
+
+
+def _heat_multifreq_analytic(t, x):
+    nu = _HEAT_NU
+    return (jnp.exp(-nu * 1.0 * t) * jnp.sin(x)
+            + 0.5 * jnp.exp(-nu * 9.0 * t) * jnp.sin(3.0 * x)
+            + 0.25 * jnp.exp(-nu * 25.0 * t) * jnp.sin(5.0 * x))
+
+
+# Variant 2: high-frequency single mode — pure sin(8x). Decays
+# exp(-64·ν·t) which at our ν = 0.1 means the solution loses ~99.8%
+# of its amplitude by t = 1. Tests whether the solver can faithfully
+# track rapid decay of a single high-frequency mode.
+def _heat_highfreq_ic(x):
+    return jnp.sin(8.0 * x)
+
+
+def _heat_highfreq_analytic(t, x):
+    return jnp.exp(-_HEAT_NU * 64.0 * t) * jnp.sin(8.0 * x)
+
+
+# Variant 3: Gaussian bump centered at x = π with width σ = 0.5.
+# Localized, smooth, but contains all Fourier modes. The reference
+# is a Fourier-series truncation evaluated mode-by-mode. Tests
+# whether the solver can fit a localized non-trivial profile that
+# spreads/diffuses over time.
+_HEAT_GAUSSIAN_X0 = float(jnp.pi)
+_HEAT_GAUSSIAN_SIGMA = 0.5
+
+
+def _heat_gaussian_ic(x):
+    return jnp.exp(-((x - _HEAT_GAUSSIAN_X0) / _HEAT_GAUSSIAN_SIGMA) ** 2)
+
+
+def _heat_fourier_reference(
+    ic_fn: Callable[[jnp.ndarray], jnp.ndarray],
+    n_modes: int = 128,
+) -> Callable[[jnp.ndarray, jnp.ndarray], jnp.ndarray]:
+    """Build a closed-form Fourier-series time-evolution function.
+
+    For heat on [0, 2π] with periodic BC, any L^2 IC has the
+    representation u(0,x) = Σ_k â_k exp(ikx), and the time evolution
+    is u(t,x) = Σ_k â_k exp(-ν·k²·t) exp(ikx). Computing â_k via FFT
+    on a fine grid gives a spectrally-accurate analytic reference for
+    any IC without re-running an integrator.
+
+    Args:
+      ic_fn   : the IC u₀(x).
+      n_modes : number of positive Fourier modes (total 2·n_modes
+                grid points used to compute coefficients).
+
+    Returns:
+      A function `ref(t, x)` that evaluates the analytic solution
+      at any (t, x). Both `t` and `x` are accepted as JAX scalars
+      or arrays (broadcasted).
+    """
+    n_grid = 2 * n_modes
+    grid = jnp.linspace(0.0, 2.0 * jnp.pi, n_grid, endpoint=False)
+    u0_grid = ic_fn(grid)
+    a_hat = jnp.fft.fft(u0_grid) / n_grid                       # complex
+    # FFT bin frequencies in units of integer modes (k ∈ {0, 1, …,
+    # n_modes-1, -n_modes, …, -1}).
+    k = jnp.fft.fftfreq(n_grid, d=1.0 / n_grid)
+
+    def ref(t, x):
+        # Damping factor per mode: exp(-ν·k²·t).
+        damping = jnp.exp(-_HEAT_NU * (k ** 2) * t)
+        # Σ_k a_k · damping_k · exp(ikx). Take real part — the IC is
+        # real so the imaginary part is roundoff noise.
+        return jnp.real(jnp.sum(a_hat * damping * jnp.exp(1j * k * x)))
+
+    return ref
+
+
+# Built once at module load. Each variant's reference is a closure
+# over the precomputed Fourier coefficients of that variant's IC.
+_heat_gaussian_analytic = _heat_fourier_reference(_heat_gaussian_ic)
+
+
+# Variant 4: square wave (step function) — `u₀(x) = 1` on the middle
+# half of the domain, 0 elsewhere. Sharp discontinuities → all Fourier
+# modes contribute (with 1/k coefficient decay). This is the hardest
+# IC: the solver must fit a discontinuous initial profile that smooths
+# out under diffusion. Tests the encoder's ability to represent
+# steep gradients.
+def _heat_step_ic(x):
+    return ((x > 0.5 * jnp.pi) & (x < 1.5 * jnp.pi)).astype(x.dtype)
+
+
+_heat_step_analytic = _heat_fourier_reference(_heat_step_ic)
+
+
 # --- burgers_smooth + burgers_shock (npz references) -----------------------
 
 # Two viscosity values matched to the committed npz field generators
@@ -170,6 +281,65 @@ PDE_BENCH: dict[str, PDEBench] = {
                      f"exact u(t,x)=e^{{-{_HEAT_NU}t}}·sin(x)"),
         has_analytic=True,
         analytic_ref=_heat_analytic,
+        npz_basename=None,
+    ),
+    # === IC-robustness variants (experiment/bc-ic-robustness) =========
+    # Same heat PDE + same periodic BC + same time/space domain + same
+    # collocation budget. The ONLY axis varying is the initial condition.
+    # Reference solutions are closed-form Fourier-series evolutions
+    # (spectrally accurate; no integrator drift).
+    "heat_multifreq": PDEBench(
+        name="heat_multifreq",
+        regime="smooth_periodic",
+        t0=0.0, t1=1.0, x0=0.0, x1=2.0 * float(jnp.pi),
+        pde_residual=_heat_residual,
+        ic_fn=_heat_multifreq_ic,
+        steps=1200,
+        n_t_colloc=24, n_x_colloc=24,
+        description=(f"Heat: u(0,x)=sin(x)+0.5·sin(3x)+0.25·sin(5x); "
+                     f"per-mode decay {_HEAT_NU}·k²·t"),
+        has_analytic=True,
+        analytic_ref=_heat_multifreq_analytic,
+        npz_basename=None,
+    ),
+    "heat_highfreq": PDEBench(
+        name="heat_highfreq",
+        regime="smooth_periodic",
+        t0=0.0, t1=1.0, x0=0.0, x1=2.0 * float(jnp.pi),
+        pde_residual=_heat_residual,
+        ic_fn=_heat_highfreq_ic,
+        steps=1200,
+        n_t_colloc=24, n_x_colloc=24,
+        description=(f"Heat: u(0,x)=sin(8x); decays e^{{-64·{_HEAT_NU}·t}}"),
+        has_analytic=True,
+        analytic_ref=_heat_highfreq_analytic,
+        npz_basename=None,
+    ),
+    "heat_gaussian": PDEBench(
+        name="heat_gaussian",
+        regime="smooth_periodic",
+        t0=0.0, t1=1.0, x0=0.0, x1=2.0 * float(jnp.pi),
+        pde_residual=_heat_residual,
+        ic_fn=_heat_gaussian_ic,
+        steps=1200,
+        n_t_colloc=24, n_x_colloc=24,
+        description=(f"Heat: u(0,x)=exp(-((x-π)/0.5)²); localized bump"),
+        has_analytic=True,
+        analytic_ref=_heat_gaussian_analytic,
+        npz_basename=None,
+    ),
+    "heat_step": PDEBench(
+        name="heat_step",
+        regime="smooth_periodic",
+        t0=0.0, t1=1.0, x0=0.0, x1=2.0 * float(jnp.pi),
+        pde_residual=_heat_residual,
+        ic_fn=_heat_step_ic,
+        steps=1200,
+        n_t_colloc=24, n_x_colloc=24,
+        description=(f"Heat: u(0,x)=1 on [π/2,3π/2], 0 else; "
+                     f"discontinuous, all Fourier modes contribute"),
+        has_analytic=True,
+        analytic_ref=_heat_step_analytic,
         npz_basename=None,
     ),
     "burgers_smooth": PDEBench(
