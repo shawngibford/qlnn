@@ -70,9 +70,15 @@ Blocker tracked (see Report when M0 ran):
 from __future__ import annotations
 
 import argparse
+import json
 import sys
+import time
+import traceback
 from dataclasses import dataclass
+from datetime import datetime
 from pathlib import Path
+
+import numpy as np
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 OUT_ROOT = REPO_ROOT / "results" / "p6_kuramoto_kdv"
@@ -86,11 +92,13 @@ PDE_QLNN_FAMILIES = ("chebyshev_dqc_2d", "qcpinn_2d", "te_qpinn_fnn_2d",
                      "te_qpinn_qnn_2d")
 SEEDS = (0, 1, 2)
 
-# Agent C's per-cell wall-clock estimates (from P6_LAUNCH_PLAN.md
-# §3 / A11). These are Apple-Silicon-CPU JAX figures; GPU would roughly
-# halve them.
-HOURS_PER_KURAMOTO_CELL = 7.0
-HOURS_PER_KDV_CELL = 8.0
+# Per-cell wall-clock estimates. Updated 2026-05-28 from the smoke
+# measurements at scripts/smoke_kuramoto_p6.py + smoke_kdv_p6.py.
+# Smokes ran the actual training loop on Apple-Silicon-CPU JAX, then
+# extrapolated to per-family production step budgets.
+# Prior Agent-C estimates (7.0 / 8.0 hr) were ~9× too pessimistic.
+HOURS_PER_KURAMOTO_CELL = 0.80   # mean across 4 families; range 0.14-2.29
+HOURS_PER_KDV_CELL = 1.13        # mean across 4 families; range 0.15-2.24
 SEC_PER_CLASSICAL_PINN_CELL = 1.5     # negligible
 
 
@@ -160,37 +168,164 @@ def _print_plan(cells: list[Cell]) -> None:
         print(f"  {i:>3}  {c.task:<11}  {c.system:<10}  {c.ansatz:<20}  "
               f"{c.seed:>4}  {c.est_hours:>7.2f}", flush=True)
     print(flush=True)
-    print("Per-cell estimates from Agent C (P6_LAUNCH_PLAN.md §3 / A11):",
+    print("Per-cell estimates (smoke-measured 2026-05-28):", flush=True)
+    print(f"  kuramoto QLNN per cell : ~{HOURS_PER_KURAMOTO_CELL:.2f} hr "
+          f"(mean of 4 families on 12D per-component scalar circuits)",
           flush=True)
-    print(f"  kuramoto QLNN per cell : ~{HOURS_PER_KURAMOTO_CELL:.0f} hr "
-          f"(12D per-component scalar circuits)", flush=True)
-    print(f"  kdv QLNN per cell      : ~{HOURS_PER_KDV_CELL:.0f} hr "
-          f"(jacrev³ triple-nested autodiff)", flush=True)
+    print(f"  kdv QLNN per cell      : ~{HOURS_PER_KDV_CELL:.2f} hr "
+          f"(mean of 4 families with jacrev³ triple-nested autodiff)",
+          flush=True)
     print(f"  classical PINN cells   : ~{SEC_PER_CLASSICAL_PINN_CELL:.1f} "
           f"sec (negligible)", flush=True)
     print("=" * 72, flush=True)
 
 
+# --- M3 dispatcher -------------------------------------------------------
+# Bulky array keys split out of metrics.json into field.npz. Everything
+# else (scalars, strings, lists of floats) stays in metrics.json so a
+# downstream aggregator can read it without loading numpy arrays.
+_BULKY_KEYS = ("t_eval", "x_eval", "u_pred", "u_ref",
+               "loss_history", "mae_per_component")
+
+
+def _dispatch_one(cell: "Cell") -> dict:
+    """Call the right training entry point for this cell. Returns the
+    raw result dict — `_execute` handles I/O.
+
+    Routing:
+      (ode_solver, kuramoto, QLNN family)   → train_one_vector
+      (ode_solver, kuramoto, classical_pinn) → train_classical_pinn_solver_one_cell
+      (pde_solver, kdv, QLNN family)        → train_one_cell (p3_9_pde_matrix)
+      (pde_solver, kdv, classical_pinn)     → train_one_pde_classical
+    """
+    if cell.task == "ode_solver":
+        if cell.ansatz == "classical_pinn":
+            from qlnn_.training.p7_5_solver_h1 import (
+                train_classical_pinn_solver_one_cell,
+            )
+            return train_classical_pinn_solver_one_cell(
+                cell.system, cell.seed)
+        else:
+            from qlnn_.training.multi_state_solver import train_one_vector
+            return train_one_vector(cell.ansatz, cell.system, cell.seed)
+    elif cell.task == "pde_solver":
+        if cell.ansatz == "classical_pinn":
+            from qlnn_.training.p3_8_review_demo import (
+                train_one_pde_classical,
+            )
+            return train_one_pde_classical(cell.system, cell.seed)
+        else:
+            from qlnn_.training.p3_9_pde_matrix import train_one_cell
+            return train_one_cell(cell.system, cell.ansatz, cell.seed)
+    else:
+        raise ValueError(f"unknown task {cell.task!r}")
+
+
+def _save_cell_result(cell: "Cell", result: dict, wall_clock_sec: float) -> None:
+    """Split bulky arrays into field.npz; write scalars + small lists +
+    wall_clock_sec to metrics.json. Adds cell-identifying fields so each
+    metrics.json is self-describing."""
+    bulky = {}
+    scalars = {}
+    for k, v in result.items():
+        if k in _BULKY_KEYS and v is not None:
+            # numpy arrays go to npz; per-component MAE lists stay in JSON
+            # (they're small and a downstream aggregator wants them inline).
+            if isinstance(v, list):
+                scalars[k] = v
+            else:
+                bulky[k] = np.asarray(v)
+        else:
+            scalars[k] = v
+
+    scalars["wall_clock_sec"] = float(wall_clock_sec)
+    scalars["task"] = cell.task
+    scalars["cell_system"] = cell.system
+    scalars["cell_ansatz"] = cell.ansatz
+    scalars["cell_seed"] = int(cell.seed)
+    scalars["timestamp_utc"] = datetime.utcnow().isoformat() + "Z"
+
+    if bulky:
+        np.savez_compressed(cell.out_dir / "field.npz", **bulky)
+    (cell.out_dir / "metrics.json").write_text(
+        json.dumps(scalars, indent=2, default=str))
+
+
+def _save_cell_error(cell: "Cell", tb_text: str, wall_clock_sec: float) -> None:
+    """Write error.json on crash. Does not raise — sweep continues."""
+    payload = {
+        "task": cell.task,
+        "system": cell.system,
+        "ansatz": cell.ansatz,
+        "seed": int(cell.seed),
+        "wall_clock_sec_before_crash": float(wall_clock_sec),
+        "timestamp_utc": datetime.utcnow().isoformat() + "Z",
+        "traceback": tb_text,
+    }
+    (cell.out_dir / "error.json").write_text(
+        json.dumps(payload, indent=2, default=str))
+
+
 def _execute(cells: list[Cell]) -> None:
-    """Stub. M3 fills this in. Right now it intentionally raises so a
-    `--confirm` with mis-wired downstream doesn't silently no-op."""
-    raise NotImplementedError(
-        "P6 M0/G8 scaffold: cell execution is a M3 deliverable, not M0. "
-        "This stub exists so the cell-iteration shape is testable in M0 "
-        "without spending 16 hr. When M3 lands, replace _execute() with "
-        "a dispatcher over (task, system, ansatz) → upstream training "
-        "entry points:\n"
-        "  - ode_solver + QLNN  → qlnn_.training.multi_state_solver."
-        "run_vector_sweep (REQUIRES kuramoto to be registered in "
-        "VECTOR_ODES first — current M3 blocker)\n"
-        "  - ode_solver + classical_pinn → qlnn_.training.solver_h1_demo."
-        "train_classical_pinn_solver_one_cell (REQUIRES kuramoto in "
-        "VECTOR_ODES)\n"
-        "  - pde_solver + QLNN  → qlnn_.training.p3_9_pde_matrix."
-        "train_one_cell  (kdv already wired via PDE_BENCH[\"kdv\"])\n"
-        "  - pde_solver + classical_pinn → qlnn_.training.p3_8_review_"
-        "demo.train_one_pde_classical (kdv wired)"
-    )
+    """M3 dispatcher. Resumable (skips cells that already have
+    metrics.json), per-cell error-isolated (a crashed cell logs to
+    error.json and the sweep continues), self-describing outputs
+    (every metrics.json carries task/system/ansatz/seed/wall_clock).
+    """
+    n = len(cells)
+    n_done = 0
+    n_skipped = 0
+    n_crashed = 0
+    sweep_start = time.perf_counter()
+
+    for i, cell in enumerate(cells, start=1):
+        cell.out_dir.mkdir(parents=True, exist_ok=True)
+        metrics_path = cell.out_dir / "metrics.json"
+        if metrics_path.exists():
+            print(f"[{i:>2}/{n}] SKIP  {cell.task:<11} {cell.system:<10} "
+                  f"{cell.ansatz:<20} seed_{cell.seed}  "
+                  f"(metrics.json already exists)",
+                  flush=True)
+            n_skipped += 1
+            continue
+
+        started_at = datetime.now().strftime("%H:%M:%S")
+        print(f"[{i:>2}/{n}] START {cell.task:<11} {cell.system:<10} "
+              f"{cell.ansatz:<20} seed_{cell.seed}  "
+              f"est={cell.est_hours:.2f}hr  at {started_at}",
+              flush=True)
+
+        t_start = time.perf_counter()
+        try:
+            result = _dispatch_one(cell)
+            elapsed = time.perf_counter() - t_start
+            _save_cell_result(cell, result, elapsed)
+            rl2 = result.get("relative_l2")
+            rl2_str = f"relL²={rl2:.4f}" if rl2 is not None else ""
+            print(f"[{i:>2}/{n}] OK    {cell.task:<11} {cell.system:<10} "
+                  f"{cell.ansatz:<20} seed_{cell.seed}  "
+                  f"wall={elapsed/3600:.2f}hr  {rl2_str}",
+                  flush=True)
+            n_done += 1
+        except Exception:
+            elapsed = time.perf_counter() - t_start
+            tb_text = traceback.format_exc()
+            _save_cell_error(cell, tb_text, elapsed)
+            print(f"[{i:>2}/{n}] CRASH {cell.task:<11} {cell.system:<10} "
+                  f"{cell.ansatz:<20} seed_{cell.seed}  "
+                  f"wall={elapsed/3600:.2f}hr  → error.json",
+                  flush=True)
+            print(tb_text, flush=True)
+            n_crashed += 1
+
+    total_hr = (time.perf_counter() - sweep_start) / 3600.0
+    print("=" * 72, flush=True)
+    print(f"M3 sweep done: {n_done} new / {n_skipped} skipped / "
+          f"{n_crashed} crashed  out of {n}  in {total_hr:.2f} hr",
+          flush=True)
+    if n_crashed:
+        print("⚠️  inspect results/p6_kuramoto_kdv/*/seed_*/error.json "
+              "for crash tracebacks", flush=True)
 
 
 def main() -> int:
