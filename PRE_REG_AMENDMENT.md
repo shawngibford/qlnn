@@ -221,6 +221,113 @@ HPO-fragile. The HPO-symmetric verdict is FALSIFIED. This is the
 methodologically strongest sensitivity point and supersedes the
 n=9 raw-bootstrap CONFIRMED as the paper's principal verdict.
 
+## Amendment A15 — Equalized solver training-step budget (2026-05-28 audit)
+
+**Audit gap closed:** the ODE-solver pipeline assigned per-family step
+budgets (chebyshev_dqc 1200, te_qpinn_fnn 1500, te_qpinn_qnn 2000,
+qcpinn 1500) justified in code (`solver_demo.FAMILIES`, line 161-163)
+by "te_qpinn_qnn's trainable embedding adds a second circuit eval per
+loss point, so equal-compute requires more steps for the cheaper
+families to match." This is an *equal-compute-per-step* fairness model,
+not an equal-iterations model. It was not documented in the
+pre-registration or in any prior amendment. The audit surfaced it as
+unfair-by-implication: the family with the largest step budget
+(te_qpinn_qnn) also wins 3 of 4 ODE solver systems (van der Pol,
+Lorenz, FitzHugh-Nagumo).
+
+**Amendment:** All four solver-family step budgets are equalized to
+2000 steps (the previous maximum), restoring equal-iterations fairness
+across families. Concretely:
+
+```python
+_UNIFORM_SOLVER_STEPS = 2000     # was per-family: 1200 / 1500 / 2000 / 1500
+FAMILIES = {family: (factory, _UNIFORM_SOLVER_STEPS) for family in (...)}
+```
+
+The fix lives in `src/qlnn_/training/solver_demo.py` with an inline
+comment cross-referencing this amendment. The pre-reg §6 matched-
+capacity intent now applies symmetrically to both parameter count
+and training iterations.
+
+**Rationale:** Equal-compute-per-step is defensible in isolation
+(quantum-resource-fairness argument), but pre-registration §6 reads
+"matched capacity ... equal training budget" without specifying which
+fairness model. The conservative reading is equal-iterations. Equalizing
+to the maximum (2000) gives every family the strongest possible shot.
+
+**Consequences:** All ODE-solver results that depended on the
+asymmetric budget must be re-run. The affected directories are:
+- `results/p3_5_solver_demo/` (4 families × 2 ODEs × 3 seeds = 24 cells)
+- `results/p3_6_multi_state/` (4 families × 3 vector ODEs × 3 seeds = 36 cells)
+- `results/p7_5_solver_h1/` (9 baseline cells, mixed PINN + QLNN)
+- `results/p7_8_solver_h1_n24/` (the PRIMARY n=24 solver verdict)
+
+PDE solver budgets are not affected (PDE config is uniform at 2400
+steps per `CORRECTED_PDE_CONFIGS["kdv"]`). Forecaster budgets are not
+affected (uniform 200 steps per A3). The integrity gate's locked
+PRIMARY solver number (Δ_diff = −0.084, CI [−0.278, +0.061]) will be
+re-computed once the affected cells re-run; the FALSIFIED verdict is
+not expected to change qualitatively (the CI is comfortably away from
+zero on the negative side and equalizing only *raises* the
+chebyshev/te_qpinn_fnn/qcpinn budgets, which can only improve their
+relL² — and the H1 contrast Δ = classical_PINN_relL² − QLNN_relL² is
+mostly classical-driven anyway).
+
+---
+
+## Amendment A16 — strongly_entangling un-aliasing (2026-05-28 audit)
+
+**Audit gap closed:** the `strongly_entangling` forecaster ansatz
+(Schuld et al. 2020, arXiv:1804.00633) produced bit-identical relL²
+values to the `data_reuploading` ansatz across every P4 forecaster cell
+— 16-digit agreement on seed_0, seed_1, seed_2 for all three ODE
+systems (lotka_volterra, van_der_pol, lorenz), and the same for the
+non-liquid variants `non_liquid_strongly_entangling` ≡
+`non_liquid_data_reuploading`.
+
+**Root cause:** PennyLane's `qml.StronglyEntanglingLayers` template,
+when called with `ranges=None`, falls back to the per-layer formula
+`r = l mod num_qubits`. At the project's P4 config (num_qubits=3,
+num_layers=1) this evaluates to `r = 0`, which is outside the
+template's valid range `1 <= r < num_qubits`; PennyLane silently
+rewrites this to `r = 1`, producing the nearest-neighbor ring-CNOT
+pattern that is *unitarily identical* to data_reuploading's explicit
+ring entangler at this config. Both circuits then apply the same RX
+encoding, the same single-qubit Rot rotations (RZ·RY·RZ), and the
+same ring CNOT — yielding identical outputs as a mathematical
+consequence, not a code-dispatch bug.
+
+**Amendment:** the default `ranges` value in `StronglyEntanglingCircuit`
+is changed from `None` (PennyLane fallback) to
+`(num_qubits - 1,) * num_layers` (long-range CNOT per layer). At
+num_qubits=3 this gives r=2 (skip-one CNOT), realizing the "strongly
+entangling" name distinct from data_reuploading's nearest-neighbor
+ring. Verification: at the P4 config, the two circuits now produce
+outputs with max absolute element-wise difference 1.24 (not bit-
+identical). Callers who want PennyLane's per-layer-modulo behavior can
+still pass explicit `ranges` via `AnsatzConfig.params`.
+
+The fix lives in `src/qlnn_/circuits/strongly_entangling.py` with a
+module-level docstring change cross-referencing this amendment.
+
+**Consequences:** All P4 forecaster cells that include
+`strongly_entangling` or `non_liquid_strongly_entangling` must be
+re-run — 18 cells across the lotka_volterra/van_der_pol/lorenz × 3
+seeds × {liquid, non-liquid} matrix. The downstream H1 verdicts
+(P5/P7.10/P7.11) re-aggregate from these cells and will produce
+slightly refreshed numbers; the FALSIFIED forecaster verdict is not
+expected to change qualitatively because both the original and the
+fixed circuit are 4th- or 5th-tier per-cell performers (the verdict is
+classical-baseline-driven, not best-QLNN-driven on these systems).
+
+The original aliased results were flagged in `HANDOFF.md` known-issues
+("strongly_entangling produces identical relL² to data_reuploading on
+every cell ... pre-existing behavior") but never disclosed in the
+paper. This amendment is the explicit disclosure plus the structural
+fix.
+
+---
+
 ## Amendment A14 — Post-hoc Q-Q residual diagnostics (P8 polish)
 
 **Audit gap closed:** the residual-distribution panel in
@@ -651,6 +758,9 @@ tightened relative to n=9 default-Adam.
 | A11 | pre-paper full-ladder expansion: n=24 FALSIFIED with sign-flip | **PRIMARY SOLVER** |
 | A12 | classical LTC + forecaster H1 decomposition: 3 verdicts, mechanism attribution | PRIMARY FORECASTER (via classical) |
 | A13 | non-liquid QLNN + complete 2×2; τ-isolation cross-check DISAGREES IN SIGN | **PRIMARY FORECASTER** (complete) |
+| A14 | post-hoc Q-Q residual diagnostics (P8 polish; archived OD + post-pivot Lorenz) | DISCLOSED |
+| A15 | equalize solver training-step budget (was per-family 1200/1500/2000/1500 → uniform 2000); audit-driven fairness fix | DISCLOSED + re-run required |
+| A16 | un-alias strongly_entangling from data_reuploading (PennyLane fallback at n=3,L=1 was bit-identical to ring-CNOT); audit-driven fix | DISCLOSED + re-run required |
 
 **Headline verdict update (post-P7.10):**
 

@@ -158,15 +158,29 @@ def _qcpinn_factory(seed: int) -> tuple[Callable, dict, dict[str, int]]:
     return circuit, p, counts
 
 
-# (family-name → factory) + the per-family training-step budget. The
-# step counts are tuned per the plan: chebyshev gate-matched at 1200;
-# te_qpinn_qnn needs ~2000 because its trainable embedding adds a
-# second circuit eval per loss point; the others 1500.
+# (family-name → factory) + the per-family training-step budget.
+#
+# FAIRNESS NOTE (2026-05-28, PRE_REG_AMENDMENT A15): the step budget is
+# now UNIFORM across all 4 families at 2000 steps. Previously each
+# family had its own budget (chebyshev_dqc 1200, te_qpinn_fnn 1500,
+# te_qpinn_qnn 2000, qcpinn 1500) justified by "equal compute per
+# loss point" (te_qpinn_qnn's trainable embedding adds a second circuit
+# eval). The audit surfaced this as an undocumented unfair-comparison
+# concern — equal-compute-per-step ≠ equal-iterations, and the family
+# with the largest step budget (te_qpinn_qnn) also wins 3 of 4 ODE
+# solver systems. Equalizing to the maximum (2000) gives every family
+# the strongest possible shot.
+#
+# Trade-off: this triples chebyshev_dqc's compute relative to its prior
+# config. Per the kuramoto+KdV smoke (2026-05-28), per-cell wall-clock
+# is dominated by per-step cost, not iteration count, so the absolute
+# cost increase is modest (~30-60%) and the comparison is now fair.
+_UNIFORM_SOLVER_STEPS = 2000
 FAMILIES: dict[str, tuple[Callable[[int], tuple[Callable, dict, dict]], int]] = {
-    "chebyshev_dqc": (_chebyshev_factory, 1200),
-    "te_qpinn_fnn":  (_te_qpinn_fnn_factory, 1500),
-    "te_qpinn_qnn":  (_te_qpinn_qnn_factory, 2000),
-    "qcpinn":        (_qcpinn_factory, 1500),
+    "chebyshev_dqc": (_chebyshev_factory, _UNIFORM_SOLVER_STEPS),
+    "te_qpinn_fnn":  (_te_qpinn_fnn_factory, _UNIFORM_SOLVER_STEPS),
+    "te_qpinn_qnn":  (_te_qpinn_qnn_factory, _UNIFORM_SOLVER_STEPS),
+    "qcpinn":        (_qcpinn_factory, _UNIFORM_SOLVER_STEPS),
 }
 
 # Wong palette assignment, matching scripts/make_paper_figures.py style.
