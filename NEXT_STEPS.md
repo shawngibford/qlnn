@@ -69,22 +69,22 @@ already run on 2026-05-28.
 
 ---
 
-## Phase C — Audit-driven re-run sweep (~55 CPU-hours committed, embarrassingly parallel)
+## Phase C — Audit-driven re-run sweep (~53 CPU-hours committed, embarrassingly parallel)
 
-The audit produced ~216 cells of re-runs and new work across four
-distinct workloads. Wall-time estimates are smoke-measured for M3
-(KdV + kuramoto smokes 2026-05-28) and extrapolated by state
-dimension or step-budget ratio for the rest:
+The audit produced ~225 cells of re-runs and new work across four
+distinct workloads. All four QLNN solver families plus all three
+A17 qcpinn variants and classical PINN have now been smoke-measured
+(`results/smoke_{kdv,kuramoto,post_audit}/*.json`, 2026-05-28):
 
 | Workload | Cells | Est. CPU-hr | Source |
 |---|---:|---:|---|
-| M3 — kuramoto + KdV at uniform 2000 steps (new cells) | 30 | ~25 | smoke-measured |
-| A15 — ODE solver re-runs of the original 4 systems × 4 QLNN + cPINN at uniform 2000 steps | ~60 | ~10 | smoke-extrapolated by state dim |
-| A17 — qcpinn quantum-attribution sub-experiment, ODE side (3 variants × 4 systems × 3 seeds) | 36 | ~15 | extrapolated (variants not smoked) |
-| A16 + A19 — forecaster re-runs at 2000 steps (post-A18 brickwall removal; includes strongly_entangling fix) | ~90 | ~5 | extrapolated |
-| **Committed-scope subtotal** | **~216** | **~55** | |
-| *Optional: A17 PDE-side extension (3 variants × 4 PDEs × 3 seeds)* | *36* | *~60* | *requires small PDE-side code patch first* |
-| **Grand total with PDE extension** | **~252** | **~115** | |
+| M3 — kuramoto + KdV at uniform 2000 steps (new cells) | 30 | ~24 | smoke-measured |
+| A15 — ODE solver re-runs of the original 4 systems × 4 QLNN + cPINN at uniform 2000 steps | ~60 | ~9 | smoke-measured (cPINN ~3 sec/cell; QLNN scaled by state dim) |
+| A17 — qcpinn quantum-attribution sub-experiment, ODE side (3 variants × 5 systems × 3 seeds) | 45 | ~15 | smoke-measured for kuramoto (0.39 / 0.90 / 1.62 hr per variant); scaled to 2D |
+| A16 + A19 — forecaster re-runs at 2000 steps (post-A18 brickwall removal; includes strongly_entangling fix) | ~90 | ~5 | extrapolated (forecaster cells fast at Q=4) |
+| **Committed-scope subtotal** | **~225** | **~53** | |
+| *Optional: A17 PDE-side extension (3 variants × 4 PDEs × 3 seeds)* | *36* | *~40* | *requires small PDE-side code patch first* |
+| **Grand total with PDE extension** | **~261** | **~93** | |
 
 **Action.** Submit as one big SLURM array job, one array task per
 cell. The cells are independent, so the wall-clock collapses from

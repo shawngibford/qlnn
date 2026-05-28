@@ -75,6 +75,10 @@ test on differential-equation tasks.
 
 ## Where we could go from here
 
+Three follow-up papers are scoped in
+[`FOLLOW_UP_PAPERS.md`](FOLLOW_UP_PAPERS.md). All three sit *after*
+the current submission lands.
+
 - **A training-hardening follow-up paper.** Three specific
   interventions — a quantum-aware optimizer, a "causal" training
   schedule, and deeper data-encoding — have been identified as
@@ -85,6 +89,16 @@ test on differential-equation tasks.
   The substrate-dependent behavior above is a more fundamental
   question than the original benchmark and currently has no
   explanation in the literature.
+- **A domain-breadth paper** *(NEW, scoped this week)*. The current
+  benchmark uses mathematical-physics and generic dynamical systems
+  (Lorenz, Burgers, Lotka-Volterra, …). A follow-up pre-registered on
+  systems the chemical / biochemical / process-systems engineering
+  communities actually deploy — Van de Vusse CSTR, Monod chemostat,
+  convection-diffusion-reaction at high and low Péclet — would close
+  the audience gap and re-test the H1 hypothesis on a domain-relevant
+  ladder. Equations verified against the canonical literature; code
+  scaffolding ~5 hours; compute ~35 CPU-hours (fits in the same Anvil
+  allocation).
 - **(Longer-term) hardware execution** on a real quantum device.
   Out of scope for the current submission but a natural revision
   ask.
@@ -145,18 +159,18 @@ KdV + kuramoto smoke measurements) is:
 
 | Workload | Cells | Est. CPU-hours | Source |
 |---|---:|---:|---|
-| M3: kuramoto + KdV at the new uniform 2000-step budget | 30 | ~25 | smoke-measured |
-| A15 re-run: original 4 ODE systems × 4 QLNN families + classical PINN, all at uniform 2000 steps | ~60 | ~10 | smoke-extrapolated by state dimension |
-| A17 ODE-side: 3 qcpinn variants × 4 ODE systems × 3 seeds | 36 | ~15 | extrapolated (variants not yet smoked) |
+| M3: kuramoto + KdV at the new uniform 2000-step budget | 30 | ~24 | smoke-measured |
+| A15 re-run: original 4 ODE systems × 4 QLNN families + classical PINN, all at uniform 2000 steps | ~60 | ~9 | smoke-measured (cPINN at ~3 sec/cell; QLNN scaled by state dim from kuramoto smoke) |
+| A17 ODE-side: 3 qcpinn variants × 5 ODE systems × 3 seeds | 45 | ~15 | smoke-measured for kuramoto (0.39 / 0.90 / 1.62 hr per variant); scaled to 2D systems |
 | A16 + A19: forecaster re-runs at 2000-step budget (post-A18 brickwall removal; includes strongly-entangling fix) | ~90 | ~5 | extrapolated (forecaster cells were seconds at 200 steps → minutes at 2000) |
-| **Committed-scope subtotal** | **~216** | **~55** | |
-| *Optional A17 extension: 3 qcpinn variants × 4 PDE systems × 3 seeds* | *36* | *~60* | *extrapolated (would require a small PDE-side code patch)* |
-| **Grand total if the PDE extension lands** | **~252** | **~115** | |
+| **Committed-scope subtotal** | **~225** | **~53** | |
+| *Optional A17 extension: 3 qcpinn variants × 4 PDE systems × 3 seeds* | *36* | *~40* | *extrapolated (would require a small PDE-side code patch)* |
+| **Grand total if the PDE extension lands** | **~261** | **~93** | |
 
 The committed-scope estimate is **roughly 2-3 days of CPU compute on
 my laptop** (Apple Silicon, JAX `default.qubit`). Extending the
-qcpinn quantum-attribution sub-experiment to the PDE side roughly
-doubles that to **5 days**. The actual wall-clock would be longer
+qcpinn quantum-attribution sub-experiment to the PDE side adds another
+~40 hours to **~4 days total**. The actual wall-clock would be longer
 because the laptop needs to do everything else I do on it.
 
 ### Why Anvil specifically
