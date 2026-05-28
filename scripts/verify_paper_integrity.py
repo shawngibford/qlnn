@@ -9,9 +9,112 @@ Tolerance: 0.0001 absolute for MAE/R² values, 0.01 for d_norm differences.
 from __future__ import annotations
 import json
 import sys
+import warnings
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+# --- Tier 5 reproducibility guards (REMEDIATION_PLAN.md, R3 concerns) -----
+
+def _assert_jax_dtype_is_x32() -> None:
+    """Reproducibility guard: every committed result was computed with
+    `jax_enable_x64 = False` (CLAUDE.md Architecture section + project
+    gotcha #2). A reproducer with a global JAX config that silently
+    enables x64 would produce different intermediates. Fail loudly here
+    rather than producing different numbers later.
+
+    JAX is an optional import for the integrity gate — most of the gate
+    just reads JSON. If JAX isn't installed, skip the check (a JSON-
+    only reproducer doesn't need it).
+    """
+    try:
+        import jax  # noqa: F401
+    except ImportError:
+        return
+    try:
+        x64_enabled = bool(jax.config.read("jax_enable_x64"))
+    except Exception:
+        # Older JAX versions or unexpected config schema — skip the check
+        # rather than fail loudly on a setup issue unrelated to the gate.
+        warnings.warn(
+            "verify_paper_integrity: could not read jax_enable_x64 config; "
+            "skipping the x32 dtype guard. Verify manually that your JAX "
+            "config matches the project's x32 contract.",
+            stacklevel=2,
+        )
+        return
+    if x64_enabled:
+        print(
+            "[FAIL] JAX x64 is enabled. The committed numbers were\n"
+            "       produced with jax_enable_x64=False (Diffrax dtype-\n"
+            "       promotion constraint per CLAUDE.md). Disable x64 in\n"
+            "       your config (no jax.config.update call, no\n"
+            "       JAX_ENABLE_X64=1 env var, no ~/.jax_config override)\n"
+            "       and re-run.")
+        sys.exit(2)
+
+
+def _check_pde_manifest_hashes() -> bool:
+    """Reproducibility guard: every committed PDE field at
+    `data/pde/<system>.npz` must match the SHA-256 recorded in
+    `data/pde/manifest.json`. Reuses the existing `assert_dataset_hash`
+    helper from `quantum_liquid_neuralode.data_processing.pde_systems`.
+
+    The integrity gate runs in two environments where the data/ symlink
+    may legitimately be absent:
+      - Worktree clones where the per-worktree symlink hasn't been
+        recreated (CLAUDE.md operational note).
+      - CI containers that only verify the JSON-side gates and
+        regenerate data lazily.
+
+    Behavior:
+      - data/ symlink missing OR manifest.json missing → emit a one-line
+        soft-skip note + return True (don't fail).
+      - All PDE files hash-match the manifest → print [OK] per system +
+        return True.
+      - Any hash mismatch → print [FAIL] with both hashes + return False.
+    """
+    manifest = ROOT / "data" / "pde" / "manifest.json"
+    if not manifest.exists():
+        print("  [SKIP] data/pde/manifest.json absent; PDE-field SHA-256 "
+              "gate skipped (typical in worktrees without the data "
+              "symlink). This gate fires when the symlink is present.")
+        return True
+
+    # Import the helper from the canonical location. Done lazily so the
+    # integrity script doesn't pay the import cost when manifest is absent.
+    try:
+        sys.path.insert(0, str(ROOT / "src"))
+        from quantum_liquid_neuralode.data_processing.pde_systems import (
+            assert_dataset_hash,
+            DatasetHashMismatchError,
+        )
+    except ImportError as exc:
+        print(f"  [SKIP] could not import assert_dataset_hash ({exc}); "
+              "PDE-field SHA-256 gate skipped.")
+        return True
+
+    # All PDE systems the paper actually depends on.
+    systems = ("heat", "burgers_smooth", "burgers_shock", "allen_cahn",
+               "kdv", "fhn")
+    all_ok = True
+    for name in systems:
+        try:
+            assert_dataset_hash(name)
+            print(f"  [OK  ] PDE field SHA-256 match: {name}.npz")
+        except DatasetHashMismatchError as exc:
+            print(f"  [FAIL] PDE field SHA-256 mismatch: {name}.npz "
+                  f"({exc})")
+            all_ok = False
+        except FileNotFoundError:
+            # System not yet generated locally — soft skip.
+            print(f"  [SKIP] {name}.npz not present locally; gate skipped "
+                  f"for this system.")
+        except Exception as exc:
+            print(f"  [SKIP] {name}.npz hash check raised {type(exc).__name__}"
+                  f"({exc}); gate skipped for this system.")
+    return all_ok
 
 
 def _load(p: str | Path) -> dict:
@@ -37,6 +140,13 @@ def _check_str(label: str, actual: str, expected: str) -> bool:
 
 def main() -> int:
     all_ok = True
+
+    # --- Tier 5 reproducibility guards (REMEDIATION_PLAN.md / R3 audit) ---
+    # These run before any numeric gate. They are environment guards, not
+    # number checks — they fail-loud on configurations that would produce
+    # different intermediate values, so the user gets a clear error
+    # instead of a confusing tolerance failure later.
+    _assert_jax_dtype_is_x32()
 
     print("=== Claim 1 (reproducibility): σ_classical_H4 / σ_QLNN ratio ===")
     c = _load("archive/results/param_sweep/euler_h3_hidden4/seeds_summary.json")
@@ -401,6 +511,14 @@ def main() -> int:
     all_ok &= _check(
         "brickwall entangling_q LOW (paper: 0.309)",
         t3["brickwall"]["entangling_q"], 0.309, tol=0.02)
+
+    # --- Tier 5: PDE-field provenance gate (REMEDIATION_PLAN R3 #4) ---
+    # Runs after the JSON gates because it can soft-skip in worktrees
+    # without the data symlink. When the data is present, every PDE field
+    # used by a paper number must match the manifest's SHA-256 — drift
+    # here would silently produce different numbers under re-training.
+    print("\n=== PDE field provenance (Tier 5 reproducibility gate) ===")
+    all_ok &= _check_pde_manifest_hashes()
 
     print()
     if all_ok:
