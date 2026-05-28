@@ -221,6 +221,101 @@ HPO-fragile. The HPO-symmetric verdict is FALSIFIED. This is the
 methodologically strongest sensitivity point and supersedes the
 n=9 raw-bootstrap CONFIRMED as the paper's principal verdict.
 
+## Amendment A18 — brickwall removed from empirical forecaster sweep (2026-05-28 audit)
+
+**Audit gap closed:** the `brickwall` forecaster ansatz scores BEST on
+the H3 T3 mechanism diagnostics (lowest entangling-Q at 0.309 vs ~0.78
+for the other families; most barren-plateau-resistant in the qubit-
+scaling study) but FAILS every empirical forecaster cell (relL² 1.15
+on Lorenz, 8.27 on van der Pol, 0.64 on Lotka-Volterra — vs winning
+families around 0.6 on each).
+
+**Root cause:** brickwall implements alternating-layer CNOT
+entanglement. At the project's P4 config (num_qubits=3, num_layers=1),
+only layer-0 executes: CNOT(0,1) connects qubits 0-1, and **qubit 2
+remains structurally disconnected** (it receives single-qubit
+rotations only). The circuit cannot represent 3D dynamics (Lorenz,
+Lotka-Volterra, van der Pol all have 2D or 3D state) because the
+required cross-component entanglement is unreachable.
+
+The T3 score is not misleading — it correctly identifies that brickwall
+entangles fewer qubits at this config. The audit's prior interpretation
+("low entangling-Q = good") read T3 in the wrong direction: low Q here
+means "structurally fewer qubits mixed", not "expressively economical".
+
+**Amendment:** brickwall is removed from `VECTOR_QLNN_FAMILIES` in
+`src/qlnn_/training/p4_forecaster_demo.py`. The trainable forecaster
+sweep is now four families: data_reuploading, hardware_efficient,
+strongly_entangling (post-A16 fix), and rf_qrc.
+
+The T3 mechanism scalars for brickwall (computed on the *untrained*
+circuit) remain in the H3 mechanism analysis — they are still valid
+data points describing what the brickwall pattern *would* produce if
+it were trained, and they correctly explain *why* it fails empirically.
+The integrity gate's brickwall T3 numbers (entangling_q 0.309,
+gradient_variance 0.046) are NOT touched.
+
+**Alternatives considered and rejected:**
+- Adding a wraparound CNOT to "close" the brickwall pattern into a
+  ring at n=3 — but that defeats brickwall's structurally distinct
+  identity (it would alias the ring-CNOT families).
+- Increasing num_layers from 1 to 2 to expose the odd-layer
+  CNOT(1,2) — but that would unfairly give brickwall a 2× compute
+  budget vs the other families (forecaster sweep is uniform at
+  num_layers=1).
+
+**Consequences:** removes 9 P4 forecaster cells from the matrix
+(3 systems × 3 seeds × {liquid only — brickwall is not used as a
+non-liquid family any more}). The PRIMARY FORECASTER FALSIFIED verdict
+is unchanged in direction because best-QLNN-per-cell selection in the
+old data already excluded brickwall from the top-of-rank position on
+every cell.
+
+---
+
+## Amendment A17 — qcpinn quantum-parameter sweep (2026-05-28 audit)
+
+**Audit gap closed:** the `qcpinn` solver-task family (Zhou 2503.16678,
+Cascade topology, n=5, L=1, pre/post-NN hidden=50) uses 15 PQC params
+alongside 706 classical pre/post-NN params — a 2% PQC : 98% classical
+ratio. The audit confirmed that qcpinn's win on Lotka-Volterra (relL²
+0.0058) is mostly attributable to the 706-param MLP, not the quantum
+circuit. As-is, qcpinn's "win" is a classical-baseline result wearing
+a quantum label.
+
+**Amendment:** three step-wise qcpinn variants are added to the solver
+family registry (`src/qlnn_/training/solver_demo.py:FAMILIES`):
+
+| variant         | topology    | n | L | pre/post_hidden | PQC | ≈classical | Q-ratio |
+|---|---|---:|---:|---:|---:|---:|---:|
+| qcpinn          | Cascade     | 5 | 1 | 50 | 15  | ~706 |  2% |
+| qcpinn_balanced | Cross-mesh  | 5 | 1 | 10 | 45  | ~146 | 24% |
+| qcpinn_quantum  | Cascade     | 8 | 3 |  4 | 72  |  ~89 | 45% |
+| qcpinn_full_q   | Cross-mesh  | 5 | 3 |  1 | 135 |  ~20 | 87% |
+
+The progression varies (topology, n, L, pre/post_hidden) along the
+axis Q-ratio = PQC / (PQC + classical). The Cross-mesh topology has
+higher PQC density per the qcpinn paper's Table 2 (n²+4n vs Cascade's
+3n); increasing L scales PQC linearly; shrinking pre/post_hidden
+reduces the classical pre/post-NN footprint to its 1-neuron-hidden
+minimum.
+
+**Goal:** make the "qcpinn quantum win" attribution testable. If the
+variants' relL² monotonically improves as Q-ratio increases, the
+quantum capacity is genuinely doing useful work. If relL² degrades or
+flatlines, the original qcpinn's win is mostly classical-MLP capacity
+and the original family carries that confound as a disclosed
+limitation.
+
+**Consequences:** adds 3 new families × 8 systems (4 ODE + 4 PDE) × 3
+seeds = **72 new solver cells**. The PRIMARY solver n=24 verdict is
+NOT immediately recomputed — A17 cells are reported separately as a
+"quantum-capacity attribution" sub-experiment in the paper's
+solver-task §3 discussion. The integrity gate's PRIMARY solver number
+is not touched by this amendment.
+
+---
+
 ## Amendment A15 — Equalized solver training-step budget (2026-05-28 audit)
 
 **Audit gap closed:** the ODE-solver pipeline assigned per-family step
@@ -761,6 +856,8 @@ tightened relative to n=9 default-Adam.
 | A14 | post-hoc Q-Q residual diagnostics (P8 polish; archived OD + post-pivot Lorenz) | DISCLOSED |
 | A15 | equalize solver training-step budget (was per-family 1200/1500/2000/1500 → uniform 2000); audit-driven fairness fix | DISCLOSED + re-run required |
 | A16 | un-alias strongly_entangling from data_reuploading (PennyLane fallback at n=3,L=1 was bit-identical to ring-CNOT); audit-driven fix | DISCLOSED + re-run required |
+| A17 | qcpinn quantum-parameter sweep — three step-wise variants (qcpinn_balanced/quantum/full_q) along Q/(Q+C) ratio axis; addresses the qcpinn 706-classical-param confound | DISCLOSED + 72 new cells |
+| A18 | brickwall removed from empirical forecaster sweep — at n=3,L=1 qubit 2 is structurally disconnected, the circuit cannot represent 3D dynamics; T3 mechanism scalars retained as untrained-circuit data | DISCLOSED + 9 cells removed |
 
 **Headline verdict update (post-P7.10):**
 

@@ -123,7 +123,17 @@ VECTOR_QLNN_FAMILIES = (
     "data_reuploading",
     "hardware_efficient",
     "strongly_entangling",
-    "brickwall",
+    # A18 (2026-05-28): brickwall removed from the empirical sweep. At
+    # the project's (n=3, L=1) config, brickwall's CNOT(0,1) leaves
+    # qubit 2 structurally disconnected — training loss decreases but
+    # the circuit cannot represent 3D dynamics (relL² 1.15-8.27 on
+    # every forecaster cell vs winners ~0.6). The T3 mechanism scalars
+    # for brickwall (entangling_q 0.309, gradient_variance 0.046) are
+    # kept in the H3 mechanism analysis because they correctly
+    # diagnose the structural limitation — they are computed on the
+    # UNTRAINED circuit and remain valid. The empirical sweep is now
+    # 4 trainable forecaster families (data_reuploading, hardware_
+    # efficient, strongly_entangling, rf_qrc). See PRE_REG_AMENDMENT A18.
 )
 
 # P7.11: τ-ablated variants of the 4 vector-QLNN families. Use a

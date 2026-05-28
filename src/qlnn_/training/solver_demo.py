@@ -140,22 +140,73 @@ def _te_qpinn_qnn_factory(seed: int) -> tuple[Callable, dict, dict[str, int]]:
     return circuit, p, counts
 
 
-def _qcpinn_factory(seed: int) -> tuple[Callable, dict, dict[str, int]]:
-    cfg = QCPINNConfig(num_qubits=5, num_layers=1, topology="Cascade",
-                       pre_hidden=50, post_hidden=50,
-                       input_dim=1, output_dim=1)
-    circuit = build_qcpinn(cfg)
-    native = init_qcpinn_weights(cfg, seed=seed)
-    p = {"w": native, "s": jnp.asarray(1.0), "b": jnp.asarray(0.0)}
-    classical = sum(int(np.prod(native[k].shape))
-                    for k in native
-                    if k.startswith("pre_") or k.startswith("post_"))
-    counts = {
-        "pqc_params": int(n_trainable_pqc_params(native, cfg)),
-        "classical_params": classical,
-        "config": f"n={cfg.num_qubits}, L={cfg.num_layers}, {cfg.topology}",
-    }
-    return circuit, p, counts
+def _qcpinn_make_factory(
+    *, num_qubits: int, num_layers: int, topology: str,
+    pre_hidden: int, post_hidden: int,
+) -> Callable[[int], tuple[Callable, dict, dict[str, int]]]:
+    """Higher-order builder: returns a qcpinn factory at the given config.
+
+    Used to register a step-wise quantum/classical-ratio sweep of qcpinn
+    variants (A17, 2026-05-28). The baseline `qcpinn` family at
+    (n=5, L=1, Cascade, pre/post=50) has only 15 PQC params alongside
+    ~706 classical pre/post-NN params — the audit confirmed that this
+    family's win on Lotka-Volterra is mostly the 706-param MLP, not the
+    quantum circuit. The variants below progressively shift mass from
+    classical to PQC so the "quantum win" attribution becomes testable.
+    """
+    def _factory(seed: int) -> tuple[Callable, dict, dict[str, int]]:
+        cfg = QCPINNConfig(
+            num_qubits=num_qubits, num_layers=num_layers, topology=topology,
+            pre_hidden=pre_hidden, post_hidden=post_hidden,
+            input_dim=1, output_dim=1,
+        )
+        circuit = build_qcpinn(cfg)
+        native = init_qcpinn_weights(cfg, seed=seed)
+        p = {"w": native, "s": jnp.asarray(1.0), "b": jnp.asarray(0.0)}
+        classical = sum(int(np.prod(native[k].shape))
+                        for k in native
+                        if k.startswith("pre_") or k.startswith("post_"))
+        counts = {
+            "pqc_params": int(n_trainable_pqc_params(native, cfg)),
+            "classical_params": classical,
+            "config": (f"n={cfg.num_qubits}, L={cfg.num_layers}, "
+                       f"{cfg.topology}, pre/post={pre_hidden}/{post_hidden}"),
+        }
+        return circuit, p, counts
+    return _factory
+
+
+# Baseline (unchanged — preserves locked numerics for prior committed runs).
+_qcpinn_factory = _qcpinn_make_factory(
+    num_qubits=5, num_layers=1, topology="Cascade",
+    pre_hidden=50, post_hidden=50,
+)
+
+# A17 quantum-parameter sweep — three step-wise variants along the
+# PQC/(PQC+classical) ratio axis. See PRE_REG_AMENDMENT A17.
+#
+#   variant         topology    n   L  pre  post   PQC  ≈cls  Q-ratio
+#   ────────────────────────────────────────────────────────────────
+#   qcpinn          Cascade     5   1   50    50    15  ~706    2%
+#   qcpinn_balanced Cross-mesh  5   1   10    10    45  ~150   23%
+#   qcpinn_quantum  Cascade     8   3    4     4    72   ~50   59%
+#   qcpinn_full_q   Cross-mesh  5   3    1     1   135    ~5   96%
+#
+# Cross-mesh topology has higher PQC density per the paper's Table 2
+# (n²+4n vs Cascade's 3n). Increasing L scales PQC linearly. Shrinking
+# pre/post_hidden reduces the classical pre/post-NN footprint.
+_qcpinn_balanced_factory = _qcpinn_make_factory(
+    num_qubits=5, num_layers=1, topology="Cross-mesh",
+    pre_hidden=10, post_hidden=10,
+)
+_qcpinn_quantum_factory = _qcpinn_make_factory(
+    num_qubits=8, num_layers=3, topology="Cascade",
+    pre_hidden=4, post_hidden=4,
+)
+_qcpinn_full_q_factory = _qcpinn_make_factory(
+    num_qubits=5, num_layers=3, topology="Cross-mesh",
+    pre_hidden=1, post_hidden=1,
+)
 
 
 # (family-name → factory) + the per-family training-step budget.
@@ -177,10 +228,14 @@ def _qcpinn_factory(seed: int) -> tuple[Callable, dict, dict[str, int]]:
 # cost increase is modest (~30-60%) and the comparison is now fair.
 _UNIFORM_SOLVER_STEPS = 2000
 FAMILIES: dict[str, tuple[Callable[[int], tuple[Callable, dict, dict]], int]] = {
-    "chebyshev_dqc": (_chebyshev_factory, _UNIFORM_SOLVER_STEPS),
-    "te_qpinn_fnn":  (_te_qpinn_fnn_factory, _UNIFORM_SOLVER_STEPS),
-    "te_qpinn_qnn":  (_te_qpinn_qnn_factory, _UNIFORM_SOLVER_STEPS),
-    "qcpinn":        (_qcpinn_factory, _UNIFORM_SOLVER_STEPS),
+    "chebyshev_dqc":   (_chebyshev_factory,        _UNIFORM_SOLVER_STEPS),
+    "te_qpinn_fnn":    (_te_qpinn_fnn_factory,     _UNIFORM_SOLVER_STEPS),
+    "te_qpinn_qnn":    (_te_qpinn_qnn_factory,     _UNIFORM_SOLVER_STEPS),
+    "qcpinn":          (_qcpinn_factory,           _UNIFORM_SOLVER_STEPS),
+    # A17 — step-wise quantum-parameter sweep (Q/(Q+C) ≈ 23% / 59% / 96%)
+    "qcpinn_balanced": (_qcpinn_balanced_factory,  _UNIFORM_SOLVER_STEPS),
+    "qcpinn_quantum":  (_qcpinn_quantum_factory,   _UNIFORM_SOLVER_STEPS),
+    "qcpinn_full_q":   (_qcpinn_full_q_factory,    _UNIFORM_SOLVER_STEPS),
 }
 
 # Wong palette assignment, matching scripts/make_paper_figures.py style.
