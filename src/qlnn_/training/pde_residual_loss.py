@@ -21,10 +21,12 @@ The split-qubit 2D Chebyshev feature map:
 - Then standard HEA layers entangle them and the readout is
   Σⱼ⟨Zⱼ⟩ (total magnetization, scalar).
 
-The Lagaris hard-IC trial solution generalizes to PDE:
-    u(t, x) = u₀(x) + t · ( s · circuit_2d(map_t(t), map_x(x), w) + b )
-- IC u(0, x) = u₀(x) is structural (no soft penalty at the singular
-  t=0 endpoint where the Chebyshev map degenerates).
+The Lagaris hard-IC trial solution generalizes to PDE (A22, 2026-05-28
+docstring fix — earlier text mis-described the t-prefactor as t rather
+than (t-t0); the implementation at line 217 has always been correct):
+    u(t, x) = u₀(x) + (t − t0) · ( s · circuit_2d(map_t(t), map_x(x), w) + b )
+- IC u(t0, x) = u₀(x) is structural (no soft penalty at the singular
+  t=t0 endpoint where the Chebyshev map degenerates).
 - BC handling: periodic for Burgers/Allen-Cahn — the residual is
   evaluated at interior points (t̃, x̃) ∈ (−1, 1)² and the periodic
   BC is enforced implicitly by loss matching at near-boundary points.

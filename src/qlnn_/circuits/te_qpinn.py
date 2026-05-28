@@ -163,10 +163,19 @@ def build_te_qpinn_fnn(
                 qml.RZ(w[layer, k, 2], wires=k)
             for k in range(n - 1):
                 qml.CNOT(wires=[k, k + 1])
-        # Readout (Eq. 13): O = ⊗_k Z_k, a single global observable.
+        # Readout: A20 (2026-05-28) — restored to the scalar Z-sum
+        # ⟨Σ_k Z_k⟩ ∈ [−n, n] to match the te_qpinn_qnn variant's
+        # readout (line 306) and the Chebyshev-DQC precedent
+        # (physics_residual_loss.py:112). Berger 2025 Eq. 13 writes
+        # `O = ⊗_k Z_k` which the original implementation interpreted
+        # as the tensor-product expectation ⟨∏_k Z_k⟩ ∈ [−1, 1];
+        # the wider QPINN literature (Kyriienko 2021, Zhou 2024) uses
+        # the magnetization sum, and the fnn/qnn paired-family
+        # equivalence requires matching readouts. See A20 in
+        # PRE_REG_AMENDMENT.md.
         if n == 1:
             return qml.expval(qml.PauliZ(0))
-        return qml.expval(qml.prod(*(qml.PauliZ(k) for k in range(n))))
+        return qml.expval(qml.sum(*(qml.PauliZ(k) for k in range(n))))
 
     return circuit
 

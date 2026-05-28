@@ -221,6 +221,121 @@ HPO-fragile. The HPO-symmetric verdict is FALSIFIED. This is the
 methodologically strongest sensitivity point and supersedes the
 n=9 raw-bootstrap CONFIRMED as the paper's principal verdict.
 
+## Amendment A22 — 2D PDE hard-IC trial-solution docstring fix (2026-05-28, post-peer-review)
+
+**Audit gap closed:** the docstring of
+`src/qlnn_/training/pde_residual_loss.py` (line 25) described the 2D
+Lagaris hard-IC trial solution as `u(t, x) = u₀(x) + t · ( s · circuit +
+b )`, omitting the `(t − t₀)` offset needed when the PDE time origin
+is not zero. The peer-review pass flagged this as a latent correctness
+violation.
+
+**Diagnosis.** The *implementation* at line 217 has always used the
+correct `ic_fn(x) + (t - t0) * n` formula. Only the module-level
+docstring carried the incorrect omission. All current PDE benchmarks
+(heat, burgers_smooth, burgers_shock, allen_cahn, kdv) use t₀ = 0, so
+the docstring discrepancy did not produce any incorrect numbers. The
+bug is purely documentation-level.
+
+**Amendment.** The docstring is corrected to match the implementation:
+`u(t, x) = u₀(x) + (t − t₀) · ( s · circuit_2d(...) + b )`. The
+comment block carries an explicit note that the implementation has
+always been correct.
+
+**Code change.** One-line docstring edit. Implementation unchanged.
+
+**Consequences.** Zero — no committed numbers depended on the
+docstring. Future PDEs with t₀ ≠ 0 are protected against
+misreading the documentation.
+
+---
+
+## Amendment A21 — brickwall connectivity diagnosis strengthened (2026-05-28, post-peer-review)
+
+**Audit gap closed:** A18 removed `brickwall` from the empirical
+forecaster sweep on the grounds that "at (num_qubits=3, num_layers=1)
+qubit 2 is structurally disconnected." The peer-review pass surfaced
+a deeper diagnosis: even at `num_layers=2`, the alternating-CNOT
+pattern produces only `CNOT(0,1)` on layer 0 and `CNOT(1,2)` on
+layer 1, giving qubit 0 ↔ qubit 2 no direct CNOT path. The
+ansatz reduces to a *linear chain* (rather than the bricklayer
+graph the name suggests) unless `num_qubits ≥ 4`.
+
+**Resolution.** No code change. brickwall stays removed from the
+forecaster empirical sweep (A18). A21 strengthens the A18
+disclosure with the connectivity caveat: any future use of
+brickwall should require `num_qubits ≥ 4` to recover the intended
+bricklayer interaction graph. The T3 mechanism scalars at
+(num_qubits=3, num_layers=1) remain valid as untrained-circuit
+diagnostic data and the integrity gate continues to verify them.
+
+**Consequences.** Zero compute or number changes. Strengthens the
+A18 paper-supplement text against reviewer pushback ("why not just
+fix brickwall by adding layers?").
+
+---
+
+## Amendment A20 — te_qpinn readout consistency restored (2026-05-28, post-peer-review)
+
+**Audit gap closed:** the peer-review pass identified a paired-family
+divergence inside `src/qlnn_/circuits/te_qpinn.py`:
+
+- Line 169 (`te_qpinn_fnn` factory): returned
+  `qml.expval(qml.prod(*PauliZ))` — the tensor-product observable
+  expectation `⟨∏ᵢ Zᵢ⟩ ∈ [−1, 1]`.
+- Line 306 (`te_qpinn_qnn` factory): returned
+  `qml.expval(qml.sum(*PauliZ))` — the sum-of-Z's magnetization
+  `⟨Σᵢ Zᵢ⟩ ∈ [−n, n]`.
+
+These are structurally different observables with different
+eigenspectra. The two ostensibly-paired QPINN variants were therefore
+fitting different objectives.
+
+**Choice.** Restore `te_qpinn_fnn` to `qml.sum(*PauliZ)`, matching:
+1. The `te_qpinn_qnn` precedent in the same file (line 306).
+2. The Chebyshev-DQC `Σⱼ⟨Zⱼ⟩` magnetization-sum readout in
+   `src/qlnn_/training/physics_residual_loss.py` (Kyriienko
+   2011.10395 §III.3 Eq. 9).
+3. The wider QPINN literature's "scalar Z-sum" convention
+   (Zhou 2503.16678; Kyriienko 2021).
+
+**Justification for the choice.** Berger 2025 Eq. 13 writes
+`O = ⊗ᵢ Zᵢ` in compact tensor notation, which the original
+implementation read as the tensor-product observable expectation.
+This is a defensible reading of the equation in isolation. However:
+(a) the paired `te_qpinn_qnn` variant in the same codebase already
+implemented the sum-of-Z's reading; (b) the Berger paper's worked
+numerical examples produce values in `[−n, n]`, consistent with the
+sum reading, not the product reading; (c) the Chebyshev-DQC
+precedent in the same codebase uses the sum form. Restoring fnn to
+the sum form re-establishes paired-family equivalence and matches
+the literature consensus.
+
+**Amendment.** One-line code change on line 169:
+`qml.prod` → `qml.sum`. Docstring comment block explains the change
+and references this amendment.
+
+**Consequences.** All prior `te_qpinn_fnn` solver-task results
+(P3.5 demo, P3.6 multi-state, P7.5 solver-h1, P7.8 n=24 verdict,
+P3.9 PDE matrix) used the product readout and need re-running with
+the corrected sum readout. The expected impact on the PRIMARY
+n=24 solver verdict is small: te_qpinn_fnn is one of four QLNN
+families in the best-of-family selection, and its empirical
+performance (mean relL² across systems) is in the middle of the
+field. The fnn family's *seed variance* may change measurably —
+the product readout's compressed observable range `[−1, 1]` made
+the family appear lower-variance than the magnetization-sum
+families.
+
+These re-runs fold into the Tier 3 Phase C sweep documented in
+`NEXT_STEPS.md` and `REMEDIATION_PLAN.md`. Per-cell wall-clock
+under the corrected readout is unchanged. Phase C budget increases
+by approximately 5 CPU-hours (4 ODE systems × 1 family × 3 seeds
+× ~0.18 hr per cell + 4 PDE systems × 1 family × 3 seeds × ~0.92
+hr per cell).
+
+---
+
 ## Amendment A19 — Cross-task budget parity: forecaster step budget raised 200 → 2000 (2026-05-28)
 
 **Audit gap closed (third pass):** the first two passes of A15
@@ -955,6 +1070,9 @@ tightened relative to n=9 default-Adam.
 | A17 | qcpinn quantum-parameter sweep — three step-wise variants (qcpinn_balanced/quantum/full_q) along Q/(Q+C) ratio axis; addresses the qcpinn 706-classical-param confound | DISCLOSED + 72 new cells |
 | A18 | brickwall removed from empirical forecaster sweep — at n=3,L=1 qubit 2 is structurally disconnected, the circuit cannot represent 3D dynamics; T3 mechanism scalars retained as untrained-circuit data | DISCLOSED + 9 cells removed |
 | A19 | cross-task budget parity — forecaster step budget raised 200 → 2000 to match solver-side uniform 2000; closes the cross-task gap A15's first two passes left open | DISCLOSED + forecaster re-runs |
+| A20 | te_qpinn_fnn readout restored from `qml.prod(*PauliZ)` → `qml.sum(*PauliZ)` to match the te_qpinn_qnn variant, Chebyshev-DQC precedent, and wider QPINN literature; paired-family equivalence restored | DISCLOSED + te_qpinn_fnn re-runs |
+| A21 | brickwall connectivity diagnosis strengthened (A18 extension): the alternating-CNOT pattern reduces to a linear chain unless num_qubits ≥ 4; any future brickwall use requires n ≥ 4 | DISCLOSED, no compute |
+| A22 | 2D PDE hard-IC trial-solution docstring fix — implementation has always been correct (line 217 uses `(t − t₀)`), only the module-level docstring carried the omission | DISCLOSED, no compute |
 
 **Headline verdict update (post-P7.10):**
 
