@@ -316,57 +316,73 @@ is not touched by this amendment.
 
 ---
 
-## Amendment A15 — Equalized solver training-step budget (2026-05-28 audit)
+## Amendment A15 — Equalized training-step budget across ALL solver-task models (2026-05-28 audit, extended)
 
-**Audit gap closed:** the ODE-solver pipeline assigned per-family step
-budgets (chebyshev_dqc 1200, te_qpinn_fnn 1500, te_qpinn_qnn 2000,
-qcpinn 1500) justified in code (`solver_demo.FAMILIES`, line 161-163)
+**Audit gap closed (initial scope):** the ODE-solver pipeline assigned
+per-QLNN-family step budgets (chebyshev_dqc 1200, te_qpinn_fnn 1500,
+te_qpinn_qnn 2000, qcpinn 1500) justified in code (`solver_demo.FAMILIES`)
 by "te_qpinn_qnn's trainable embedding adds a second circuit eval per
 loss point, so equal-compute requires more steps for the cheaper
 families to match." This is an *equal-compute-per-step* fairness model,
-not an equal-iterations model. It was not documented in the
-pre-registration or in any prior amendment. The audit surfaced it as
-unfair-by-implication: the family with the largest step budget
-(te_qpinn_qnn) also wins 3 of 4 ODE solver systems (van der Pol,
-Lorenz, FitzHugh-Nagumo).
+not an equal-iterations model. The family with the largest budget
+(te_qpinn_qnn) is also the family that wins 3 of 4 ODE solver systems.
 
-**Amendment:** All four solver-family step budgets are equalized to
-2000 steps (the previous maximum), restoring equal-iterations fairness
-across families. Concretely:
+**Audit gap closed (extended scope):** the same audit pass surfaced a
+SECOND asymmetry — the classical PINN solver
+(`train_classical_pinn_solver_one_cell`, default `steps=1500`) was
+running 25 % FEWER iterations than the quantum families (which had been
+running 2000 steps after the within-QLNN equalization). This is
+unfair-to-classical and biases the QLNN-vs-classical comparison
+*toward* quantum. The user's directive (2026-05-28): "we need a matched
+budget for ALL models."
 
-```python
-_UNIFORM_SOLVER_STEPS = 2000     # was per-family: 1200 / 1500 / 2000 / 1500
-FAMILIES = {family: (factory, _UNIFORM_SOLVER_STEPS) for family in (...)}
-```
+**Amendment:** ALL solver-task training paths — quantum AND classical
+— are equalized to **2000 steps**. Concretely:
 
-The fix lives in `src/qlnn_/training/solver_demo.py` with an inline
-comment cross-referencing this amendment. The pre-reg §6 matched-
-capacity intent now applies symmetrically to both parameter count
-and training iterations.
+| Side                            | File                                   | Previous | Now |
+|---|---|---:|---:|
+| QLNN chebyshev_dqc              | solver_demo.FAMILIES                   | 1200 | 2000 |
+| QLNN te_qpinn_fnn               | solver_demo.FAMILIES                   | 1500 | 2000 |
+| QLNN te_qpinn_qnn               | solver_demo.FAMILIES                   | 2000 | 2000 |
+| QLNN qcpinn                     | solver_demo.FAMILIES                   | 1500 | 2000 |
+| QLNN qcpinn_balanced / quantum / full_q (A17 new) | solver_demo.FAMILIES | n/a | 2000 |
+| **Classical PINN (ODE solver)** | **p7_5_solver_h1.py:train_classical_pinn_solver_one_cell** | **1500** | **2000** |
+| Classical PINN script default   | scripts/run_p7_5_solver_h1.py --steps  | 1500 | 2000 |
+| HPO sensitivity sweep lower bound | scripts/run_p7_5_hpo_sensitivity.py --train-steps-list | [1500, 3000] | [2000, 3000] |
+
+PDE solver budgets are uniform per-PDE across QLNN AND classical
+(`CORRECTED_PDE_CONFIGS[pde].steps` is consumed by both
+`train_one_cell` and `train_one_pde_classical`) so the PDE side is
+inherently symmetric — no changes needed there.
+
+Forecaster budgets are also already uniform: `p4_forecaster_demo.
+ForecasterConfig.train_steps = 200` is consumed by both QLNN and
+classical (plain Neural-ODE, classical_LTC, plain_mlp) sides through
+`p5_matched_baselines.py` — no changes needed.
+
+The pre-reg §6 matched-capacity intent now applies symmetrically to
+both parameter count AND training iterations AND model-class.
 
 **Rationale:** Equal-compute-per-step is defensible in isolation
 (quantum-resource-fairness argument), but pre-registration §6 reads
 "matched capacity ... equal training budget" without specifying which
-fairness model. The conservative reading is equal-iterations. Equalizing
-to the maximum (2000) gives every family the strongest possible shot.
+fairness model. Equalizing to the maximum (2000) on every model class
+gives every side — quantum and classical — the strongest possible shot.
 
 **Consequences:** All ODE-solver results that depended on the
 asymmetric budget must be re-run. The affected directories are:
 - `results/p3_5_solver_demo/` (4 families × 2 ODEs × 3 seeds = 24 cells)
 - `results/p3_6_multi_state/` (4 families × 3 vector ODEs × 3 seeds = 36 cells)
-- `results/p7_5_solver_h1/` (9 baseline cells, mixed PINN + QLNN)
-- `results/p7_8_solver_h1_n24/` (the PRIMARY n=24 solver verdict)
+- `results/p7_5_solver_h1/` (9 baseline cells, mixed PINN + QLNN — BOTH sides re-run)
+- `results/p7_8_solver_h1_n24/` (the PRIMARY n=24 solver verdict — re-runs entirely)
 
-PDE solver budgets are not affected (PDE config is uniform at 2400
-steps per `CORRECTED_PDE_CONFIGS["kdv"]`). Forecaster budgets are not
-affected (uniform 200 steps per A3). The integrity gate's locked
-PRIMARY solver number (Δ_diff = −0.084, CI [−0.278, +0.061]) will be
-re-computed once the affected cells re-run; the FALSIFIED verdict is
-not expected to change qualitatively (the CI is comfortably away from
-zero on the negative side and equalizing only *raises* the
-chebyshev/te_qpinn_fnn/qcpinn budgets, which can only improve their
-relL² — and the H1 contrast Δ = classical_PINN_relL² − QLNN_relL² is
-mostly classical-driven anyway).
+The integrity gate's locked PRIMARY solver number (Δ_diff = −0.084,
+CI [−0.278, +0.061]) will be re-computed once the affected cells
+re-run. The FALSIFIED verdict is not expected to change qualitatively:
+the QLNN re-runs can only improve QLNN relL² (more training), and the
+classical-PINN re-run also gets 33 % more steps — the H1 contrast
+Δ = classical_PINN_relL² − QLNN_relL² should remain near zero, just
+with both endpoints sharper.
 
 ---
 
@@ -854,7 +870,7 @@ tightened relative to n=9 default-Adam.
 | A12 | classical LTC + forecaster H1 decomposition: 3 verdicts, mechanism attribution | PRIMARY FORECASTER (via classical) |
 | A13 | non-liquid QLNN + complete 2×2; τ-isolation cross-check DISAGREES IN SIGN | **PRIMARY FORECASTER** (complete) |
 | A14 | post-hoc Q-Q residual diagnostics (P8 polish; archived OD + post-pivot Lorenz) | DISCLOSED |
-| A15 | equalize solver training-step budget (was per-family 1200/1500/2000/1500 → uniform 2000); audit-driven fairness fix | DISCLOSED + re-run required |
+| A15 | equalize solver training-step budget across ALL models (QLNN families AND classical PINN) — was per-family 1200/1500/2000/1500 + classical 1500 → uniform 2000; audit-driven fairness fix | DISCLOSED + re-run required |
 | A16 | un-alias strongly_entangling from data_reuploading (PennyLane fallback at n=3,L=1 was bit-identical to ring-CNOT); audit-driven fix | DISCLOSED + re-run required |
 | A17 | qcpinn quantum-parameter sweep — three step-wise variants (qcpinn_balanced/quantum/full_q) along Q/(Q+C) ratio axis; addresses the qcpinn 706-classical-param confound | DISCLOSED + 72 new cells |
 | A18 | brickwall removed from empirical forecaster sweep — at n=3,L=1 qubit 2 is structurally disconnected, the circuit cannot represent 3D dynamics; T3 mechanism scalars retained as untrained-circuit data | DISCLOSED + 9 cells removed |

@@ -110,7 +110,12 @@ def train_classical_pinn_solver_one_cell(
     system: str, seed: int,
     *,
     n_colloc: int = 60,
-    steps: int = 1500,
+    # A15 (2026-05-28): uniform solver step budget across QLNN AND classical
+    # PINN sides. Was 1500 — matched solver_demo._UNIFORM_SOLVER_STEPS to
+    # close the cross-side asymmetry the audit surfaced (QLNN at 2000,
+    # classical PINN at 1500 was a hidden 25% disadvantage to the classical
+    # baseline). See PRE_REG_AMENDMENT A15 (extended).
+    steps: int = 2000,
     lr: float = 0.02,
     target_param_count: int | None = None,
 ) -> dict[str, Any]:

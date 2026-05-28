@@ -65,8 +65,13 @@ def main() -> None:
     ap = argparse.ArgumentParser(description=__doc__)
     ap.add_argument("--lrs", nargs="+", type=float,
                     default=[1e-3, 5e-3, 1e-2])
+    # A15 (2026-05-28): lower bound raised 1500 → 2000 to match the
+    # uniform QLNN solver budget. Sensitivity sweep now brackets the
+    # locked default (2000) on its upper side only — [2000, 3000] —
+    # so HPO can only find LONGER-budget wins, never shorter-budget
+    # ones below the locked baseline.
     ap.add_argument("--train-steps-list", nargs="+", type=int,
-                    default=[1500, 3000])
+                    default=[2000, 3000])
     ap.add_argument("--out", type=Path, default=OUT)
     args = ap.parse_args()
 

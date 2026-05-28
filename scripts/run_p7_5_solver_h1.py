@@ -95,7 +95,10 @@ def main() -> None:
     ap.add_argument("--systems", nargs="+", default=list(P36_SYSTEMS),
                     choices=list(ALL_SYSTEMS))
     ap.add_argument("--seeds", nargs="+", type=int, default=[0, 1, 2])
-    ap.add_argument("--steps", type=int, default=1500,
+    # A15 (2026-05-28): default raised 1500 → 2000 to match the uniform
+    # QLNN solver budget (solver_demo._UNIFORM_SOLVER_STEPS). Cross-side
+    # parity: same step count on quantum and classical PINN sides.
+    ap.add_argument("--steps", type=int, default=2000,
                     help="Optax training steps for classical PINN solver")
     ap.add_argument("--n-colloc", type=int, default=60,
                     help="Interior collocation count")
