@@ -62,9 +62,38 @@ test on differential-equation tasks.
   structural-deficit disclosure, and cross-task budget parity. The
   paper is now defensible at full *PRX Quantum* rigor.
 
+## Do we have a minimum viable paper right now? Yes.
+
+Honest read: **the current 17-page draft + 7-page supplement is
+already submittable.** The verdict is clear, the pre-registration is
+locked, every number is mechanically gated, and the 14 + 5 = 19
+amendments document every methodological choice openly. If we had to
+ship today, the paper would defend.
+
+What the audit-driven re-runs add is *strength*, not *validity*:
+
+- The training-step parity fix (A15) closes a reviewer-surface concern
+  before a reviewer can raise it — the current numbers used a
+  defensible-but-undisclosed "equal compute per step" model; the
+  refresh uses the more conservative "equal iterations" model.
+- The strongly-entangling un-aliasing (A16) replaces a circuit that
+  was *unitarily identical* to data-reuploading at our config with a
+  genuinely distinct circuit. Doesn't change the verdict; removes an
+  embarrassment.
+- The qcpinn quantum-attribution sub-experiment (A17) tests whether
+  "qcpinn wins Lotka-Volterra" is the quantum circuit or the 706-
+  parameter MLP attached to it. Strengthens the attribution story.
+- The kuramoto + KdV completion (M3) takes the system ladder from 8
+  of 9 to all 9.
+
+So the choice is: **submit now and respond to reviewers, or invest
+the ~53 CPU-hours / one Anvil weekend and submit the strengthened
+version.** My recommendation is the latter, but the former is real
+and would not embarrass anyone.
+
 ## What we want to finish before submitting
 
-- The audit-driven re-runs (about 216 cells, roughly 55 CPU-hours on
+- The audit-driven re-runs (about 225 cells, roughly 53 CPU-hours on
   a laptop — or a small fraction of an HPC GPU allocation that runs
   embarrassingly parallel in roughly cell-time) plus the last two
   systems on the problem ladder, bringing coverage from 8 of 9
@@ -73,35 +102,89 @@ test on differential-equation tasks.
   master verdict table, and the integrity gate.
 - Submit to *PRX Quantum*.
 
-## Where we could go from here
+## The pipeline beyond this submission — three follow-up papers
 
-Three follow-up papers are scoped in
-[`FOLLOW_UP_PAPERS.md`](FOLLOW_UP_PAPERS.md). All three sit *after*
-the current submission lands.
+Full design in [`FOLLOW_UP_PAPERS.md`](FOLLOW_UP_PAPERS.md). Each sits
+*after* the current submission lands; the current paper ships first.
 
-- **A training-hardening follow-up paper.** Three specific
-  interventions — a quantum-aware optimizer, a "causal" training
-  schedule, and deeper data-encoding — have been identified as
-  candidates that might change the verdict. If they do, the story is
-  "default optimization underestimated quantum potential"; if they do
-  not, the null becomes much stronger. Either outcome is publishable.
-- **A mechanism-investigation paper on the time-constant finding.**
-  The substrate-dependent behavior above is a more fundamental
-  question than the original benchmark and currently has no
-  explanation in the literature.
-- **A domain-breadth paper** *(NEW, scoped this week)*. The current
-  benchmark uses mathematical-physics and generic dynamical systems
-  (Lorenz, Burgers, Lotka-Volterra, …). A follow-up pre-registered on
-  systems the chemical / biochemical / process-systems engineering
-  communities actually deploy — Van de Vusse CSTR, Monod chemostat,
-  convection-diffusion-reaction at high and low Péclet — would close
-  the audience gap and re-test the H1 hypothesis on a domain-relevant
-  ladder. Equations verified against the canonical literature; code
-  scaffolding ~5 hours; compute ~35 CPU-hours (fits in the same Anvil
-  allocation).
-- **(Longer-term) hardware execution** on a real quantum device.
-  Out of scope for the current submission but a natural revision
-  ask.
+### Follow-up #1 — Training-hardening paper
+
+> *Hardening quantum PINN training: QNG + causal weighting +
+> deeper data-reuploading on the QLNN benchmark.*
+
+Three literature-best interventions identified by the H3 mechanism
+analysis as plausibly relevant:
+
+1. **Quantum Natural Gradient** (Stokes 2020) — replace optax Adam
+   with PennyLane's QNG. Drop-in.
+2. **Causal training** (Wang et al. arXiv:2203.07404) — weight
+   collocation points by inverse time-order. Targets the van der Pol
+   stiff failure.
+3. **Deeper data-reuploading L=5** (Schuld 2021) — widens the
+   Fourier K_max ceiling.
+
+Either outcome publishable. If the verdict flips at literature-best:
+"default optimization underestimated quantum potential." If it stays
+FALSIFIED: the strongest possible Bowles-Schuld 2024 null.
+
+**Effort:** ~3-4 days dev + ~2 hr Anvil GPU.
+
+### Follow-up #2 — Substrate-dependent τ mechanism paper
+
+> *Substrate-dependent behavior of learned time constants: a
+> mechanism investigation.*
+
+The current paper's headline mechanism finding — the τ-cross-check
+disagreement (Δ_τ on classical MLP is +0.115; Δ_τ on quantum cell is
+−0.334; signs disagree, algebraic identities hold per-cell exactly)
+— has **no explanation in the literature**. Why does a learned per-
+neuron time constant help on a classical hidden state but hurt on a
+quantum hidden state?
+
+A focused mechanism investigation: τ-distribution analysis, frequency-
+domain decomposition, a third substrate (random-feature reservoir)
+to isolate trainability from representation, and an analytical
+derivation of the τ-leak sign asymmetry for both substrates.
+
+**Effort:** ~1 day dev + hours of focused experiments. Sits on the
+existing cells from the current paper.
+
+### Follow-up #3 — Domain-breadth paper *(NEW, scoped this week)*
+
+> *Quantum-enhanced solvers and forecasters for chemical, biochemical,
+> and process-systems engineering: a pre-registered benchmark.*
+
+The current benchmark is mathematical-physics (Lorenz, Burgers, KdV)
+and generic dynamical (Lotka-Volterra, van der Pol, kuramoto, FHN).
+These were the right systems for testing the H1 hypothesis but they
+leave a gap: **the ChemE / BioE / PSE communities that would actually
+deploy a quantum-enhanced differential-equation solver have not seen
+a head-to-head benchmark on systems they care about.**
+
+The follow-up re-runs the benchmark on four web-verified canonical
+systems:
+
+| Domain | System | Equation | Reference | Regime |
+|---|---|---|---|---|
+| ChemE | **Van de Vusse CSTR** | `dC_A/dt = (q/V)(C_A,in − C_A) − k₁·C_A − k₃·C_A²`, `dC_B/dt = −(q/V)·C_B + k₁·C_A − k₂·C_B` | Van de Vusse 1964; Pannocchia 2003 | SMOOTH (stiff transitions near a fold) |
+| BioE | **Monod chemostat** | `dS/dt = D·(S_in − S) − (1/Y)·μ(S)·X`, `dX/dt = (μ(S) − D)·X` with `μ(S) = μ_max·S/(K_s + S)` | Monod 1950; Novick-Szilard 1950 | SMOOTH (washout boundary at D → μ_max) |
+| PSE | **CDR low-Pe** | `∂u/∂t + v·∂u/∂x = D·∂²u/∂x² − k·u`, Pe = vL/D = 1 | Agud Albesa et al. 2023 | SMOOTH (diffusion-dominated) |
+| PSE | **CDR high-Pe** | same equation, Pe = 100 | same | BROADBAND (sharp reaction front) |
+
+Two systems per regime keeps the H1 bin balance. The CDR equation
+yields two systems from one residual function by varying Péclet.
+
+**Effort:** ~5 hr code scaffolding + ~35 CPU-hours compute. Fits in
+the same ACCESS Explore allocation.
+
+### Plus — long-term: hardware execution
+
+Pre-reg disclaimed simulator-only. PRX Quantum routinely publishes
+simulator-only QML benchmarks. A small-scale hardware run (e.g.
+4-qubit ionQ Aria; IBM Eagle 127q with transpilation) is a natural
+revision-stage extension if reviewers request it. Out of scope for
+the current submission and for the three follow-ups above unless
+budget + device-access materializes.
 
 ---
 

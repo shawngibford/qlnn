@@ -139,6 +139,33 @@ needs the new numbers.
 
 ---
 
+## Decision point: minimum viable submission vs strengthened submission
+
+The current 17-page main + 7-page supplement is **already submittable
+as-is**. The integrity gate is exit-0, the pre-registration is locked,
+and the 19 amendments openly document every methodological choice.
+
+The five phases above describe the path to the **strengthened**
+submission: the audit-driven re-runs (A15-A19), the kuramoto + KdV
+completion (M3), and the refreshed verdict numbers (Phase D).
+
+If a faster path is preferable, the **minimum** path is:
+
+```
+A (ACCESS — optional) → D (paper polish, ~2 hr) → E (submit, ~1 week)
+```
+
+Phase A is only required if Phase C re-runs are to happen on Anvil
+rather than on a laptop. Phase D in the minimum path is just a
+formatting + cover-letter pass; no number refresh, since no re-runs
+have happened.
+
+The trade-off: minimum-path submission may face reviewer queries on
+the four fairness items A15-A19 closed (training-budget asymmetry,
+strongly-entangling aliasing, qcpinn classical-param confound,
+brickwall structural deficit). The strengthened-path submission has
+already closed those.
+
 ## Critical path summary
 
 ```
