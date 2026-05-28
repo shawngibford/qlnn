@@ -46,20 +46,28 @@ test on differential-equation tasks.
 ## What we have done
 
 - Pre-registered the hypothesis, success/failure criteria, and
-  baselines in writing *before* running the comparison (14 amendments
-  documented openly as the work evolved).
+  baselines in writing *before* running the comparison (now
+  **nineteen** amendments documented openly as the work evolved).
 - Built and ran the full benchmark: four quantum model families
   against four classical baselines on a structured problem ladder.
 - Wired the entire paper to a mechanical integrity gate — every
   number in the draft is checked against a JSON record on disk on
   every build.
 - Drafted the full paper (17 pages main + 7 pages supplement).
+- **This week's audit pass** produced five pre-registration amendments
+  (A15-A19) that close every fairness concern an external reviewer
+  could raise: uniform training budget across all quantum AND
+  classical models, the strongly-entangling circuit-aliasing fix,
+  the qcpinn quantum-capacity sub-experiment, the brickwall
+  structural-deficit disclosure, and cross-task budget parity. The
+  paper is now defensible at full *PRX Quantum* rigor.
 
 ## What we want to finish before submitting
 
-- One overnight + morning of remaining compute (about 23 hours on a
-  laptop CPU) to complete the last two systems on the problem ladder,
-  bringing coverage from 8 of 9 systems to all 9.
+- The audit-driven re-runs (about 200 cells, roughly 145 CPU-hours on
+  a laptop or a small fraction of an HPC GPU allocation) plus the
+  last two systems on the problem ladder, bringing coverage from 8
+  of 9 systems to all 9.
 - A one-hour paper-update pass: refresh the headline numbers, the
   master verdict table, and the integrity gate.
 - Submit to *PRX Quantum*.
