@@ -59,14 +59,30 @@ test on differential-equation tasks.
   could raise: uniform training budget across all quantum AND
   classical models, the strongly-entangling circuit-aliasing fix,
   the qcpinn quantum-capacity sub-experiment, the brickwall
-  structural-deficit disclosure, and cross-task budget parity. The
-  paper is now defensible at full *PRX Quantum* rigor.
+  structural-deficit disclosure, and cross-task budget parity.
+- **A self-administered peer-review pass** (five reviewer-agents,
+  modeled as a hostile *PRX Quantum* panel) identified fifteen
+  distinct concerns a real reviewer would raise. **Nine were closed
+  in-session today** as a closure plan ([`REMEDIATION_PLAN.md`](REMEDIATION_PLAN.md))
+  with three more amendments (A20–A22 covering a paired QPINN
+  readout divergence, a brickwall connectivity diagnosis, and a
+  latent 2D PDE docstring fix), a Tier 1 paper-text polish pass
+  (numerical inconsistency between abstract and body fixed,
+  bibliography expanded from 10 to 15 entries, amendment count
+  synchronized), and two Tier 5 reproducibility guards (a JAX dtype
+  startup assertion and a PDE field SHA-256 manifest gate). The
+  remaining six concerns split into the audit re-runs already on
+  the Anvil queue, two advisor-decision items (venue + scope), and
+  one deferred reproducibility-deepening pass. See
+  [`PEER_REVIEW_SYNTHESIS.md`](PEER_REVIEW_SYNTHESIS.md) for what
+  the reviewers said and [`REMEDIATION_PLAN.md`](REMEDIATION_PLAN.md)
+  for how each item closes.
 
 ## Do we have a minimum viable paper right now? Yes.
 
 Honest read: **the current 17-page draft + 7-page supplement is
 already submittable.** The verdict is clear, the pre-registration is
-locked, every number is mechanically gated, and the 14 + 5 = 19
+locked, every number is mechanically gated, and the 14 + 5 + 3 = 22
 amendments document every methodological choice openly. If we had to
 ship today, the paper would defend.
 
