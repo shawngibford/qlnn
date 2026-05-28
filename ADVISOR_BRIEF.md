@@ -64,10 +64,11 @@ test on differential-equation tasks.
 
 ## What we want to finish before submitting
 
-- The audit-driven re-runs (about 200 cells, roughly 145 CPU-hours on
-  a laptop or a small fraction of an HPC GPU allocation) plus the
-  last two systems on the problem ladder, bringing coverage from 8
-  of 9 systems to all 9.
+- The audit-driven re-runs (about 216 cells, roughly 55 CPU-hours on
+  a laptop — or a small fraction of an HPC GPU allocation that runs
+  embarrassingly parallel in roughly cell-time) plus the last two
+  systems on the problem ladder, bringing coverage from 8 of 9
+  systems to all 9.
 - A one-hour paper-update pass: refresh the headline numbers, the
   master verdict table, and the integrity gate.
 - Submit to *PRX Quantum*.
@@ -138,21 +139,25 @@ numbers backing it will be refreshed with a fair comparison.
 
 ### What this implies for compute
 
-Combining the re-runs the audit forces, plus the originally-planned
-M3 sweep to bring our pre-registration coverage from 8 of 9 systems
-to all 9 of 9:
+Combining the re-runs the audit forces with the originally-planned M3
+sweep, the compute footprint (recomputed 2026-05-28 from the on-disk
+KdV + kuramoto smoke measurements) is:
 
-| Workload | Cells | Est. CPU-hours |
-|---|---:|---:|
-| Original M3: kuramoto + KdV solver sweep | 30 | ~23 |
-| A15 re-run: solver cells at equalized training budget | ~80 | ~50 |
-| A16 re-run: strongly_entangling forecaster cells | ~18 | ~3 |
-| A17 new: qcpinn quantum-parameter sweep (3 variants × 8 systems × 3 seeds) | 72 | ~70 |
-| **Total** | **~200** | **~145** |
+| Workload | Cells | Est. CPU-hours | Source |
+|---|---:|---:|---|
+| M3: kuramoto + KdV at the new uniform 2000-step budget | 30 | ~25 | smoke-measured |
+| A15 re-run: original 4 ODE systems × 4 QLNN families + classical PINN, all at uniform 2000 steps | ~60 | ~10 | smoke-extrapolated by state dimension |
+| A17 ODE-side: 3 qcpinn variants × 4 ODE systems × 3 seeds | 36 | ~15 | extrapolated (variants not yet smoked) |
+| A16 + A19: forecaster re-runs at 2000-step budget (post-A18 brickwall removal; includes strongly-entangling fix) | ~90 | ~5 | extrapolated (forecaster cells were seconds at 200 steps → minutes at 2000) |
+| **Committed-scope subtotal** | **~216** | **~55** | |
+| *Optional A17 extension: 3 qcpinn variants × 4 PDE systems × 3 seeds* | *36* | *~60* | *extrapolated (would require a small PDE-side code patch)* |
+| **Grand total if the PDE extension lands** | **~252** | **~115** | |
 
-That is roughly **six straight days of CPU compute on my laptop**
-(Apple Silicon, JAX `default.qubit`). The actual wall-clock would be
-longer because the laptop needs to do everything else I do on it.
+The committed-scope estimate is **roughly 2-3 days of CPU compute on
+my laptop** (Apple Silicon, JAX `default.qubit`). Extending the
+qcpinn quantum-attribution sub-experiment to the PDE side roughly
+doubles that to **5 days**. The actual wall-clock would be longer
+because the laptop needs to do everything else I do on it.
 
 ### Why Anvil specifically
 
@@ -212,8 +217,9 @@ I can send you a draft to sign.
 
 **Authorize me to request an ACCESS Explore allocation on Anvil so
 the audit re-runs and the kuramoto + KdV sweep can finish on GPU
-this week rather than holding the paper open for another six days of
-my laptop CPU.**
+in roughly cell-time rather than two to five straight days of laptop
+CPU — and so the same allocation can backstop the qcpinn PDE-side
+extension if we decide it strengthens the paper.**
 
 ---
 

@@ -69,17 +69,22 @@ already run on 2026-05-28.
 
 ---
 
-## Phase C — Audit-driven re-run sweep (24-48 hr, embarrassingly parallel)
+## Phase C — Audit-driven re-run sweep (~55 CPU-hours committed, embarrassingly parallel)
 
-The audit produced 200 cells of re-runs across five workloads:
+The audit produced ~216 cells of re-runs and new work across four
+distinct workloads. Wall-time estimates are smoke-measured for M3
+(KdV + kuramoto smokes 2026-05-28) and extrapolated by state
+dimension or step-budget ratio for the rest:
 
-| Workload | Cells | Notes |
-|---|---:|---|
-| A15 — solver re-runs at uniform 2000 steps (7 QLNN families + classical PINN) | ~80 | includes the 3 A17 qcpinn variants |
-| A16 — forecaster re-runs with un-aliased strongly_entangling | folded into A19 | |
-| A17 — qcpinn quantum-attribution sub-experiment (3 variants × 8 systems × 3 seeds) | 72 | NEW work |
-| A19 — forecaster all 5 sides at 2000 steps | 36 | post-A18 (brickwall removed) |
-| M3 — kuramoto + KdV solver matrix | 30 | from the original launch plan |
+| Workload | Cells | Est. CPU-hr | Source |
+|---|---:|---:|---|
+| M3 — kuramoto + KdV at uniform 2000 steps (new cells) | 30 | ~25 | smoke-measured |
+| A15 — ODE solver re-runs of the original 4 systems × 4 QLNN + cPINN at uniform 2000 steps | ~60 | ~10 | smoke-extrapolated by state dim |
+| A17 — qcpinn quantum-attribution sub-experiment, ODE side (3 variants × 4 systems × 3 seeds) | 36 | ~15 | extrapolated (variants not smoked) |
+| A16 + A19 — forecaster re-runs at 2000 steps (post-A18 brickwall removal; includes strongly_entangling fix) | ~90 | ~5 | extrapolated |
+| **Committed-scope subtotal** | **~216** | **~55** | |
+| *Optional: A17 PDE-side extension (3 variants × 4 PDEs × 3 seeds)* | *36* | *~60* | *requires small PDE-side code patch first* |
+| **Grand total with PDE extension** | **~252** | **~115** | |
 
 **Action.** Submit as one big SLURM array job, one array task per
 cell. The cells are independent, so the wall-clock collapses from
@@ -138,8 +143,16 @@ needs the new numbers.
 
 ```
 A (ACCESS) → B (Anvil setup) → C (re-run sweep) → D (paper update) → E (submit)
-   1-3 d         ~2 hr           24-48 hr           ~2 hr        ~1 week
+   1-3 d         ~2 hr           ~55 CPU-hr          ~2 hr         ~1 week
+                                 (parallel → hours
+                                  on Anvil GPU)
 ```
 
-Everything past Phase A is wall-clock work that can be scheduled. Phase A
-is the gate the advisor letter unblocks.
+Everything past Phase A is wall-clock work that can be scheduled.
+Phase C is **embarrassingly parallel by cell** — on Anvil with
+adequate GPU parallelism it collapses to roughly one cell-time
+(longest-cell wall-clock, the te_qpinn_qnn cell at ~2.3 hr per the
+2026-05-28 smoke), not the serial sum.
+
+Phase A is the only gate that requires advisor action: the
+one-paragraph letter on institutional letterhead.
