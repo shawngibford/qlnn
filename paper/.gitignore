@@ -9,6 +9,10 @@
 *.synctex.gz
 *.toc
 mainNotes.bib
-main.pdf
-supplement.pdf
 supplementNotes.bib
+
+# main.pdf and supplement.pdf are intentionally TRACKED so the
+# advisor / reviewer / GitHub-link readers see the rendered paper
+# without having to install a TeX distribution. Run `bash build.sh`
+# and `bash build_supplement.sh` after .tex edits and commit the
+# refreshed PDFs alongside the source.
