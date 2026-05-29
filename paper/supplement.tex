@@ -227,6 +227,24 @@ JSONs underpinning the tables above.
 \label{sup:fig:p3-9-pde-matrix}
 \end{figure*}
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fig_qcpinn_variants.pdf}
+\caption{Amendment A17 quantum-parameter step-wise sweep on
+\texttt{qcpinn} (Kuramoto, seed 0, SMOKE-budget 50 steps; production
+2000 steps via Phase~C on Anvil). Left: training loss vs.\ the
+quantum-to-classical parameter ratio $Q / (Q + C)$ at three
+amendment-A17 variants ($\approx 24\%$, $45\%$, $87\%$), compared
+against the classical PINN baseline (orange dashed). Right: estimated
+per-cell wall-clock as a function of quantum capacity. The figure is
+labelled SMOKE because the 50-step budget is too short to distinguish
+underfitting from family separation; the figure exists to document
+that the A17 sweep \emph{is wired and instrumented}, not to support
+a Q-helps/Q-hurts conclusion. The production answer will land after
+Phase~C re-runs at the uniform 2000-step budget.}
+\label{sup:fig:qcpinn-variants}
+\end{figure*}
+
 \subsection{Forecaster-task complete 2$\times$2 matrix ($n=9$)}
 \label{sup:forecaster}
 

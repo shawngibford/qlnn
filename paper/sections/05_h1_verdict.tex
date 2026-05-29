@@ -234,3 +234,37 @@ estimate $+0.059$ and CI~$[-0.058, +0.191]$, methodologically
 strengthening the default-Adam $n=18$ row directly above it.}
 \label{fig:hpo}
 \end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_sample_size_sensitivity.pdf}
+\caption{Sample-size and binning sensitivity of the solver-task
+$\Delta_{\mathrm{diff}}$ point estimate. The original $n{=}18$ raw
+analysis (broadband bin = Lorenz only) returned a small positive
+$\Delta_{\mathrm{diff}} = +0.109$; the post-A12 $n{=}24$ PRIMARY
+analysis (broadband bin expanded to include FitzHugh--Nagumo, the
+canonical fast-slow stiff system) returns $\Delta_{\mathrm{diff}} =
+-0.084$ with CI crossing zero. The forecaster-task $n{=}9$ PRIMARY
+verdict $\Delta_{\mathrm{diff}} = -0.501$ (CI excludes zero
+negatively) is shown for cross-task comparison. The solver sign flip
+is the single most-asked reviewer concern about robustness; it is
+the reason the verdict is reported as FALSIFIED (CI crosses zero on
+the smooth side) rather than ``inconclusive at the limit of the
+sample.''}
+\label{fig:sample-size}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_system_heatmap.pdf}
+\caption{Per-system mean relative-$L^2$ heatmap aggregating the
+$n{=}24$ PRIMARY solver-task cells (8 systems $\times$ 3 seeds). The
+red horizontal line separates the smooth-periodic regime band (top)
+from the broadband-multiscale band (bottom). The most-frequent
+QLNN-best family per system is annotated parenthetically. The 24$\times$
+log scale span between the easiest cell (Allen--Cahn classical PINN)
+and the hardest (Lorenz at the smooth-side tail) makes the
+per-system structure that the verdict-level $\Delta_{\mathrm{diff}}$
+aggregation hides directly visible.}
+\label{fig:system-heatmap}
+\end{figure}

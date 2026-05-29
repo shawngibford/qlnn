@@ -143,6 +143,40 @@ significance means we report KL as a \emph{candidate mechanism},
 not a confirmed one. A P6-scale unified matrix
 (Section~\ref{sec:discussion}) would discriminate.
 
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_2x2_decomposition.pdf}
+\caption{Schematic of the 2$\times$2 mechanism-decomposition design
+introduced by amendments A12--A13. Rows index the cell substrate
+(classical MLP vs.\ quantum cell); columns index the baseline
+reference (LTC-liquid vs.\ nonliquid Neural-ODE). Each cell yields a
+per-cell $\Delta_{\mathrm{diff}}$; the four numbers algebraically
+partition the headline forecaster $\Delta_{\mathrm{combined}} = -0.501$
+into a sum of substrate and reference contributions plus an
+interaction term. The interaction term is the substrate-dependent
+$\tau$ signature analyzed in
+Figure~\ref{fig:tau-substrate}.}
+\label{fig:2x2-cartoon}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\columnwidth]{figures/fig_tau_substrate.pdf}
+\caption{Substrate-dependent $\tau$ signature: the two decomposition
+paths that \emph{isolate} the liquid time-constant machinery
+(\texttt{liquid\_via\_classical}, \texttt{liquid\_via\_quantum})
+disagree in sign, with $|\Delta_{\mathrm{classical}} -
+\Delta_{\mathrm{quantum}}| \approx 0.449$. The two control paths
+(\texttt{quantum\_via\_ltc}, \texttt{quantum\_via\_nonliquid}), which
+do \emph{not} isolate $\tau$, are both negative and broadly consistent
+with the combined verdict. This pattern is the strongest
+mechanistic evidence in the paper that LTC-style time-constant
+machinery interacts with the substrate it is mounted on, and is the
+seed for a planned follow-up paper
+(Section~\ref{sec:discussion}).}
+\label{fig:tau-substrate}
+\end{figure}
+
 \subsection{Connecting the mechanism story to the LTC decomposition}
 \label{sec:mechanism-ltc}
 

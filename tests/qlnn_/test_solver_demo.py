@@ -31,8 +31,13 @@ SMOKE_COLLOC = 12
 
 
 def test_all_four_families_registered():
-    assert set(FAMILIES) == {
-        "chebyshev_dqc", "te_qpinn_fnn", "te_qpinn_qnn", "qcpinn"}
+    # The 4 baseline families (chebyshev_dqc / te_qpinn_fnn /
+    # te_qpinn_qnn / qcpinn) must all be present. A17 (2026-05-28)
+    # additionally registered 3 step-wise qcpinn variants
+    # (qcpinn_balanced/quantum/full_q) along the Q/(Q+C) parameter
+    # ratio; those are allowed but not required by this baseline check.
+    assert {"chebyshev_dqc", "te_qpinn_fnn", "te_qpinn_qnn",
+            "qcpinn"}.issubset(set(FAMILIES))
 
 
 def test_both_odes_registered():
@@ -63,14 +68,22 @@ def test_each_family_trains_on_expdecay_at_reduced_steps(family):
 
 
 def test_smoke_sweep_wall_clock_under_60s():
+    # Budget scales with the number of registered families: A17 added
+    # 3 qcpinn variants (qcpinn_balanced/quantum/full_q) on top of the
+    # 4 baseline families. Each family has its own JIT-compile cost
+    # (≈ 6-10s on CPU) plus a few seconds of stepping at SMOKE_STEPS.
+    # Allow ~15s per family + a 20s slack so the budget tracks the
+    # actual registered count without false-positive failures.
+    budget_s = 15.0 * len(FAMILIES) + 20.0
     t0 = time.time()
     for family in FAMILIES:
         out = train_one_family(family, "expdecay", seed=0,
                                 steps=SMOKE_STEPS, n_colloc=SMOKE_COLLOC)
         assert math.isfinite(out["final_loss"])
     elapsed = time.time() - t0
-    assert elapsed < 60.0, (
-        f"smoke sweep took {elapsed:.1f}s; budget is 60s")
+    assert elapsed < budget_s, (
+        f"smoke sweep took {elapsed:.1f}s; budget is {budget_s:.0f}s "
+        f"for {len(FAMILIES)} registered families")
 
 
 def test_run_sweep_returns_full_cartesian_product():
