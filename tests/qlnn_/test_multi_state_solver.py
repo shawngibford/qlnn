@@ -33,10 +33,14 @@ SMOKE_COLLOC = 10
 
 
 def test_all_vector_systems_registered():
-    # P7.8 expansion: FHN added to bring ODE solver coverage to 4/5
-    # pre-reg systems (Kuramoto deferred to follow-up paper).
+    # P7.8 expansion: FHN added (4/5 pre-reg systems).
+    # M3-prep (commit 019e771): Kuramoto added to bring coverage to
+    # 5/5 pre-reg systems; per A11 the kuramoto sweep itself is
+    # deferred to follow-up compute, but the entry exists so the
+    # solver dispatcher can route to it once Phase C runs on Anvil.
     assert set(VECTOR_ODES) == {
         "lotka_volterra", "van_der_pol", "lorenz", "fitzhugh_nagumo",
+        "kuramoto",
     }
 
 

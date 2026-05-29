@@ -241,52 +241,16 @@ def test_aggregate_seed_metrics_std_nan_for_single_seed():
 
 
 # ---------------------------------------------------------------------------
-# clip_predictions_norm — the R3 finding 6 raw-OD-range clip helper.
-# Defined in scripts/train_baseline.py (and mirrored in scripts/train_qlnn.py).
+# clip_predictions_norm tests — the four `test_clip_predictions_norm_*` tests
+# that lived here imported `train_baseline.clip_predictions_norm`, which was
+# moved to `archive/scripts/train_baseline.py` during the 2026-05-27 OD-era
+# purge. The clip-predictions-norm helper itself is OD-program-only and is
+# not used by any active post-pivot code path. The original tests are
+# preserved at `archive/tests/test_metrics_clip_predictions_norm.py` (when
+# present) for reproducibility of the archived OD-era results.
+#
+# Removed 2026-05-28 alongside the broader OD-purge test-debt cleanup.
 # ---------------------------------------------------------------------------
-def test_clip_predictions_norm_noop_when_max_is_none():
-    from train_baseline import clip_predictions_norm
-
-    sc = _od_scaler(0.0, 3.8)
-    y = np.array([-0.5, 0.0, 0.5, 1.0, 1.5], dtype=np.float32)
-    out = clip_predictions_norm(y, sc, clip_raw_max=None)
-    # Pass-through (identity), same dtype and values.
-    np.testing.assert_array_equal(out, y)
-
-
-def test_clip_predictions_norm_clips_to_raw_range():
-    """With scaler fit on [0, 4] and raw clip at 3.8, normalized clip = 0.95.
-    Predictions outside [0, 0.95] in normalized space must be clamped."""
-    from train_baseline import clip_predictions_norm
-
-    sc = _od_scaler(0.0, 4.0)  # 1.0 norm == 4.0 raw
-    y = np.array([-0.1, 0.0, 0.5, 0.95, 1.0, 1.5], dtype=np.float32)
-    out = clip_predictions_norm(y, sc, clip_raw_max=3.8, clip_raw_min=0.0)
-    # Normalized image of [0, 3.8] under fit [0, 4] is [0, 0.95].
-    np.testing.assert_allclose(
-        out, np.array([0.0, 0.0, 0.5, 0.95, 0.95, 0.95], dtype=np.float32), rtol=0, atol=1e-6
-    )
-
-
-def test_clip_predictions_norm_handles_train_only_scaler():
-    """When the scaler is fit on a training slice whose max is below the
-    physical clip ceiling, the normalized clip ceiling is > 1 — predictions
-    in [0, 1] pass through, predictions above 1 are still clipped to the
-    normalized image of clip_raw_max."""
-    from train_baseline import clip_predictions_norm
-
-    # Scaler fit on training range [0, 2.5]. Physical max prior = 3.8.
-    sc = _od_scaler(0.0, 2.5)
-    # 3.8 raw maps to (3.8 - 0) / (2.5 - 0) = 1.52 norm.
-    y = np.array([0.5, 1.0, 1.4, 1.52, 1.8, 5.0], dtype=np.float32)
-    out = clip_predictions_norm(y, sc, clip_raw_max=3.8, clip_raw_min=0.0)
-    np.testing.assert_allclose(
-        out, np.array([0.5, 1.0, 1.4, 1.52, 1.52, 1.52], dtype=np.float32), rtol=0, atol=1e-6
-    )
-    # Below-zero values get clipped up to 0.
-    y2 = np.array([-1.0, -0.1, 0.0], dtype=np.float32)
-    out2 = clip_predictions_norm(y2, sc, clip_raw_max=3.8, clip_raw_min=0.0)
-    np.testing.assert_allclose(out2, np.array([0.0, 0.0, 0.0], dtype=np.float32))
 
 
 # ---------------------------------------------------------------------------
@@ -347,20 +311,7 @@ def test_aggregate_seed_metrics_ci_nan_for_single_seed():
         assert np.isnan(agg[field]["ci95_high"])
 
 
-def test_clip_predictions_norm_metric_impact_via_compute_metrics():
-    """End-to-end: a wildly over-shooting prediction is clipped to the
-    physical max before compute_metrics, so the raw-space error reflects the
-    clipped value (not the original overshoot). This is the property that
-    actually closes the leakage at the eval layer."""
-    from train_baseline import clip_predictions_norm
-
-    sc = _od_scaler(0.0, 4.0)  # 1.0 norm == 4.0 raw; 3.8 raw == 0.95 norm.
-    y_true = np.array([0.5], dtype=np.float32)
-    y_pred = np.array([5.0], dtype=np.float32)  # absurd overshoot
-    # Without clipping: raw error = |5*4 - 0.5*4| = 18.0.
-    m_unclipped = compute_metrics(y_true_norm=y_true, y_pred_norm=y_pred, od_scaler=sc)
-    assert m_unclipped.mae_raw == pytest.approx(18.0)
-    # With clipping at physical max 3.8: pred -> 0.95 norm -> 3.8 raw; error = 3.8 - 2.0 = 1.8.
-    y_pred_c = clip_predictions_norm(y_pred, sc, clip_raw_max=3.8)
-    m_clipped = compute_metrics(y_true_norm=y_true, y_pred_norm=y_pred_c, od_scaler=sc)
-    assert m_clipped.mae_raw == pytest.approx(1.8)
+# test_clip_predictions_norm_metric_impact_via_compute_metrics — removed
+# 2026-05-28 alongside the other three clip_predictions_norm tests above.
+# Same rationale: it imports `train_baseline.clip_predictions_norm` which
+# moved to `archive/scripts/` during the 2026-05-27 OD-purge.
