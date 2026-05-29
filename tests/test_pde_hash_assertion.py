@@ -101,6 +101,20 @@ def test_real_manifest_systems_match():
     """All four real PDE artifacts under data/pde/ must currently match
     their manifest entries. This catches accidental drift in the
     committed fields and ensures the gate would be a no-op on the
-    canonical repo state."""
+    canonical repo state.
+
+    Skip-when-absent: the `data/` symlink is per-worktree (gitignored)
+    and may legitimately be missing in fresh clones / CI runs that
+    don't need it. We skip the assertion rather than fail in that
+    case — the test fires when the symlink is present.
+    """
+    import pytest as _pytest
+    from pathlib import Path as _Path
+
+    repo_root = _Path(__file__).resolve().parents[1]
+    manifest = repo_root / "data" / "pde" / "manifest.json"
+    if not manifest.exists():
+        _pytest.skip("data/pde/manifest.json absent; gate-on-presence "
+                     "(typical in worktrees without the data symlink)")
     for name in ("burgers_smooth", "burgers_shock", "allen_cahn", "kdv"):
         assert_dataset_hash(name)
