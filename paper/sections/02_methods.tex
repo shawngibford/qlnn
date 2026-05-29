@@ -251,6 +251,17 @@ the following:
         positively; FALSIFIED if it includes zero or excludes
         zero negatively; INCONCLUSIVE if the guards drop too
         many cells to render the bootstrap underpowered.
+  \item \emph{Multiple-comparison control}: when several verdicts
+        are reported as a single inferential family
+        (see Table~\ref{tab:master-verdicts}, eleven layered
+        verdicts), the family-wise error rate is controlled by
+        Holm--Bonferroni at $\alpha = 0.05$. Because the family is
+        a \emph{falsification} family rather than a discovery
+        family --- every row tests the same pre-registered
+        directional claim --- correction can only make the
+        falsification stricter, never weaker; the headline
+        verdicts pass even the strict reading (footnote on
+        Table~\ref{tab:master-verdicts}).
 \end{enumerate}
 
 The pre-registration commits the framework to mechanical
@@ -271,6 +282,28 @@ budgets $\{1500, 3000\}$ steps -- 72 retrains in total. The
 takes the per-cell minimum-$\relltwo$ HPO point on both sides.
 This is the Bowles--Schuld~\cite{bowles2024better} ``tune both
 sides'' sensitivity test.
+
+\subsection{Compute envelope}
+\label{sec:methods-compute}
+
+All committed results in this paper were produced on a single
+Apple Silicon (M1) laptop CPU. The headline committed corpus
+consists of approximately 320 individual training cells across
+the solver and forecaster tasks, totalling
+$\sim 145$~CPU-hours of wall-clock. The largest individual cell
+(\texttt{chebyshev\_dqc} on KdV at the post-A15 uniform 2000-step
+budget) ran for $\sim 1.1$~hours; the smallest (classical PINN
+on Lotka--Volterra) for under one minute. The task is
+embarrassingly parallel by cell and was run sequentially on
+CPU; the post-audit re-runs required by amendments A15--A20
+(Appendix~\ref{sup:prereg}) are deferred to an NSF~ACCESS
+\texttt{Anvil} GPU partition and are estimated at $\sim
+55$~CPU-equivalent-hours, parallelizable in $< 10$~hours
+wall-clock by SLURM array. Detailed per-cell wall-clock
+measurements live in the committed
+\texttt{results/*/metrics.json} files and feed the per-figure
+provenance dictionaries verified by
+\texttt{scripts/verify\_paper\_integrity.py}.
 
 \subsection{Open-source reproducibility}
 \label{sec:methods-repro}

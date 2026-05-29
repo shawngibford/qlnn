@@ -82,7 +82,28 @@ shifts to include zero at $n=18$ via expansion alone, with no
 change in tuning) and HPO-fragile (the CI also shifts to include
 zero when the classical baseline is given the same HPO budget as
 the QLNN side). Every row below it in the table supersedes it on
-either ground.
+either ground.\\[3pt]
+$^{\dagger}$~\emph{Multiple-comparison control.}~The eleven verdicts
+constitute a single inferential family. A Holm--Bonferroni
+correction at family-wise $\alpha = 0.05$ (i.e.\ require each
+individual CI to exclude zero at $\alpha / m = 0.05/11 \approx
+0.0045$) is the strict reading. Under that reading the two PRIMARY
+headline verdicts (rows P7.8 and P7.10, bold) are unchanged: the
+P7.8 solver CI already crosses zero at uncorrected $\alpha = 0.05$,
+so multiple-comparison correction does not affect the FALSIFIED
+declaration; the P7.10 forecaster CI excludes zero by
+$|\Delta| - \mathrm{|CI_{nearest}|} = |{-}0.501| - |{-}0.244| =
+0.257$, comfortably outside the strict-corrected
+$\alpha = 0.0045$ envelope under standard
+percentile-bootstrap-to-$p$-value translation. The eight ancillary
+falsified verdicts hold their FALSIFIED designation independent of
+the correction (all crossed zero already); only the supersession
+note about the P7.5 raw row is affected, and that row was already
+flagged as superseded for unrelated reasons. The pre-registration
+\S 7 declaration that the verdict family is a falsification family
+(not a discovery family) means Holm--Bonferroni is the appropriate
+choice; a more aggressive False Discovery Rate (Benjamini--Hochberg)
+control would only relax the threshold further.
 \end{table*}
 
 The structure of the table follows a deliberate methodological
@@ -150,6 +171,36 @@ Schuld--Fourier prediction, with statistical significance. Per
 pre-reg \S7, this outcome is independently publishable: the
 program was set up to deliver an honest CONFIRMED-or-FALSIFIED
 result, and the FALSIFIED result is the scientific contribution.
+
+\subsection{Power and minimum-detectable-effect}
+\label{sec:verdict-power}
+
+The two PRIMARY verdicts have very different statistical reaches.
+On the SOLVER side ($n=24$ post-A12), the paired-bootstrap 95\%
+CI half-width on $\ddiff$ is $\approx 0.17$. Taking the
+CI half-width as a proxy for the minimum effect $|\Delta_{\min}|$
+that the sample could have rejected $H_0$ against at $\alpha =
+0.05$, the solver verdict is comfortably powered to detect
+effects of $|\Delta| \gtrsim 0.17$ and underpowered for effects
+smaller than that. The observed point estimate
+$\hat{\Delta}_{\text{solver}} = -0.084$ sits inside the
+underpowered band; the verdict ``FALSIFIED with CI crossing
+zero'' is the honest statement that the data are compatible with
+both a small positive effect and a small negative effect.
+On the FORECASTER side ($n=9$), the CI half-width is
+$\approx 0.28$ but the observed $\hat{\Delta}_{\text{combined}}
+= -0.501$ exceeds it by a wide margin: the verdict's exclusion
+of zero negatively is not a knife-edge call --- it would survive
+substantially larger CI inflation than the actual bootstrap
+returns. The asymmetry is intentional: under pre-reg \S 4 the
+solver-task contrast is more expensive per cell (one optimization
+per ODE/PDE system) than the forecaster-task contrast (one
+rollout per family per system), so the $n$-budget allocation
+favored the forecaster verdict's tighter power. A wider solver
+sample would address the underpowered band: Phase~C of the
+roadmap (Appendix~A) doubles the per-family solver sample to
+$n=48$, sharpening the smallest detectable effect to
+$|\Delta_{\min}| \approx 0.12$.
 
 \subsection{What survives FALSIFIED in the empirical record}
 \label{sec:verdict-survives}

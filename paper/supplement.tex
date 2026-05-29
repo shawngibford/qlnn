@@ -454,22 +454,25 @@ The full pre-registration document is at
 SHA stamped). Section~7's decision rule is applied mechanically by
 \texttt{verify\_paper\_integrity.py}.
 
-The complete amendment record (A1--A13) is at
+The complete amendment record (A1--A22) is at
 \texttt{PRE\_REG\_AMENDMENT.md}. Table~\ref{sup:tab:amendments}
-summarizes the headline status of each amendment.
+summarizes the headline status of each amendment. A1--A13 are
+the pre-paper amendments adopted before locking the headline
+results; A14 is a post-hoc polish item (Q-Q residual
+diagnostics, see \S\ref{sup:qq-diagnostics}); A15--A22 are the
+audit-pass amendments adopted after the 5-reviewer peer-review
+swarm (2026-05-28), each closing a specific reviewer-flagged
+concern.
 
 \begin{table*}[t]
 \centering
-\caption{Pre-registration amendments (A1--A13). Status column
+\caption{Pre-registration amendments (A1--A22). Status column
 flags PRIMARY = canonical headline verdict; SUPERSEDED = the
 amendment is documented but a later amendment takes precedence
 for the paper's narrative; DISCLOSED = methodological choice
-made open without superseding. Note: A14 (Q-Q residual
-diagnostics, see \S\ref{sup:qq-diagnostics}) is a post-hoc
-amendment introduced after the pre-registration set was
-locked, and is intentionally not part of the pre-registered
-A1--A13 record; it is documented in
-\texttt{PRE\_REG\_AMENDMENT.md}.}
+made open without superseding; \textsc{re-run req.} = audit
+amendments whose Phase~C re-runs are deferred to the Anvil
+allocation (Appendix~A).}
 \label{sup:tab:amendments}
 \small
 \begin{tabular}{lll}
@@ -489,6 +492,17 @@ A10 & combined ODE+PDE n=18 (P7.6 c2) & SUPERSEDED-BY-A11 \\
 A11 & full-ladder n=24 sign-flip (P7.8) & \textbf{PRIMARY SOLVER} \\
 A12 & classical LTC + 3-verdict forecaster decomposition (P7.10) & PRIMARY FORECASTER (via classical path) \\
 A13 & non-liquid QLNN + complete 2$\times$2 + $\tau$-cross-check disagreement (P7.11) & \textbf{PRIMARY FORECASTER (complete)} \\
+\midrule
+A14 & post-hoc Q-Q residual diagnostics (archived OD + Lorenz) & DISCLOSED \\
+\midrule
+A15 & equalized training-step budget across ALL solver models (uniform 2000) & DISCLOSED + \textsc{re-run req.} \\
+A16 & un-aliased \texttt{strongly\_entangling} from \texttt{data\_reuploading} (PennyLane fallback fix) & DISCLOSED + \textsc{re-run req.} \\
+A17 & \texttt{qcpinn} quantum-parameter step-wise sweep along $Q/(Q{+}C)$ ratio (3 variants) & DISCLOSED + 72 new cells \\
+A18 & \texttt{brickwall} removed from empirical forecaster sweep (qubit-2 disconnected at $n{=}3,L{=}1$) & DISCLOSED + 9 cells removed \\
+A19 & cross-task budget parity: forecaster step budget raised $200 \to 2000$ & DISCLOSED + forecaster re-runs \\
+A20 & \texttt{te\_qpinn\_fnn} readout restored \texttt{qml.prod} $\to$ \texttt{qml.sum} (paired-family equivalence) & DISCLOSED + \texttt{fnn} re-runs \\
+A21 & \texttt{brickwall} connectivity diagnosis strengthened (linear-chain reduction unless $n_q \geq 4$) & DISCLOSED, no compute \\
+A22 & 2D PDE hard-IC docstring fix (implementation always correct; only docstring carried the omission) & DISCLOSED, no compute \\
 \bottomrule
 \end{tabular}
 \end{table*}
