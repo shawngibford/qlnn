@@ -54,7 +54,8 @@ def main() -> None:
         ("Forecaster  n=9 (PRIMARY)", fc, "#009E73"),
     ]
 
-    fig, ax = plt.subplots(figsize=(7.2, 3.2))
+    fig, ax = plt.subplots(figsize=(9.0, 4.0),
+                            constrained_layout=True)
     y = np.arange(len(rows))
     for i, (label, b, color) in enumerate(rows):
         mean = float(b["delta_diff_mean"])
@@ -62,28 +63,46 @@ def main() -> None:
         hi   = float(b["ci_high"])
         err = np.array([[mean - lo], [hi - mean]])
         ax.errorbar(mean, i, xerr=err, fmt="o", color=color,
-                    markersize=10, capsize=4, capthick=1.5, lw=1.8,
-                    markeredgecolor="black", markeredgewidth=0.6)
-        ax.text(mean, i + 0.18, f"{mean:+.3f}", ha="center", va="bottom",
-                fontsize=9, fontweight="bold", color=color)
+                    markersize=11, capsize=5, capthick=1.6, lw=2.0,
+                    markeredgecolor="black", markeredgewidth=0.7,
+                    zorder=3)
+        # Numeric value label BELOW the point (consistent with the
+        # τ-substrate figure; never collides with the title or arms).
+        ax.annotate(f"{mean:+.3f}", xy=(mean, i),
+                    xytext=(0, -16), textcoords="offset points",
+                    ha="center", va="top",
+                    fontsize=9.5, fontweight="bold", color=color)
+        # n_smooth / n_broad shown to the RIGHT of the point label in
+        # the same row, via axis-relative offset so it never clips.
         n_smooth = b.get("n_smooth")
         n_broad  = b.get("n_broad")
         if n_smooth is not None and n_broad is not None:
-            ax.text(hi + 0.04, i, f"n_s={n_smooth}, n_b={n_broad}",
-                    fontsize=7.5, va="center", color="#444444")
+            ax.annotate(f"$n_{{\\mathrm{{s}}}}={n_smooth}$, "
+                         f"$n_{{\\mathrm{{b}}}}={n_broad}$",
+                         xy=(mean, i),
+                         xytext=(0, 16), textcoords="offset points",
+                         ha="center", va="bottom",
+                         fontsize=8.5, color="#555555")
 
-    ax.axvline(0.0, color="black", lw=0.7, ls="--", alpha=0.6)
+    ax.axvline(0.0, color="black", lw=0.8, ls="--", alpha=0.6, zorder=1)
     ax.set_yticks(y)
-    ax.set_yticklabels([r[0] for r in rows], fontsize=9)
+    ax.set_yticklabels([r[0] for r in rows], fontsize=9.5)
     ax.invert_yaxis()
     ax.set_xlabel(r"$\Delta_{\mathrm{diff}}$  (95% paired-bootstrap CI)")
-    ax.set_title("Sample-size + binning sensitivity: solver Δ flipped sign\n"
-                 "between n=18 (raw) and n=24 (broadband bin expanded)",
-                 fontsize=10.5)
-    ax.grid(axis="x", alpha=0.25, lw=0.5)
+    ax.set_title("Sample-size + binning sensitivity: solver "
+                 r"$\Delta_{\mathrm{diff}}$ flipped sign "
+                 "between $n{=}18$ (raw) and $n{=}24$ (broadband expanded)",
+                 fontsize=11)
+    ax.grid(axis="x", alpha=0.30, lw=0.5)
+    # Pad x-axis so the annotations have breathing room.
+    x_lo = min(float(b["ci_low"])  for _, b, _ in rows)
+    x_hi = max(float(b["ci_high"]) for _, b, _ in rows)
+    pad = 0.10 * (x_hi - x_lo)
+    ax.set_xlim(x_lo - pad, x_hi + pad)
+    # Pad y-axis so labels above row 0 and below row N-1 don't clip.
+    ax.set_ylim(len(rows) - 0.5 + 0.25, -0.5 - 0.25)
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
-    fig.tight_layout()
     fig.savefig(OUT_DIR / "fig_sample_size_sensitivity.png")
     fig.savefig(OUT_DIR / "fig_sample_size_sensitivity.pdf")
     plt.close(fig)
