@@ -35,16 +35,23 @@ def test_rotation_count_matches_paper_3nL_anchor():
     assert int(np.prod(w["pqc_W"].shape)) == 60
 
 
-# ---------- HOOK: tensor-Z readout is a scalar in [-1, 1] -------------------
+# ---------- HOOK: sum-of-Z readout is a scalar in [-n, n] -------------------
 
-def test_output_is_scalar_in_minus1_to_1():
-    cfg = TEQPINNFnnConfig(num_qubits=3, num_layers=2)
+def test_output_is_scalar_in_minus_n_to_n():
+    # A20 (2026-05-28): te_qpinn_fnn readout was changed from
+    # qml.prod(*PauliZ) (range [-1, 1]) to qml.sum(*PauliZ) (range
+    # [-n, n]) to match te_qpinn_qnn and the Chebyshev-DQC convention
+    # used elsewhere in the project. Bound widens from ±1 to ±n
+    # accordingly.
+    n_qubits = 3
+    cfg = TEQPINNFnnConfig(num_qubits=n_qubits, num_layers=2)
     circ = build_te_qpinn_fnn(cfg)
     w = init_te_qpinn_fnn_weights(cfg, seed=0)
+    bound = float(n_qubits) + 1e-6
     for x in (-0.7, 0.0, 0.5):
         y = circ(jnp.asarray(x), w)
         assert jnp.ndim(y) == 0
-        assert -1.0 - 1e-6 <= float(y) <= 1.0 + 1e-6
+        assert -bound <= float(y) <= bound
 
 
 # ---------- HOOK: differentiable via jax.jacrev (the locked convention) ----

@@ -257,3 +257,38 @@ to make the family specialization patterns
 (Section~\ref{sec:solver-failures}) visible at a glance.}
 \label{fig:solver-multistate}
 \end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_circuit_zoo.pdf}
+\caption{Schematic of the four quantum ansatz families on the
+solver-task surface. Each family combines (i) a real-valued time
+input, (ii) an encoding stage, (iii) a variational stage with
+single-qubit rotations, (iv) an entanglement stage, and (v) a
+Pauli-$Z$ readout. The families differ in \emph{which} stages are
+classical versus quantum: \texttt{chebyshev\_dqc} uses a Chebyshev-$T$
+angle encoding plus a ring-CNOT topology; the paired
+\texttt{te\_qpinn\_fnn} / \texttt{te\_qpinn\_qnn} families differ only
+in whether the encoder is a classical FNN or a quantum re-uploading
+block; \texttt{qcpinn} (Sedykh et al.\ 2024) wraps a quantum block in
+classical pre- and post-nets, and amendment A17 sweeps the
+quantum-to-classical parameter ratio across three additional variants
+\texttt{qcpinn\_balanced}, \texttt{qcpinn\_quantum}, and
+\texttt{qcpinn\_full\_q} ($Q/(Q{+}C) \approx 24\%, 45\%, 87\%$
+respectively).}
+\label{fig:circuit-zoo}
+\end{figure}
+
+\begin{figure}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_trajectory_grid.pdf}
+\caption{Per-system QLNN-prediction-vs-reference trajectories (seed
+$0$, first state component) for the best-performing quantum family per
+system at the P3.6 multi-state configuration. Tracking is qualitatively
+correct on the smooth-periodic regime (Lotka--Volterra, Van der Pol)
+and degrades systematically on the broadband-multiscale regime
+(FitzHugh--Nagumo, Lorenz), foreshadowing the per-regime $\Delta$
+contrasts that drive the H1 verdict in
+Section~\ref{sec:h1-verdict}.}
+\label{fig:trajectory-grid}
+\end{figure}
