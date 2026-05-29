@@ -83,6 +83,34 @@ default budget. Per-family architectural variants (e.g., deeper
 reuploading at $L = 5$, alternative entanglement patterns) are
 deferred to the follow-up paper described next.
 
+\textbf{Multiple-comparison family.} The eleven layered
+verdicts of Table~\ref{tab:master-verdicts} constitute a single
+inferential family; the per-row $\alpha = 0.05$ CI machinery
+does not on its own control the family-wise error rate.
+Under the strict Holm--Bonferroni reading
+($\alpha_{\text{family}} = 0.05$, $m = 11$ comparisons), both
+PRIMARY headline verdicts (P7.8 solver and P7.10 forecaster)
+retain their FALSIFIED designation; the eight ancillary
+falsified verdicts hold their FALSIFIED designation
+independent of the correction (all crossed zero already). The
+correction is therefore conservative for the paper's
+conclusions but is disclosed for transparency
+(Section~\ref{sec:methods-verdict} and the footnote on
+Table~\ref{tab:master-verdicts}).
+
+\textbf{Latent-bug remediation.} The post-peer-review audit
+pass (Amendments A20--A22) surfaced three implementation issues
+that did not affect the committed headline numbers but did
+affect cleanliness of the inferential family: the
+\texttt{te\_qpinn\_fnn} readout convention divergence (A20), the
+\texttt{brickwall} connectivity reduction at $n_q = 3$ (A21),
+and a 2D PDE hard-IC trial-solution docstring omission
+(A22, latent only; the implementation was always correct). A20
+requires re-runs of the \texttt{te\_qpinn\_fnn} cells; A21 is a
+disclosure-only strengthening of A18; A22 is a docstring fix
+with no compute effect. The post-A20 re-runs are bundled into
+the Phase~C Anvil sweep (Appendix~A).
+
 \subsection{Future work: hardening quantum PINN training}
 \label{sec:discussion-future}
 
