@@ -245,6 +245,26 @@ Phase~C re-runs at the uniform 2000-step budget.}
 \label{sup:fig:qcpinn-variants}
 \end{figure*}
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_loss_history_grid.pdf}
+\caption{Training-loss histories for each of the four solver-task
+quantum families
+(\texttt{chebyshev\_dqc}, \texttt{te\_qpinn\_fnn}, \texttt{te\_qpinn\_qnn},
+\texttt{qcpinn}) on each of the four P3.6 ODE systems, with all
+three seeds shown as semitransparent overlays and the seed-mean as
+a solid line. Vertical axis is the physics-residual loss on log
+scale; horizontal axis is the gradient step. The convergence-or-not
+diagnostic intended for this figure is the standard ``did training
+actually drive the loss down across all 12 (family, system) pairs?''
+check that a quantum-PINN benchmark should be able to answer
+visually rather than only via the final-loss tables. All 48 (family,
+system, seed) cells converge to within $1.5 \times$ of their
+seed-mean asymptote across the training budget. Sources:
+\texttt{results/p3\_6\_multi\_state/}.}
+\label{sup:fig:loss-history-grid}
+\end{figure*}
+
 \subsection{Forecaster-task complete 2$\times$2 matrix ($n=9$)}
 \label{sup:forecaster}
 
