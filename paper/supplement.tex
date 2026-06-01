@@ -25,6 +25,14 @@
 \usepackage{microtype}
 \hypersetup{colorlinks=true,linkcolor=blue,citecolor=blue,urlcolor=blue}
 
+% Cross-document references into the main paper. Reads main.aux to
+% resolve \ref{tab:...} that point at labels in the main paper.
+% Requires main.pdf to have been built at least once (build.sh
+% builds main first, then supplement, so the .aux is always present
+% by the time bibtex/pdflatex run on supplement.tex).
+\usepackage{xr}
+\externaldocument{main}
+
 % Mirror the custom commands used in main.tex.
 \newcommand{\relltwo}{\mathrm{relL}^2}
 \newcommand{\dsmooth}{\Delta_{\mathrm{smooth}}}
