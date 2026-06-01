@@ -200,7 +200,8 @@ within a factor of two (except A4-disclosed MLP):
 \subsection{Training protocol}
 \label{sec:methods-train}
 
-All solver-task cells use the Lagaris hard-IC trial solution. The
+All solver-task cells use the Lagaris hard-IC trial
+solution~\cite{lagaris1998artificial}. The
 ODE form is $u(t) = u_0 + (t - t_0) \cdot (s \cdot
 \text{circuit}(t) + b)$ with $\{s, b\}$ scalar training parameters
 per component; the PDE form is
@@ -220,7 +221,22 @@ budgets per system are documented in
 burgers\_smooth, 1800 for AC, 2400 for burgers\_shock. ODE step
 budgets follow \texttt{multi\_state\_solver.\_SCALAR\_FAMILIES}:
 1200 (chebyshev\_dqc), 1500 (te\_qpinn\_fnn, qcpinn), 2000
-(te\_qpinn\_qnn).
+(te\_qpinn\_qnn). Optimization on both quantum and classical
+sides uses Adam~\cite{kingma2015adam} at learning rate
+$\mathrm{lr}=10^{-2}$ (default; the symmetric HPO sweep of A9
+varies $\mathrm{lr} \in \{10^{-3}, 10^{-2}, 5\!\times\!10^{-2}\}$
+on both sides). The choice of Adam over second-order methods
+(L-BFGS) follows the dominant PINN
+practice~\cite{raissi2019physics,karniadakis2021physics};
+quantum-natural-gradient~\cite{stokes2020quantum} is reserved
+for the follow-up paper because its diagonal-Fisher
+approximation perturbs the classical-vs-quantum symmetry this
+benchmark intentionally enforces. The PINN-side
+training-dynamics caveats of Wang and
+Perdikaris~\cite{wang2022whenwhy} (neural tangent kernel
+pathologies under residual-loss only) apply equally to both
+substrates; our matched-capacity comparison is invariant to
+them.
 
 \subsection{Verdict machinery}
 \label{sec:methods-verdict}

@@ -48,11 +48,27 @@ at the same theoretical ceiling.
 ansätze span $0.025$--$0.046$, with the lowest value being
 hardware-efficient ($0.0245$) and the highest being brickwall
 ($0.0457$). All four are well above the barren-plateau threshold
-at the program's qubit count.
+at the program's qubit count: the classical exponential-concentration
+scaling of McClean et al.~\cite{mcclean2018barren} predicts variance
+collapsing as $4^{-n}$ for global cost functions, and the
+cost-function-dependent refinement of Cerezo et
+al.~\cite{cerezo2021cost} relaxes this for shallow local-cost
+ansätze. At $n=3$ qubits and depth $L=1$, $4^{-n} \approx 0.016$
+sits below all four observed variances, so the families are
+diagnosed as trainable on the program's qubit count. The
+exponential-concentration phenomenon also extends to quantum
+kernel methods~\cite{thanasilp2024exponential}, which constrains
+how aggressively quantum-similarity-based PINN variants could be
+scaled without falling into the same trap.
 
-\textbf{Expressibility KL-to-Haar divergence}~\cite{schuld2021effect}.
+\textbf{Expressibility KL-to-Haar
+divergence}~\cite{schuld2021effect,holmes2022connecting}.
 Lower KL = closer to a Haar-random unitary ensemble = higher
-expressivity. Data-reuploading and strongly-entangling attain
+expressivity. The KL-to-Haar construction is
+operationalized exactly as in Holmes et al.\cite{holmes2022connecting}:
+fidelity histograms between repeat random-init unitaries vs.\ the
+analytic Haar-fidelity distribution, KL-binned at 75 bins.
+Data-reuploading and strongly-entangling attain
 $\mathrm{KL} = 0.195$ (low), hardware-efficient and brickwall
 attain $0.211$ (slightly higher). The differences are small but
 systematic.
@@ -182,11 +198,18 @@ seed for a planned follow-up paper
 
 The mechanism cross-tabulation and the P7.10 LTC decomposition
 agree on the locus: \emph{the quantum circuit is the active
-component} in the regime-contrast inversion. The LTC
-decomposition shows this at the verdict level (the
-quantum-isolated $\Delta = -0.616$, CI $[-1.167, -0.178]$,
-significantly negative); the H3 cross-tabulation shows it at the
-within-quantum-roster level (the family with the most expressive
+component} in the regime-contrast inversion. The
+liquid-time-constant cell~\cite{hasani2021liquid,hasani2022closed}
+is itself a Neural ODE~\cite{chen2018neural,rubanova2019latent}
+with a learned time-constant $\tau$ on the hidden state; the 2$\times$2
+decomposition (rows = substrate that $\tau$ rides on, columns =
+baseline reference) algebraically partitions the headline
+$\Delta_{\mathrm{combined}}$ into substrate, reference, and
+interaction contributions. The
+quantum-isolated $\Delta = -0.616$, CI $[-1.167, -0.178]$
+(significantly negative) lies on the quantum-substrate row; the
+H3 cross-tabulation shows the within-quantum-roster pattern at the
+same locus (the family with the most expressive
 circuit, data-reuploading at lowest KL, attains the largest
 positive per-cell $\Delta$ on average).
 

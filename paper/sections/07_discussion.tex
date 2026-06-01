@@ -211,6 +211,20 @@ does not contradict; they are the kind of finding the
 \texttt{rf\_qrc}~\cite{ahmed2024rfqrc} original works each
 target, here observed in an independent benchmark.
 
+\textbf{(4) Comparison to classical operator-learning competitors.}
+The matched-classical baselines used in this work are MLP-PINNs;
+on operator-learning tasks the relevant classical state-of-the-art
+includes DeepONet~\cite{lu2021deeponet} and the Fourier Neural
+Operator~\cite{li2021fourier}. Our PINN-vs-PINN matched-capacity
+framing was chosen because the quantum-PINN literature is itself
+PINN-vs-PINN; benchmarking against operator-learning methods would
+collapse the PINN inductive-bias question (which depends on the
+trial-solution structure) into a representational-capacity
+question (which depends on data scale and architecture). The
+follow-up paper described above is the appropriate venue to
+include operator-learning baselines, paired with the corresponding
+generalization analysis~\cite{caro2022generalization}.
+
 \subsection{Reproducibility and audit}
 \label{sec:discussion-reproducibility}
 

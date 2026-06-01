@@ -102,8 +102,15 @@ note about the P7.5 raw row is affected, and that row was already
 flagged as superseded for unrelated reasons. The pre-registration
 \S 7 declaration that the verdict family is a falsification family
 (not a discovery family) means Holm--Bonferroni is the appropriate
-choice; a more aggressive False Discovery Rate (Benjamini--Hochberg)
-control would only relax the threshold further.
+choice; a more aggressive False Discovery Rate
+(Benjamini--Hochberg)~\cite{benjamini1995controlling} control
+would only relax the threshold further. The paired-bootstrap
+percentile interval underlying every row follows the
+construction in Efron and Tibshirani~\cite{efron1993introduction};
+we use percentile rather than BCa because the bias correction
+estimate is itself noisy at $n{\le}24$, and the multiple-data-set
+comparison framework of Dem\v{s}ar~\cite{demsar2006statistical}
+informs the family-wise vs.\ FDR choice.
 \end{table*}
 
 The structure of the table follows a deliberate methodological
