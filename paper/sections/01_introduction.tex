@@ -12,13 +12,24 @@
 
 The question of whether variational quantum machine-learning (QML)
 models offer a useful advantage over classical neural networks
-remains contested. Schuld and Killoran observed that the field
+remains contested~\cite{schuld2019quantum,havlicek2019supervised,
+caro2022generalization}. Schuld and Killoran observed that the field
 should pursue \emph{regime-dependent} advantages rather than blanket
 quantum supremacy claims~\cite{schuld2022right}: a quantum model is
 ``useful'' if it solves a specific class of problems better than the
-best matched classical model at the same parameter budget. The
-landscape of \emph{quantum physics-informed neural networks}
-(quantum PINNs)~\cite{perezsalinas2020dataru,berger2025teqpinn,
+best matched classical model at the same parameter budget.
+Physics-informed neural networks (PINNs) — the mesh-free continuous
+trial solutions introduced by Raissi, Perdikaris, and
+Karniadakis~\cite{raissi2019physics} and surveyed
+in~\cite{karniadakis2021physics,lu2021deepxde} — provide a natural
+substrate to ask this question, because the differential-equation
+residual loss is a single scalar that depends on the model class
+through a clean derivative-of-parameterized-function interface and
+admits matched classical baselines~\cite{wang2022whenwhy} and
+operator-learning competitors~\cite{lu2021deeponet,li2021fourier}.
+The landscape of \emph{quantum physics-informed neural networks}
+(quantum PINNs)~\cite{perezsalinas2020dataru,kyriienko2021solving,
+markidis2022physics,berger2025teqpinn,sedykh2024quantum,
 farea2025qcpinn,ahmed2024rfqrc} has produced several candidate
 ansätze with theoretically motivated regime-dependence claims, most
 prominently the prediction that the
@@ -32,11 +43,12 @@ on what kinds of problems, does a quantum PINN outperform a
 capacity-matched classical PINN?} unanswered at any rigorous level.
 
 Bowles, Ahmed, and Schuld recently catalogued the methodological
-gaps that make existing QML benchmarks unreliable: tuning the
+gaps that make existing QML benchmarks
+unreliable~\cite{bowles2024better,huang2025qml}: tuning the
 classical baseline insufficiently, comparing at mismatched parameter
 counts, reporting only the best-of-many random seeds, and citing
 isolated wins rather than statistically defensible
-contrasts~\cite{bowles2024better}. They propose a set of
+contrasts. They propose a set of
 methodological commitments \textemdash{} pre-registration, matched
 training budgets, paired bootstrap confidence intervals, an
 underfit guard, and a known-structure ``skyline'' baseline
@@ -139,8 +151,27 @@ This paper makes four contributions.
   \texttt{scripts/reproduce\_paper.sh} (regenerates every result),
   \texttt{scripts/verify\_paper\_integrity.py} (gates the cited
   numbers), and tagged GitHub releases at the post-rigor and
-  post-airtight-matrix checkpoints.
+  post-airtight-matrix checkpoints. The reproducibility commitments
+  follow the NeurIPS 2019 program guidance~\cite{pineau2021improving}
+  on environment pinning, seed determinism, and post-hoc auditability
+  of cited numbers.
 \end{enumerate}
+
+\subsection*{What this paper does \emph{not} claim}
+
+To be precise about scope: this paper does not claim a quantum
+advantage; it claims its \emph{absence} at this matched-capacity,
+matched-budget scale. It does not claim that the H1 hypothesis is
+false in general — only that the pre-registered acceptance
+threshold is not crossed on this hardness ladder. It does not
+claim that the broadband-leaning point estimate sign is reliable;
+the confidence interval crosses zero on every sensitivity point and
+no multiple-comparison correction~\cite{benjamini1995controlling,
+demsar2006statistical} is invoked because the headline verdict is
+not significance-positive in either direction. It does not assert
+generalization from $n=24$ cells to the full QML/PDE landscape;
+the cited follow-up papers (Section~\ref{sec:discussion}) are
+precisely the experiments needed to address that gap.
 
 Two extensions were proven feasible by mechanism gates but
 deferred for compute budget reasons. The triple-nested
