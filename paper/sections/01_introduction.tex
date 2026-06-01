@@ -57,6 +57,32 @@ our knowledge no published quantum-PINN benchmark has yet
 implemented this complete framework on a hardness ladder spanning
 both ordinary and partial differential equations.
 
+\paragraph{Methodological lineage.}
+The framework this paper implements sits at the intersection of three
+methodological lineages. From the classical PINN
+literature~\cite{raissi2019physics,karniadakis2021physics,
+lu2021deepxde} we inherit the mesh-free continuous trial-solution
+formulation and the physics-residual loss closure, including the
+known training-pathology
+caveats~\cite{krishnapriyan2021characterizing,wang2022whenwhy}
+that constrain matched-capacity comparison. From the variational
+QML literature~\cite{schuld2019quantum,havlicek2019supervised,
+schuld2021effect,caro2022generalization} we inherit the
+data-reuploading ansatz family, the Fourier-series expressivity
+analysis, and the Meyer--Wallach $Q$ /
+KL-to-Haar~\cite{holmes2022connecting} trainability scalars used in
+the H3 mechanism cross-tabulation. From the QML-benchmarking
+literature~\cite{bowles2024better,huang2025qml} we inherit the
+methodological commitments enumerated above
+\textemdash{} pre-registration, matched training budgets, paired
+bootstrap, underfit + skyline guards, and symmetric HPO sensitivity.
+The synthesis these three lineages enable, applied to a
+pre-registered ODE+PDE hardness ladder with a mechanically gated
+reproducibility script and twenty-two openly-documented
+amendments, is the methodological contribution of this work, even
+when (as in our case) the empirical hypothesis it tests is
+falsified.
+
 This work executes exactly such a benchmark. Following a
 pre-registration committed before any results were generated
 (Appendix~A; Methods~\ref{sec:methods}), we test the hypothesis
