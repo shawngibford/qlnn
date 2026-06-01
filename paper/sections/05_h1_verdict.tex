@@ -326,3 +326,42 @@ per-system structure that the verdict-level $\Delta_{\mathrm{diff}}$
 aggregation hides directly visible.}
 \label{fig:system-heatmap}
 \end{figure}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fig_cross_task_verdict.pdf}
+\caption{Cross-task PRIMARY verdict comparison. Left: per-regime
+$\Delta$ contributions ($\Delta_{\mathrm{smooth}}$ and
+$\Delta_{\mathrm{broad}}$) for solver ($n{=}24$) and forecaster
+($n{=}9$) tasks. Right: the headline test statistic
+$\Delta_{\mathrm{diff}}$ with 95\% paired-bootstrap CI for each task.
+The two PRIMARY verdicts agree in \emph{sign} (both negative,
+broadband-leaning) but disagree in \emph{strength} (solver CI
+crosses zero, forecaster CI excludes zero negatively). The
+consistent-direction-but-different-strength pattern is the basis for
+the cross-task corroboration argument: the
+falsification is reproduced on a methodologically independent task
+(data-driven rollout) with a different baseline (Neural-ODE), not
+an artifact of the solver-side residual-loss configuration.}
+\label{fig:cross-task}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fig_hpo_heatmap.pdf}
+\caption{Amendment A9 symmetric HPO sensitivity, full per-cell
+$\Delta$ heatmap. Each panel is one anchor cell; rows are Adam
+learning rates ($10^{-3}, 5{\times}10^{-3}, 10^{-2}$) and columns
+are training-step budgets ($1500, 3000$). Cells are colored by
+$\Delta = \relltwo(\mathrm{cPINN}) - \relltwo(\mathrm{QLNN\;best})$;
+positive (blue) favors the quantum side, negative (red) favors the
+classical side. Sign-stability of $\Delta$ across the $3\times 2$
+HPO grid is the per-cell robustness test: Lotka--Volterra s2 and
+Lorenz s2 remain all-positive across the grid (sign-stable),
+Van der Pol s1 mixes signs at the lowest learning rate
+(sign-unstable). The mixed-stability of Van der Pol s1 is the
+locus of the symmetric-HPO mechanism story; it is the cell where
+both quantum and classical sides have non-trivial training
+sensitivity.}
+\label{fig:hpo-heatmap}
+\end{figure*}

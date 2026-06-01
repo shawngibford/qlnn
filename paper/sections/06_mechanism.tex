@@ -193,6 +193,43 @@ seed for a planned follow-up paper
 \label{fig:tau-substrate}
 \end{figure}
 
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fig_delta_vs_t3_scatter.pdf}
+\caption{Per-cell $\Delta_{\mathrm{combined}}$ scattered against each
+of the four T3 ansatz scalars (KL-to-Haar, Meyer--Wallach $Q$,
+mean-square gradient variance, Fourier $K_{\max}$) at the cell's
+best-quantum family. Color encodes regime (blue =
+smooth/periodic; orange = broadband/multiscale); marker labels are
+abbreviated (system, seed). The KL-to-Haar panel (top-left) is the
+only one with a sign-stable trend ($\rho_{\mathrm{full}} = +0.518$,
+all-9 LOO resamples positive); Meyer--Wallach $Q$ and gradient
+variance (top-right, bottom-left) carry weak unstable trends; Fourier
+$K_{\max}$ (bottom-right) is degenerate at $L=1$. The scatter makes
+the n=9 sample-size caveat visible: even the sign-stable trend rests
+on a 9-point spread.}
+\label{fig:delta-vs-t3}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fig_forecaster_2x2_heatmap.pdf}
+\caption{Forecaster 2$\times$2 decomposition, per-cell breakdown.
+Rows are the four decomposition paths
+(Section~\ref{sec:forecaster-decomp}); columns are the nine
+(system, seed) cells, with the regime band labeled at the top.
+Blue cells favor the
+quantum/LTC side of the contrast; red cells favor the classical/non-liquid
+side. The substrate-dependent $\tau$ signature
+(Figure~\ref{fig:tau-substrate}) is visible at the per-cell level:
+the second row (\texttt{liquid\_via\_quantum}) carries the strong
+broadband-positive cells (lorenz s0 = $+0.66$, lorenz s2 = $+0.59$),
+while the controls (rows 3-4) split between negative smooth cells
+and positive broadband cells, consistent with the $-0.501$ aggregate
+verdict and the broadband-leaning sign on the solver task.}
+\label{fig:forecaster-heatmap}
+\end{figure*}
+
 \subsection{Connecting the mechanism story to the LTC decomposition}
 \label{sec:mechanism-ltc}
 
