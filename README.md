@@ -1,10 +1,12 @@
 # Quantum Liquid Neural Network — ODE/PDE solver & forecaster
 
 [![integrity](https://img.shields.io/badge/verify__paper__integrity-passing-brightgreen)](scripts/verify_paper_integrity.py)
-[![paper](https://img.shields.io/badge/paper-main%2017pp%20%2B%20supp%207pp-blue)](paper/main.tex)
-[![tests](https://img.shields.io/badge/pytest-502%20passing-brightgreen)](tests/)
+[![paper](https://img.shields.io/badge/paper-main%2027pp%20%2B%20supp%208pp-blue)](paper/main.pdf)
+[![tests](https://img.shields.io/badge/pytest-510%20passing-brightgreen)](tests/)
+[![figures](https://img.shields.io/badge/figures-25%20(21%20main%20%2B%204%20supp)-blue)](paper/figures/)
+[![bibliography](https://img.shields.io/badge/references-37%20verified-blue)](paper/references.bib)
 [![status](https://img.shields.io/badge/status-post--audit%20re--runs%20pending%20(Anvil)-orange)](NEXT_STEPS.md)
-[![amendments](https://img.shields.io/badge/pre--reg%20amendments-A1--A19-blue)](PRE_REG_AMENDMENT.md)
+[![amendments](https://img.shields.io/badge/pre--reg%20amendments-A1--A22-blue)](PRE_REG_AMENDMENT.md)
 
 Research code and paper draft for a controlled benchmark of **Quantum
 Liquid Neural Networks (QLNNs) as both a physics-informed solver and a
@@ -31,13 +33,22 @@ In order:
    here to *PRX Quantum* submission, with explicit gates between
    phases. The single blocker is Phase A (ACCESS allocation —
    advisor letter required).
-3. **[`paper/main.tex`](paper/main.tex)** — the 17-page paper draft
-   (§1 Intro through §8 Conclusions); build with `bash paper/build.sh`.
-   Supplement: `bash paper/build_supplement.sh` (7 pages).
+3. **[`paper/main.pdf`](paper/main.pdf)** — the rendered 27-page paper
+   draft (§1 Intro through §8 Conclusions). 21 figures, 37 verified
+   bibliography entries, 72 in-prose citations. Source:
+   `paper/main.tex` + `paper/sections/0*.tex`; rebuild with
+   `bash paper/build.sh`. Supplement
+   (**[`paper/supplement.pdf`](paper/supplement.pdf)**, 8 pages, 4
+   figures) via `bash paper/build_supplement.sh`. For a single-link
+   print: **[`paper/main_with_supplement.pdf`](paper/main_with_supplement.pdf)**
+   (35 pages combined).
 4. **[`ODE_PDE_PRE_REG.md`](ODE_PDE_PRE_REG.md)** + **[`PRE_REG_AMENDMENT.md`](PRE_REG_AMENDMENT.md)**
-   — pre-registration that locks the science; 19 amendments are
-   disclosed openly (no silent moves). A15-A19 landed 2026-05-28 and
-   close every reviewer-fairness concern an audit could surface.
+   — pre-registration that locks the science; 22 amendments
+   (A1–A22) are disclosed openly (no silent moves). A15–A19 landed
+   2026-05-28 and close every reviewer-fairness concern from the
+   internal audit; A20–A22 landed the same day from a five-reviewer
+   adversarial peer-review pass (un-aliased te_qpinn_fnn readout,
+   brickwall connectivity disclosure, latent docstring fix).
 5. **[`CLAUDE.md`](CLAUDE.md)** — operational guidance for the
    coding agent (current state, what not to do, where the runners are).
 
@@ -65,8 +76,11 @@ In order:
 - **Integrity-gated numbers.** `scripts/verify_paper_integrity.py` exits
   0 on every committed headline; the paper LaTeX references results
   through this gate, so a mismatch fails the build.
-- **5 seeds** per cell; mean ± ddof=1 std, 95% t-CI, and paired-bootstrap
-  p-values reported for every comparison.
+- **3 seeds** per cell (canonical solver matrix: 8 systems × 3 seeds
+  = 24 PRIMARY cells; canonical forecaster matrix: 3 systems × 3
+  seeds = 9 PRIMARY cells); mean ± ddof=1 std, 95% paired-bootstrap
+  percentile CI, and Holm–Bonferroni multiple-comparison correction
+  applied across the master verdict family.
 - **Equal HPO budget** between classical and quantum baselines
   (documented per-cell). The non-liquid Neural-ODE baseline is mandatory
   and isolates the quantum-vs-liquid confound that the project identity
@@ -98,9 +112,12 @@ python3.11 -m venv .venv
 PYTHONPATH=src .venv/bin/python -m pytest -q                          # full suite must pass
 PYTHONPATH=src .venv/bin/python scripts/verify_paper_integrity.py    # must exit 0
 
-# Rebuild figures from on-disk results (no training):
-PYTHONPATH=src .venv/bin/python scripts/make_paper_figures.py
-PYTHONPATH=src .venv/bin/python scripts/make_diagnostic_figures.py
+# Rebuild any individual figure from on-disk results (no training).
+# Each figure has its own standalone generator under scripts/:
+PYTHONPATH=src .venv/bin/python scripts/make_tau_substrate_figure.py
+PYTHONPATH=src .venv/bin/python scripts/make_compute_envelope_figure.py
+# ...  (28 generators in scripts/make_*.py; see paper/figures/ for the
+#       full set of 25 rendered figures.)
 
 # Build the paper:
 bash paper/build.sh
@@ -124,6 +141,8 @@ pre-registered question and method are the contribution.
 
 ## Citation & contact
 
-Research code (no production claims). Citation: see `paper/main.tex`
-once the supplement is finalized. For author contact see the top-level
-commit history.
+Research code (no production claims). The current rendered paper is
+**[`paper/main.pdf`](paper/main.pdf)** (27pp, integrity-gated, on
+master). Cite via the in-prose contributions enumeration in §1 until
+the arXiv preprint / *PRX Quantum* submission tag lands. For author
+contact see the top-level commit history.
