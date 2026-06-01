@@ -320,6 +320,53 @@ measurements live in the committed
 \texttt{results/*/metrics.json} files and feed the per-figure
 provenance dictionaries verified by
 \texttt{scripts/verify\_paper\_integrity.py}.
+Figure~\ref{fig:compute-envelope} provides a visual breakdown of
+the per-family per-cell wall-clock and the per-scope contribution
+to the Phase~C re-run envelope.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fig_compute_envelope.pdf}
+\caption{Compute envelope. Left: per-family per-cell wall-clock
+(smoke-extrapolated to the uniform 2000-step budget), stratified by
+task surface (ODE solver on the kuramoto smoke,
+PDE solver on the KdV smoke, ODE qcpinn variants from the A17
+sweep). The classical PINN reference line at 0.001\,h sets the
+matched-budget cost of the classical side. Right: Phase~C re-run
+compute envelope as the cell-count × per-cell-hour product per scope
+(A15 / A16 / A17 / A19 / M3). The grand total is reported as
+serial-equivalent CPU-hours; the workload is embarrassingly parallel
+by cell and parallelizes in $\sim 10$\,h wall-clock on an Anvil
+GPU partition via SLURM array.
+Sources: \texttt{results/smoke\_kuramoto/}, \texttt{results/smoke\_kdv/},
+\texttt{results/smoke\_post\_audit/}.}
+\label{fig:compute-envelope}
+\end{figure*}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fig_training_budget_sensitivity.pdf}
+\caption{Training-budget sensitivity check: is 2000 steps the right
+budget? Left: HPO-direct probe of the classical PINN side, showing
+relative-$L^2$ at the 1500-step checkpoint vs.\ the 3000-step
+checkpoint, per (anchor cell $\times$ learning rate). Points landing
+on the dashed diagonal mean ``additional steps did nothing'';
+distance below the diagonal is the gain. The diminishing-returns
+pattern at high learning rate (top-right cluster on Lorenz s2,
+Van der Pol s1) makes the extension-past-2000 case visibly weak.
+Right: training-loss convergence ratio relative to the asymptotic
+seed-mean loss, plotted at four checkpoint budgets
+$\{500, 1000, 1500, 2000\}$ for each of the four ODE solver
+quantum families. Values $\le 1.0$ indicate the family has
+substantially converged by step $N$. By step 1500 all four families
+are within $1.5\times$ of their asymptote; by step 2000 they are
+within $1.0\times$. The 2000-step budget is the smallest budget that
+delivers near-asymptotic loss across every family, motivating
+amendment A15's choice for the matched cross-side budget.
+Sources: \texttt{results/p7\_5\_hpo\_sensitivity/},
+\texttt{results/p3\_6\_multi\_state/}.}
+\label{fig:training-budget}
+\end{figure*}
 
 \subsection{Open-source reproducibility}
 \label{sec:methods-repro}

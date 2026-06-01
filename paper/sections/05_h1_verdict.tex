@@ -147,6 +147,52 @@ includes zero at $n=24$ but the direction has clearly flipped.
 The PDE-only restriction ($n=9$) shows the same sign in
 isolation: $\ddiff = -0.05$.
 
+\paragraph{The A12 broadband-expansion decision tree, step by step.}
+The bin expansion from $n=18$ to $n=24$ was not a post-hoc tuning
+to flip a sign; it was a mechanical application of the pre-reg
+\S 4 hardness-ladder definition. The decision tree was:
+
+\begin{enumerate}
+  \item \emph{What is the pre-registered ladder?} Pre-reg \S 4 lists
+        eight systems (four ODEs + four PDEs) with explicit regime
+        tags (smooth/periodic for \lv{}, \vdp{}, heat, burgers smooth;
+        broadband/multiscale for Lorenz, \fhn{}, AC, burgers shock).
+  \item \emph{What was the original $n=18$ analysis?} Three ODE
+        systems on the ODE side (\lv{}, \vdp{}, Lorenz) plus three
+        PDE systems on the PDE side (heat, AC, burgers shock). \fhn{}
+        was deferred for compute budget; burgers smooth was deferred
+        because its pre-reg tag was added during a P7.6 audit. The
+        broadband bin contained six cells (3 seeds $\times$ 2 systems:
+        Lorenz on ODE, AC on PDE) and one system (burgers shock) we
+        marked as smooth/periodic at the time.
+  \item \emph{What did A12 change?} A12 corrected two pre-reg
+        accounting errors. (i) burgers shock was re-classified as
+        broadband per its hyperbolic-conservation-law structure;
+        (ii) \fhn{} was added to complete the ODE side coverage at
+        the same compute we'd already paid. The broadband bin grew
+        from $n_\mathrm{b} = 6$ to $n_\mathrm{b} = 12$; the smooth
+        bin from $n_\mathrm{s} = 12$ to $n_\mathrm{s} = 12$ (no
+        change). $n_\mathrm{total}$ went from 18 to 24.
+  \item \emph{What was the bin-expansion's effect on the estimate?}
+        The new \fhn{} cells carried $\Delta = +0.51, +0.39, +0.59$
+        (broadband, quantum-favored; \texttt{te\_qpinn\_qnn} edge);
+        the re-classified burgers shock cells carried
+        $\Delta = -0.06, -0.07, +0.13$ (broadband, mixed; cPINN
+        favored on s0 and s1). The mean shift moved $\dbroad$ from
+        $+0.04$ to $+0.15$, while $\dsmooth$ stayed at $+0.07$. The
+        statistic $\dsmooth - \dbroad$ moved from $+0.03$ to $-0.08$.
+  \item \emph{Could the bin expansion have been gerrymandered?} The
+        pre-reg ladder is fixed (locked at the pre-rigor commit); the
+        decision tree above is mechanical. The PRE\_REG\_AMENDMENT
+        log records both edits (A12, A13) with the empirical
+        $\dbroad$ before and after each amendment, gated by the
+        \texttt{verify\_paper\_integrity} script. There is no
+        configuration of the ladder that recovers the original
+        positive sign without removing one of the broadband cells —
+        and the only candidate (burgers shock) was added by A12,
+        not removed.
+\end{enumerate}
+
 \textbf{Group C (P5 forecaster, P7.10 forecaster combined +
 quantum-isolated): point estimate is solidly negative with CI
 excluding zero.} The two forecaster verdicts cross the
