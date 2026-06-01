@@ -167,6 +167,60 @@ on the follow-up branch); the design adheres to the same
 matched-capacity, paired-bootstrap, underfit-guard, and skyline
 machinery used in this paper.
 
+\paragraph{Three named follow-up papers.}
+The negative finding and the mechanistic substructure (substrate-
+dependent $\tau$ signature, KL-to-Haar expressivity trend) jointly
+seed three follow-up papers that this work's structure deliberately
+makes ready. They are listed in priority order of
+experimental readiness, not in order of expected scientific impact.
+
+\begin{enumerate}
+  \item \textbf{The training-hardening paper.} The three interventions
+        enumerated above (QNG~\cite{stokes2020quantum}, causal
+        weighting~\cite{wang2022causality},
+        higher-$K_{\max}$~\cite{schuld2021effect}) are tested
+        jointly on the same hardness ladder, at the same compute
+        budget, with the same pre-registration + verdict machinery.
+        If any subset of the three recovers $H_1$ in the predicted
+        direction, the paper reports it as a positive
+        result; otherwise it strengthens the present FALSIFIED
+        verdict from one to four sensitivity points. Estimated
+        scope: $\sim 60$ cells, $\sim 18$~CPU-hours on Anvil.
+
+  \item \textbf{The $\tau$-substrate mechanism paper.} The
+        substrate-dependent $\tau$ signature
+        (Figure~\ref{fig:tau-substrate}; $\Delta_{\mathrm{liquid}|\,
+        \mathrm{classical}} \approx +0.12$ vs.\
+        $\Delta_{\mathrm{liquid}|\,\mathrm{quantum}} \approx -0.33$,
+        $|\textrm{gap}| = 0.45$) is the strongest mechanism
+        finding in this paper and is not explained by either
+        substrate alone. The follow-up isolates the LTC $\tau$
+        machinery at multiple substrate widths + reuploading depths,
+        and seeks a closed-form prediction in the spirit of
+        Hasani et al.~\cite{hasani2022closed} for the sign of
+        $\Delta_\tau$. A theoretical posit + a focused experimental
+        sweep ($\sim 36$ cells) constitute the paper.
+
+  \item \textbf{The domain-breadth paper (ChemE / BioE / PSE).}
+        The follow-up extends the ladder from 8 dynamical-system
+        archetypes to 12 process-engineering-specific
+        ODEs / PDEs spanning chemical-reactor (Van~de~Vusse,
+        Saponification, etc.), biochemical (Monod, Yeast / Andrews,
+        Contois), and process-systems
+        (Fisher--KPP, CDR low/high-Pe, fixed-bed, ADM1) regimes.
+        Estimated scope: $\sim 12$ systems $\times$ 4 quantum
+        families $\times$ 3 seeds $= 144$ cells, $\sim 36$~CPU-hours.
+        This paper tests whether the FALSIFIED H1 generalizes from
+        the canonical-dynamical-systems ladder to the
+        domain-specific ladder a practitioner actually cares about.
+\end{enumerate}
+
+All three follow-ups inherit this paper's reproducibility
+infrastructure: pre-registration template,
+matched-capacity / paired-bootstrap / underfit-skyline-guard
+verdict machinery, and the \texttt{verify\_paper\_integrity}
+mechanical gate.
+
 \subsection{Positioning relative to the field}
 \label{sec:discussion-position}
 

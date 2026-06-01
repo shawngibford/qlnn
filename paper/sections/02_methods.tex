@@ -10,6 +10,31 @@
 \section{Methods}
 \label{sec:methods}
 
+Figure~\ref{fig:pipeline-diagram} summarizes the
+end-to-end benchmark pipeline at a glance: from the
+pre-registered hardness ladder
+(top row), through the Lagaris hard-IC trial solution and the
+quantum circuit family
+(middle row), to the physics-residual loss, Adam optimizer,
+trained-model evaluation, and paired-bootstrap verdict
+(bottom row). The remainder of this section
+documents each stage in detail.
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=\textwidth]{figures/fig_pipeline_diagram.pdf}
+\caption{End-to-end quantum-PINN benchmark pipeline. Top row:
+problem specification (pre-registered hardness ladder, regime tag,
+analytic IC, reference solver). Middle row: trial solution + quantum
+circuit (Lagaris hard-IC ansatz, encoder, variational core, $\Sigma
+\langle Z_i \rangle$ readout). Bottom row: physics-residual loss,
+Adam optimizer, trained-model evaluation against the reference, and
+paired-bootstrap verdict. The dashed back-propagation loop
+($\nabla_\theta$ via \texttt{jacrev}) closes the training cycle
+through the nested Diffrax + PennyLane QNode stack.}
+\label{fig:pipeline-diagram}
+\end{figure*}
+
 \subsection{Pre-registration and the falsifiable hypothesis}
 \label{sec:methods-prereg}
 
