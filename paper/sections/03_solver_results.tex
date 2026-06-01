@@ -132,6 +132,84 @@ $\Delta \approx +0.02$ each because both quantum and classical
 collapse to the predict-zero baseline at $T = 2$ Lyapunov times
 ($\relltwo \approx 0.98$).
 
+\subsection{Per-system difficulty profile}
+\label{sec:per-system-profile}
+
+The aggregate ``smooth-vs-broadband'' bin masks substantial
+within-regime variance. We summarize the dominant inductive challenge
+per system, why it is hard or easy, and which family handles it best.
+Figures~\ref{fig:system-heatmap} and~\ref{fig:delta-distribution}
+provide the per-cell support for this narrative.
+
+\begin{description}
+  \item[\lv{} (S, predator-prey).] Periodic limit cycle in 2D with
+        smooth derivatives; the Schuld--Fourier feature
+        space~\cite{schuld2021effect} captures it almost exactly
+        at $K_{\max} = 3$. All four quantum families and the cPINN
+        attain $\relltwo \le 0.02$; \texttt{qcpinn} leads
+        ($\relltwo \approx 0.007$). The cell carries small positive
+        $\Delta$ contributions, mostly from cPINN underfit at lower
+        learning rates.
+  \item[\vdp{} (S, limit cycle with relaxation).] Stiff oscillation
+        with a slow drift + fast snap-back. The relaxation phase is
+        a localized derivative discontinuity that the smooth
+        Fourier series cannot represent at $K_{\max} = 3$; both
+        quantum and classical sides plateau around
+        $\relltwo \approx 0.18$--$0.34$. \texttt{te\_qpinn\_qnn}
+        is the most consistent on this regime, with the lowest
+        seed variance.
+  \item[Heat (S, diffusion).] Linear PDE with analytic
+        Fourier-mode decomposition; the Schuld--Fourier ansatz is a
+        natural fit. All families attain $\relltwo \le 0.005$;
+        \texttt{qcpinn} and \texttt{te\_qpinn\_qnn} are
+        essentially tied at the integrity-gate floor. This is the
+        easiest cell in the entire matrix.
+  \item[Burgers smooth (S, parabolic with mild nonlinearity).]
+        Smooth dissipation around a coherent traveling profile;
+        $\nu = 0.07$ keeps gradients moderate. All quantum
+        families attain $\relltwo \le 0.045$; cPINN attains
+        $\le 0.025$. Marginally cPINN-favored at every seed —
+        the cleanest single counterexample to the
+        smooth-favors-quantum hypothesis in the matrix.
+  \item[\fhn{} (B, fast-slow stiff).] Excitable membrane with two
+        timescales differing by $\approx 12.5\times$. The fast-snap
+        recovery phase is the canonical stiff-PINN failure
+        mode~\cite{krishnapriyan2021characterizing,wang2022whenwhy}
+        and explains the cPINN's catastrophic seed-2 cell
+        ($\relltwo = 1.326$ vs the cPINN seed-mean of 0.870).
+        \texttt{te\_qpinn\_qnn} carries the positive sub-finding
+        here: $\relltwo = 0.327, 0.356, 0.329$ with a $24\times$
+        tighter seed variance.
+  \item[Allen--Cahn (B, double-well front).] Sharp interfaces
+        between $\pm 1$ basins; the smooth Fourier feature space
+        cannot represent the front structure at $K_{\max} = 3$.
+        Both \texttt{chebyshev\_dqc\_2d} and \texttt{qcpinn\_2d}
+        sit at $\relltwo \approx 0.49$--$0.90$ depending on seed.
+        \texttt{te\_qpinn\_qnn\_2d} is the lone non-failing
+        family here.
+  \item[Burgers shock (B, hyperbolic with steep gradient).] Same
+        front-representation challenge as Allen--Cahn but with
+        rightward-propagating dynamics; cPINN handles it best
+        ($\relltwo \le 0.05$ at all seeds) because its dense MLP
+        capacity covers the locally-piecewise structure.
+  \item[Lorenz (B, chaotic).] Strange-attractor dynamics on
+        $T = 2$ ($\approx 2$ Lyapunov times). At this horizon the
+        trial solution's hard-IC structure cannot diverge from
+        $u(0)$ enough to follow the chaotic trajectory; everything
+        collapses to the predict-zero baseline
+        ($\relltwo \approx 0.98$). The Lorenz contribution to the
+        verdict is in the noise.
+\end{description}
+
+The takeaway: of the eight systems, exactly one (\fhn{}) shows a
+clear regime-specific quantum-PINN structural advantage, and exactly
+one (Burgers smooth) shows a clear regime-specific classical-PINN
+advantage. The remaining six are shared-failure or shared-success
+cells. This is precisely the per-cell distribution the verdict-level
+$\dsmooth - \dbroad$ statistic compresses into a single number — and
+the n=24 PRIMARY CI crosses zero because the per-cell distribution
+itself is not concentrated.
+
 \subsection{Four layered solver-task sensitivity points}
 \label{sec:solver-verdicts}
 
@@ -292,3 +370,22 @@ contrasts that drive the H1 verdict in
 Section~\ref{sec:h1-verdict}.}
 \label{fig:trajectory-grid}
 \end{figure}
+
+\begin{figure*}[t]
+\centering
+\includegraphics[width=0.95\textwidth]{figures/fig_delta_distribution.pdf}
+\caption{Per-system $\Delta$ distribution underlying the $n{=}24$
+PRIMARY solver verdict. Box-and-whisker on individual seed scatter
+makes visible (a) that
+the verdict-level $\dsmooth - \dbroad = -0.084$ statistic
+compresses an underlying distribution with substantial within-system
+spread, (b) that exactly one system per regime carries a
+qualitatively decisive $\Delta$ (\fhn{} on the broadband side,
+\vdp{} on the smooth side), and (c) that the
+remaining six systems sit near zero with overlapping IQRs.
+The CI on the headline statistic crosses zero precisely because the
+per-cell distribution itself is not concentrated; the verdict is
+appropriately reported as FALSIFIED-direction-flipped rather than
+``inconclusive at the sample limit.''}
+\label{fig:delta-distribution}
+\end{figure*}
