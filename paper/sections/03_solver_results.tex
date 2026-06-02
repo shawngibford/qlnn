@@ -31,6 +31,11 @@ The architectural family names abbreviate to: ``cheb'' for
 \texttt{te\_qpinn\_qnn(\_2d)}, and ``qcp'' for
 \texttt{qcpinn(\_2d)}.
 
+The four ansatz families competing on the matrix are summarized
+in Figure~\ref{fig:circuit-zoo}; their per-cell relative-$L^2$
+behavior is visualized at the all-to-all level in
+Figure~\ref{fig:solver-multistate} and per-system in
+Figure~\ref{fig:trajectory-grid}.
 No single quantum family dominates the matrix: \texttt{qcpinn}
 wins on \lv{} and most PDE-smooth cells; \texttt{te\_qpinn\_qnn}
 dominates the broadband bin (Lorenz, \fhn{}, \ac{}); and
@@ -157,7 +162,7 @@ provide the per-cell support for this narrative.
         quantum and classical sides plateau around
         $\relltwo \approx 0.18$--$0.34$. \texttt{te\_qpinn\_qnn}
         is the most consistent on this regime, with the lowest
-        seed variance.
+        seed standard deviation.
   \item[Heat (S, diffusion).] Linear PDE with analytic
         Fourier-mode decomposition; the Schuld--Fourier ansatz is a
         natural fit. All families attain $\relltwo \le 0.005$;
@@ -179,7 +184,7 @@ provide the per-cell support for this narrative.
         ($\relltwo = 1.326$ vs the cPINN seed-mean of 0.870).
         \texttt{te\_qpinn\_qnn} carries the positive sub-finding
         here: $\relltwo = 0.327, 0.356, 0.329$ with a $24\times$
-        tighter seed variance.
+        tighter seed standard deviation.
   \item[Allen--Cahn (B, double-well front).] Sharp interfaces
         between $\pm 1$ basins; the smooth Fourier feature space
         cannot represent the front structure at $K_{\max} = 3$.
@@ -201,7 +206,10 @@ provide the per-cell support for this narrative.
         verdict is in the noise.
 \end{description}
 
-The takeaway: of the eight systems, exactly one (\fhn{}) shows a
+The Fourier amplitude content of each system's reference dynamics
+relative to the program's accessible bandwidth $K_{\max} = 3$ is
+shown in Figure~\ref{fig:system-spectrum} for context. The
+takeaway: of the eight systems, exactly one (\fhn{}) shows a
 clear regime-specific quantum-PINN structural advantage, and exactly
 one (Burgers smooth) shows a clear regime-specific classical-PINN
 advantage. The remaining six are shared-failure or shared-success
@@ -276,7 +284,7 @@ The matched classical PINN attains $0.640, 0.641, 1.326$
 ($\mathrm{mean} = 0.870$, $\mathrm{std} = 0.396$), with seed~2
 exhibiting a catastrophic training failure
 ($\relltwo > 1$ indicates worse than predict-zero). The
-quantum-side seed variance is roughly twenty-four times tighter,
+quantum-side seed standard deviation is roughly twenty-four times tighter,
 and the mean is roughly two-and-a-half times lower. Notably the
 \texttt{te\_qpinn\_qnn} architecture has zero classical
 parameters by construction (Section~\ref{sec:methods-roster}),

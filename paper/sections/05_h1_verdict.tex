@@ -20,7 +20,24 @@ its own sample size, baseline contrast, and tuning configuration.
 \begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig_p5_h1_verdict.pdf}
-\caption{Pre-registered $H_1$ forecaster verdict, visualized. Top: per-system relative-$L^2$ for QLNN best vs.\ matched Neural-ODE, MLP, known-structure skyline, and persistence floor across the three smooth/periodic and three broadband/chaotic systems of the hardness ladder. Middle: per-cell $\Delta = \text{Neural-ODE} - \text{QLNN}$ stratified by regime (blue: smooth/periodic, $\bar\Delta_{\text{smooth}} = -0.128$; orange: broadband/chaotic, $\bar\Delta_{\text{broad}} = +0.289$). Bottom: the test statistic $\Delta_{\text{smooth}} - \Delta_{\text{broad}} = -0.417$ with paired-bootstrap 95\% CI $[-0.787,\,-0.046]$ over $n=6$ cells. The CI excludes zero in the negative direction; per pre-registration \S7, the verdict is \textsc{falsified} on the matched-capacity forecaster contrast. Source: \texttt{results/p5\_h1\_verdict/h1\_analysis.json}.}
+\caption{Pre-registered $H_1$ forecaster verdict at the original
+$P5$ configuration ($n=6$ post-guard, retained as a layered
+sensitivity point in Table~\ref{tab:master-verdicts}; the PRIMARY
+forecaster verdict that replaces this row is the P7.10 row
+$\Delta_{\mathrm{diff}}=-0.501$ at $n=9$). Top: per-system
+relative-$L^2$ for QLNN best vs.\ matched Neural-ODE, MLP,
+known-structure skyline, and persistence floor across the three
+smooth/periodic and three broadband/chaotic systems of the
+hardness ladder. Middle: per-cell $\Delta = \text{Neural-ODE} -
+\text{QLNN}$ stratified by regime (blue: smooth/periodic,
+$\bar\Delta_{\text{smooth}} = -0.128$; orange: broadband/chaotic,
+$\bar\Delta_{\text{broad}} = +0.289$). Bottom: the test statistic
+$\Delta_{\text{smooth}} - \Delta_{\text{broad}} = -0.417$ with
+paired-bootstrap 95\% CI $[-0.787,\,-0.046]$ over $n=6$
+post-guard cells. The CI excludes zero in the negative direction;
+per pre-registration \S7, the verdict is \textsc{falsified} on
+the matched-capacity forecaster contrast. Source:
+\texttt{results/p5\_h1\_verdict/h1\_analysis.json}.}
 \label{fig:h1-verdict}
 \end{figure*}
 
@@ -84,10 +101,14 @@ zero when the classical baseline is given the same HPO budget as
 the QLNN side). Every row below it in the table supersedes it on
 either ground.\\[3pt]
 $^{\dagger}$~\emph{Multiple-comparison control.}~The eleven verdicts
-constitute a single inferential family. A Holm--Bonferroni
-correction at family-wise $\alpha = 0.05$ (i.e.\ require each
-individual CI to exclude zero at $\alpha / m = 0.05/11 \approx
-0.0045$) is the strict reading. Under that reading the two PRIMARY
+constitute a single inferential family. A strict
+Bonferroni correction at family-wise $\alpha = 0.05$ (i.e.\ require
+each individual CI to exclude zero at the uncorrected
+$\alpha / m = 0.05/11 \approx 0.0045$ threshold) is the most
+conservative reading; the Holm--Bonferroni step-down procedure that
+sorts the verdicts by p-value and tests them sequentially at
+$\alpha/m, \alpha/(m-1), \ldots, \alpha/1$ is the more common
+practical choice and is uniformly less stringent. Under that reading the two PRIMARY
 headline verdicts (rows P7.8 and P7.10, bold) are unchanged: the
 P7.8 solver CI already crosses zero at uncorrected $\alpha = 0.05$,
 so multiple-comparison correction does not affect the FALSIFIED
@@ -100,9 +121,10 @@ falsified verdicts hold their FALSIFIED designation independent of
 the correction (all crossed zero already); only the supersession
 note about the P7.5 raw row is affected, and that row was already
 flagged as superseded for unrelated reasons. The pre-registration
-\S 7 declaration that the verdict family is a falsification family
-(not a discovery family) means Holm--Bonferroni is the appropriate
-choice; a more aggressive False Discovery Rate
+\S 7 declaration that the verdict family controls Type-I error
+across a falsification ensemble (not a discovery ensemble) means
+either Bonferroni or Holm--Bonferroni is appropriate; a more
+aggressive False Discovery Rate
 (Benjamini--Hochberg)~\cite{benjamini1995controlling} control
 would only relax the threshold further. The paired-bootstrap
 percentile interval underlying every row follows the
@@ -145,12 +167,18 @@ at $n=24$, while $\dsmooth$ stays at $+0.07$. The point estimate
 inverts: from $+0.03$ at $n=18$ to $-0.08$ at $n=24$. The CI
 includes zero at $n=24$ but the direction has clearly flipped.
 The PDE-only restriction ($n=9$) shows the same sign in
-isolation: $\ddiff = -0.05$.
+isolation: $\ddiff = -0.05$. The solver and forecaster PRIMARY
+verdicts are visualized side-by-side in
+Figure~\ref{fig:cross-task}, and the symmetric-HPO per-cell
+sensitivity is in Figure~\ref{fig:hpo} (point-estimate summary)
+and Figure~\ref{fig:hpo-heatmap} (full $3\times 2$ heatmap).
 
 \paragraph{The A12 broadband-expansion decision tree, step by step.}
 The bin expansion from $n=18$ to $n=24$ was not a post-hoc tuning
 to flip a sign; it was a mechanical application of the pre-reg
-\S 4 hardness-ladder definition. The decision tree was:
+\S 4 hardness-ladder definition. The resulting sign-flip
+sensitivity of the PRIMARY solver verdict is visualized in
+Figure~\ref{fig:sample-size}. The decision tree was:
 
 \begin{enumerate}
   \item \emph{What is the pre-registered ladder?} Pre-reg \S 4 lists
@@ -270,11 +298,11 @@ pre-registered prediction direction. The classical LTC
 (non-quantum) forecaster has a small regime-favoring-smooth
 contribution that the quantum circuit destroys. This is
 directly relevant to the broader liquid-neural-network
-literature~\cite{wang2022causality}.
+literature~\cite{hasani2021liquid,hasani2022closed}.
 
 \textbf{(2) Family-specific quantum advantages exist on stiff
 fast--slow dynamics.} \texttt{te\_qpinn\_qnn} attains $\relltwo
-= 0.327, 0.356, 0.329$ on \fhn{} (twenty-four times tighter seed
+= 0.327, 0.356, 0.329$ on \fhn{} (twenty-four times tighter seed-standard-deviation
 variance than the matched classical PINN; mean error $2.6\times$
 lower; Section~\ref{sec:solver-fhn}). On the forecaster task,
 \texttt{rf\_qrc} achieves the strongest Lorenz cells

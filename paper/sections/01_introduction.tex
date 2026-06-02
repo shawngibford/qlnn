@@ -25,7 +25,7 @@ in~\cite{karniadakis2021physics,lu2021deepxde} — provide a natural
 substrate to ask this question, because the differential-equation
 residual loss is a single scalar that depends on the model class
 through a clean derivative-of-parameterized-function interface and
-admits matched classical baselines~\cite{wang2022whenwhy} and
+admits matched classical baselines as well as
 operator-learning competitors~\cite{lu2021deeponet,li2021fourier}.
 The landscape of \emph{quantum physics-informed neural networks}
 (quantum PINNs)~\cite{perezsalinas2020dataru,kyriienko2021solving,
@@ -104,17 +104,19 @@ broadband/multiscale for Lorenz, \fhn{}, \ac{}, and shock
 Burgers.
 
 The pre-registered hypothesis is FALSIFIED. The combined
-solver-task verdict at $n=24$ is
+solver-task PRIMARY verdict at $n=24$ is
 $\ddiff = \dsmooth - \dbroad = -0.084$ with paired-bootstrap 95\%
-confidence interval $[-0.278, +0.061]$. Four additional layered
-sensitivity points \textemdash{} the forecaster-task verdict at
-$n=9$ ($\ddiff = -0.42$, CI excludes zero in the
-\emph{negative} direction~\cite{schuld2022right}), the
+confidence interval $[-0.278, +0.061]$. The pre-registered
+forecaster-task PRIMARY verdict at $n=9$ is
+$\ddiff = -0.501$ with CI $[-0.804, -0.244]$, excluding zero in the
+\emph{negative} (broadband-favoring) direction. Three additional
+layered sensitivity points \textemdash{} the
 default-Adam combined verdict at the pre-expansion
 $n=18$ ($\ddiff = +0.032$, CI $[-0.040, +0.109]$), the
 both-sides hyperparameter-optimized verdict at $n=9$
-($\ddiff = +0.059$, CI $[-0.058, +0.191]$), and the $n=24$
-verdict reported above \textemdash{} all return the same
+($\ddiff = +0.059$, CI $[-0.058, +0.191]$), and the original
+pre-registration $P5$ forecaster verdict at $n=9$ ($\ddiff = -0.417$,
+CI $[-0.787, -0.046]$ post-guards) \textemdash{} all return the same
 qualitative result: no statistically distinguishable regime-dependent
 advantage at this matched-capacity, matched-budget compute.
 Notably, the point estimate flips sign as the broadband bin is
@@ -132,11 +134,11 @@ quantum PINN with QNN encoder
 (\texttt{te\_qpinn\_qnn})~\cite{berger2025teqpinn}
 achieves a structural advantage on \fhn{} that was invisible at
 $n=18$: across three seeds it attains
-$\relltwo = 0.327, 0.356, 0.329$ \textemdash{} a seed-variance
+$\relltwo = 0.327, 0.356, 0.329$ \textemdash{} a seed-standard-deviation
 twenty-four times tighter than the matched classical PINN
 (0.640, 0.641, 1.326; one cell exhibits a catastrophic training
-failure). The seed-mean advantage is roughly twofold (0.337
-versus 0.870). This is a clear regime-specific structural QLNN
+failure). The seed-mean advantage is roughly two-and-a-half-fold
+(0.337 versus 0.870). This is a clear regime-specific structural QLNN
 edge on stiff fast--slow dynamics, observed at zero classical
 parameters in the ansatz and at the same training budget as
 every other cell.
@@ -153,12 +155,15 @@ This paper makes four contributions.
   tuned at three learning rates and two training-step budgets at
   three anchor cells), and a \texttt{verify\_paper\_integrity}
   script that mechanically checks every cited number in the
-  paper against a committed JSON file. Eleven pre-registration
-  amendments are documented openly (Appendix~A).
+  paper against a committed JSON file. Twenty-two pre-registration
+  amendments (A1--A22) are documented openly (Appendix~A).
 \item \textbf{Empirical.} A pre-registered regime-dependent
-  advantage hypothesis is FALSIFIED at five layered sensitivity
-  points covering eight of the nine pre-registered hardness-ladder
-  systems and both pre-registered tasks (solver and forecaster).
+  advantage hypothesis is FALSIFIED across two PRIMARY verdicts
+  (solver $n{=}24$ and forecaster $n{=}9$) plus three layered
+  sensitivity points (P5 forecaster $n{=}9$, default-Adam combined
+  $n{=}18$, symmetric-HPO $n{=}9$), covering all eight
+  pre-registered hardness-ladder systems and both pre-registered
+  tasks (solver and forecaster).
   A positive structural sub-finding (\texttt{te\_qpinn\_qnn} on
   \fhn{}) is identified at the same compute budget.
 \item \textbf{Mechanistic.} The H3 cross-tabulation links the

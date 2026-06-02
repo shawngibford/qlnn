@@ -83,13 +83,14 @@ training budgets, paired-bootstrap confidence intervals, an underfit
 guard, and a known-structure skyline. The pre-registered hypothesis
 \textemdash{} that quantum PINNs achieve a regime-dependent advantage
 favoring smooth/periodic systems over broadband/multiscale ones
-\textemdash{} is FALSIFIED at five layered sensitivity points: the
-forecaster task ($n=9$), the default-Adam solver task ($n=18$), the
-both-sides HPO-best solver task ($n=9$), and the expanded full-ladder
-solver task ($n=24$, with the point-estimate sign inverted relative
-to the original hypothesis). The expanded matrix surfaces a
+\textemdash{} is FALSIFIED across two PRIMARY verdicts (full-ladder
+solver task at $n=24$, with the point-estimate sign inverted relative
+to the original hypothesis; and forecaster task at $n=9$ with the
+CI excluding zero negatively) and three additional layered sensitivity
+points (default-Adam combined $n=18$, symmetric-HPO $n=9$, and the
+original P5 forecaster $n=9$). The expanded matrix surfaces a
 positive sub-finding: the trainable-embedding quantum PINN with QNN
-encoder (te\_qpinn\_qnn) exhibits a $24\times$ tighter seed variance
+encoder (te\_qpinn\_qnn) exhibits a $24\times$ tighter seed standard deviation
 and $2.5\times$ lower mean error than the classical PINN on FitzHugh--Nagumo,
 a regime-dependent structural advantage on stiff fast--slow dynamics
 that was not visible at the smaller sample size. We release the
@@ -122,7 +123,7 @@ This work was carried out as an independent research project. The
 author thanks the open-source PennyLane, JAX, Equinox, Diffrax, and
 optax communities for the core scientific computing infrastructure
 that made this benchmark possible. Anthropic's Claude provided
-research assistance throughout. The authors declare no competing
+research assistance throughout. The author declares no competing
 interests.
 \end{acknowledgments}
 

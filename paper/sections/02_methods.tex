@@ -261,7 +261,9 @@ training-dynamics caveats of Wang and
 Perdikaris~\cite{wang2022whenwhy} (neural tangent kernel
 pathologies under residual-loss only) apply equally to both
 substrates; our matched-capacity comparison is invariant to
-them.
+them. The choice of a uniform 2000-step training budget across all
+solver-side models (amendment A15) is empirically motivated by the
+diminishing-returns sweep in Figure~\ref{fig:training-budget}.
 
 \subsection{Verdict machinery}
 \label{sec:methods-verdict}
