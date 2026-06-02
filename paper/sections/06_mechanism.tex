@@ -14,6 +14,12 @@ contrast is mechanistically a quantum-circuit property (as the
 P7.10 LTC decomposition indicates), then per-family scalars
 describing circuit expressivity and trainability should track the
 sign of the per-cell $\Delta$ when stratified by quantum family.
+The structural picture of this section is summarized in
+Figures~\ref{fig:mechanism} (T3 scalar dependence),
+\ref{fig:2x2-cartoon} (the 2$\times$2 decomposition design),
+\ref{fig:delta-vs-t3} (per-cell $\Delta$ scattered against each
+T3 scalar), and \ref{fig:forecaster-heatmap} (the per-cell 2$\times$2
+breakdown across all 9 cells).
 
 \subsection{T3 scalar inventory}
 \label{sec:mechanism-scalars}
@@ -39,7 +45,7 @@ The accessible Fourier order at our default reuploading depth
 the same upper bound at this depth. The Schuld--Sweke--Meyer
 theorem predicts $K_{\max} = L \cdot n$ where $L$ is the
 reuploading depth and $n$ is the number of qubits; with our
-$L=1, n=4$ configuration we recover precisely that bound. This
+$L=1, n=3$ configuration we recover precisely that bound. This
 explains the lack of per-family discrimination on the Fourier
 axis at the program's compute budget: every family is operating
 at the same theoretical ceiling.
@@ -62,7 +68,7 @@ how aggressively quantum-similarity-based PINN variants could be
 scaled without falling into the same trap.
 
 \textbf{Expressibility KL-to-Haar
-divergence}~\cite{schuld2021effect,holmes2022connecting}.
+divergence}~\cite{holmes2022connecting}.
 Lower KL = closer to a Haar-random unitary ensemble = higher
 expressivity. The KL-to-Haar construction is
 operationalized exactly as in Holmes et al.\cite{holmes2022connecting}:
