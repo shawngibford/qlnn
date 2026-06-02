@@ -112,12 +112,10 @@ def main() -> None:
         ax_f.set_xlim(0, min(30, len(amps) - 1))
         ax_f.grid(alpha=0.25, lw=0.5, which="both")
 
-    fig.suptitle(
-        "Per-system reference dynamics  (top)  +  Fourier amplitude "
-        "spectrum  (bottom)\n"
-        r"grey band / vertical line = accessible Fourier bandwidth "
-        r"at the program's $L\!=\!1, n\!=\!3$ default ($K_{\max}\!=\!3$)",
-        y=1.06, fontsize=11)
+    # NOTE: suptitle intentionally omitted so the figure's LaTeX
+    # caption (Section 03) is the sole title in the rendered paper.
+    # The previous baked-in matplotlib suptitle duplicated content
+    # already in the \caption{} and read as redundant on page 13.
 
     OUT_DIR.mkdir(parents=True, exist_ok=True)
     fig.savefig(OUT_DIR / "fig_system_spectrum.png")

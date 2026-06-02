@@ -218,7 +218,7 @@ We applied the paired-bootstrap verdict
 sample-size and tuning configurations on the solver task; all
 four return the same qualitative outcome (Table~\ref{tab:verdicts}).
 
-\begin{table}[h]
+\begin{table*}[t]
 \centering
 \caption{Solver-task H1 verdicts across four sensitivity
 configurations. Every CI either includes zero or excludes it in
@@ -245,7 +245,7 @@ HPO-best both sides, n=9 (P7.6) &
 \small\par
 *~The default-Adam $n=9$ raw verdict is sample-size fragile and
 fails the symmetric HPO test in the next row (Section~\ref{sec:methods-hpo}).
-\end{table}
+\end{table*}
 
 The first row -- the default-Adam $n=9$ raw bootstrap that
 appears in the P7.5 commit -- is the only configuration whose
@@ -336,7 +336,7 @@ to make the family specialization patterns
 \label{fig:solver-multistate}
 \end{figure}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig_circuit_zoo.pdf}
 \caption{Schematic of the four quantum ansatz families on the
@@ -355,7 +355,7 @@ quantum-to-classical parameter ratio across three additional variants
 \texttt{qcpinn\_full\_q} ($Q/(Q{+}C) \approx 24\%, 45\%, 87\%$
 respectively).}
 \label{fig:circuit-zoo}
-\end{figure}
+\end{figure*}
 
 \begin{figure*}[t]
 \centering
@@ -380,7 +380,7 @@ the bare Fourier spectrum does not fully expose.}
 \label{fig:system-spectrum}
 \end{figure*}
 
-\begin{figure}[t]
+\begin{figure*}[t]
 \centering
 \includegraphics[width=\textwidth]{figures/fig_trajectory_grid.pdf}
 \caption{Per-system QLNN-prediction-vs-reference trajectories (seed
@@ -392,7 +392,7 @@ and degrades systematically on the broadband-multiscale regime
 contrasts that drive the H1 verdict in
 Section~\ref{sec:verdict}.}
 \label{fig:trajectory-grid}
-\end{figure}
+\end{figure*}
 
 \begin{figure*}[t]
 \centering
