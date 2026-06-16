@@ -11,7 +11,7 @@ Quantum target). Read in this order:
    of the work, the headline finding, and the case for Anvil HPC.
 2. [`NEXT_STEPS.md`](NEXT_STEPS.md) — five-phase timeline (ACCESS
    allocation → Anvil setup → audit re-runs → paper refresh → submit).
-3. [`paper/main.pdf`](paper/) — the 17-page draft + 7-page supplement.
+3. [`paper/main.pdf`](paper/) — the 25-page draft + 8-page supplement.
 4. [`PRE_REG_AMENDMENT.md`](PRE_REG_AMENDMENT.md) — the 19
    pre-registration amendments (A1-A19) documenting every methodological
    choice and deviation.
@@ -21,8 +21,9 @@ Quantum target). Read in this order:
 
 ## Current state (master HEAD, post-2026-05-28 audit session)
 
-- **Paper draft complete and integrity-gated:** main 17pp + supplement 7pp.
-  Headline `fig:h1-verdict` lives in §5.
+- **Paper draft complete and integrity-gated:** main 25pp + supplement 8pp.
+  Headline `fig:h1-verdict` lives in §5. (Grew from 17pp via the Tier-1/2/3
+  figure expansion; abstract + all body sections de-overwritten 2026-06-15.)
 - **Two PRIMARY verdicts, both FALSIFIED**:
   - Solver-task H1 (n=24): Δ_diff ≈ −0.084 (CI includes 0; sign
     flipped from +0.032 at n=18 when broadband bin expanded).
