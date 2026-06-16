@@ -1,0 +1,42 @@
+{
+  "version": "1.0",
+  "timestamp": "2026-06-16T13:48:55.109Z",
+  "phase": null,
+  "phase_name": "Paper de-overwriting + submission staging (non-GSD project)",
+  "phase_dir": null,
+  "plan": null,
+  "task": null,
+  "total_tasks": null,
+  "status": "paused",
+  "context": "default",
+  "note": "This repo does not use GSD .planning/phases scaffolding; it tracks state via CLAUDE.md, NEXT_STEPS.md, ADVISOR_BRIEF.md. Project phase per NEXT_STEPS.md is Phase A (blocked on ACCESS advisor letter).",
+  "completed_tasks": [
+    {"id": 1, "name": "Trim overwritten abstract (~330->~175 words) + introduction (~halved, methodology moved to Methods, contributions folded to prose)", "status": "done", "commit": "baa1a27"},
+    {"id": 2, "name": "De-overwrite body sections 2-8 via 7 parallel subagents (prose-only, all numbers/cites/labels/figures preserved)", "status": "done", "commit": "bfc925c"},
+    {"id": 3, "name": "Refresh stale page counts in CLAUDE.md (17/7 -> 25/8)", "status": "done", "commit": "380df89"},
+    {"id": 4, "name": "Draft + commit PRX Quantum cover letter (COVER_LETTER.md, stage-ready not submitted)", "status": "done", "commit": "bcbad5d"}
+  ],
+  "remaining_tasks": [
+    {"id": 5, "name": "Coauthor reviews the trimmed abstract+intro+body for voice/density approval", "status": "not_started"},
+    {"id": 6, "name": "DECISION: minimum-path submission (as-is, A15-A22 re-runs documented-but-deferred) vs strengthened path (run re-runs on Anvil first)", "status": "not_started"},
+    {"id": 7, "name": "If strengthened path: Phase A ACCESS allocation -> Phase B Anvil setup -> Phase C re-run sweep -> Phase D verdict refresh (see NEXT_STEPS.md)", "status": "not_started"},
+    {"id": 8, "name": "Optional follow-up: restore rf_qrc/Lorenz secondary sub-finding to conclusions if coauthor prefers", "status": "not_started"}
+  ],
+  "blockers": [
+    {"description": "Phase A ACCESS allocation requires a one-paragraph advisor letter on institutional letterhead; blocks the strengthened-path re-runs (Phase C). Minimum-path submission is NOT blocked by this.", "type": "human_action", "workaround": "Submit minimum path now with deferral documented; only the strengthened version needs Anvil."},
+    {"description": "Submission framing (the FALSIFIED headline) needs coauthor sign-off before submitting.", "type": "human_action", "workaround": "none"}
+  ],
+  "human_actions_pending": [
+    {"action": "Advisor letter on institutional letterhead for ACCESS Explore proposal", "context": "Only required for the strengthened path (Anvil re-runs). See NEXT_STEPS.md Phase A + ACCESS_APPLICATION.md.", "blocking": false},
+    {"action": "Coauthor review of trimmed prose + agreement on minimum-vs-strengthened submission path", "context": "Coauthor's overwriting complaint drove this session's work; she should confirm the new density before submission.", "blocking": false}
+  ],
+  "decisions": [
+    {"decision": "Relocated methodology from intro to Methods rather than deleting it", "rationale": "Verified Methods (sec:methods-prereg, sec:verdict, sec:hpo, sec:methods-ladder) already carries the BAS commitments, the methodological-lineage detail, and the deferred Kuramoto/KdV extensions; intro was duplicating it.", "phase": null},
+    {"decision": "Folded the four intro contributions from a numbered list into prose", "rationale": "User choice during this session.", "phase": null},
+    {"decision": "Conclusions (sec 8) dropped the rf_qrc/Lorenz secondary sub-finding", "rationale": "Abstract+intro headline only one positive sub-finding (te_qpinn_qnn/FHN); a second in the conclusion read inconsistent. rf_qrc remains in the body. Reversible (task id 8).", "phase": null},
+    {"decision": "Body sweep ran as 7 parallel subagents with hard invariants (no number/cite/label/figure changes); orchestrator built + integrity-checked centrally", "rationale": "Each section is a distinct file (no edit conflicts); central build avoids LaTeX aux-file races.", "phase": null}
+  ],
+  "uncommitted_files": [],
+  "next_action": "Confirm with coauthor that the trimmed abstract/intro/body density is right; then make the minimum-vs-strengthened submission-path decision. No code/paper edits are pending — the tree is clean and pushed (HEAD bcbad5d).",
+  "context_notes": "Session was paper-cleanup only, not compute. 4 commits, all pushed to origin/master. All gates green throughout: main build exit-0 (25pp), supplement exit-0 (8pp), no undefined refs, verify_paper_integrity.py exit-0 (no numbers altered anywhere). Results on disk: 405 metrics.json, 0 error.json. Paper is publishable on the minimum path NOW. DO NOT run the M3/audit re-runs on the laptop (CLAUDE.md 'What NOT to do') -- they belong on Anvil GPU. DO NOT push to GitHub 'main' (placeholder) -- push to 'master'."
+}
