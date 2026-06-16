@@ -72,33 +72,27 @@
 
 \begin{abstract}
 We pre-register and execute a head-to-head benchmark of four quantum
-physics-informed neural network (PINN) families against capacity-matched
-classical PINN and Neural-ODE baselines on a hardness ladder of four
-ordinary differential equations (Lotka--Volterra, Van der Pol,
-Lorenz, FitzHugh--Nagumo) and four partial differential equations
-(heat, smooth Burgers, Allen--Cahn, shock Burgers), each at three
-random seeds. Following the methodology proposed by Bowles, Ahmed,
-and Schuld for QML benchmarking, every comparison uses matched
-training budgets, paired-bootstrap confidence intervals, an underfit
-guard, and a known-structure skyline. The pre-registered hypothesis
-\textemdash{} that quantum PINNs achieve a regime-dependent advantage
-favoring smooth/periodic systems over broadband/multiscale ones
-\textemdash{} is FALSIFIED across two PRIMARY verdicts (full-ladder
-solver task at $n=24$, with the point-estimate sign inverted relative
-to the original hypothesis; and forecaster task at $n=9$ with the
-CI excluding zero negatively) and three additional layered sensitivity
-points (default-Adam combined $n=18$, symmetric-HPO $n=9$, and the
-original P5 forecaster $n=9$). The expanded matrix surfaces a
-positive sub-finding: the trainable-embedding quantum PINN with QNN
-encoder (te\_qpinn\_qnn) exhibits a $24\times$ tighter seed standard deviation
-and $2.5\times$ lower mean error than the classical PINN on FitzHugh--Nagumo,
-a regime-dependent structural advantage on stiff fast--slow dynamics
-that was not visible at the smaller sample size. We release the
-full open-source benchmark framework, including a
-\texttt{verify\_paper\_integrity.py} script that gates every cited
-number against a committed JSON file, and document two
-mechanism-proven-but-compute-deferred extensions (12-dimensional
-Kuramoto, KdV with third-order spatial autodiff) for follow-up.
+physics-informed neural network (PINN) families against
+capacity-matched classical PINN and Neural-ODE baselines, on a
+hardness ladder of four ordinary and four partial differential
+equations at three random seeds each. Following the methodology
+proposed by Bowles, Ahmed, and Schuld for credible quantum
+machine-learning benchmarks \textemdash{} matched training budgets,
+paired-bootstrap confidence intervals, an underfit guard, and a
+known-structure skyline \textemdash{} we test the pre-registered
+hypothesis that quantum PINNs hold a regime-dependent advantage
+favoring smooth/periodic over broadband/multiscale dynamics. The
+hypothesis is FALSIFIED. Across both PRIMARY verdicts \textemdash{} the
+full-ladder solver task at $n=24$ and the forecaster task at $n=9$
+\textemdash{} the regime-dependent advantage is statistically
+indistinguishable from zero, and the point estimate trends, if
+anything, in the opposite (broadband-favoring) direction. One positive
+sub-finding survives the falsification: the trainable-embedding quantum
+PINN with a QNN encoder achieves markedly tighter seed-to-seed variance
+and lower mean error than the matched classical PINN on stiff
+fast--slow (\fhn{}) dynamics. We release the full open-source benchmark
+framework, with every cited number mechanically verified against a
+committed results file.
 \end{abstract}
 
 \maketitle
