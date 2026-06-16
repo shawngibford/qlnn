@@ -6,306 +6,251 @@
 \section{Discussion}
 \label{sec:discussion}
 
-This work executed a pre-registered quantum-PINN benchmark across
-nine layered sensitivity points covering both the solver and the
-forecaster tasks, with a complete fairness matrix on the
-forecaster side. The pre-registered $H_1$ regime-dependent
-quantum advantage hypothesis is FALSIFIED across all eight
-non-fragile verdicts (Table~\ref{tab:master-verdicts}). The LTC
-decomposition (Section~\ref{sec:forecaster-decomp}) localizes the
-mechanism in the quantum circuit. The H3 cross-tabulation
-(Section~\ref{sec:mechanism}) finds a candidate expressivity-driven
-trend at the within-roster level but with $n=9$ statistical
-power insufficient for confirmation. Together, these results
-constitute a rigorous mechanistic null on a specific, falsifiable
-quantum-ML hypothesis -- the kind of result the Bowles--Schuld
-methodological program~\cite{bowles2024better} calls for.
+The pre-registered $H_1$ regime-dependent quantum advantage
+hypothesis is FALSIFIED across all eight non-fragile verdicts
+(Table~\ref{tab:master-verdicts}). The LTC decomposition
+(Section~\ref{sec:forecaster-decomp}) localizes the mechanism in
+the quantum circuit; the H3 cross-tabulation
+(Section~\ref{sec:mechanism}) finds a candidate
+expressivity-driven trend, underpowered at $n=9$. Together these
+constitute a rigorous mechanistic null on a falsifiable quantum-ML
+hypothesis --- the kind of result the Bowles--Schuld program
+calls for~\cite{bowles2024better}.
 
 \subsection{Limitations}
 \label{sec:discussion-limitations}
 
 \textbf{Sample size.} The forecaster task and the HPO-best
-sensitivity point both run at $n=9$. The combined ODE+PDE
-solver verdict at $n=24$ (Section~\ref{sec:solver-verdicts})
-is the largest-$n$ result in the paper. A larger ladder
-(the pre-registered Kuramoto + KdV systems, deferred per
-amendments A11+A12) would tighten the CIs but is unlikely to
-shift the qualitative outcome given the consistency across
-eight independent verdicts.
+sensitivity point run at $n=9$; the combined ODE+PDE solver
+verdict at $n=24$ (Section~\ref{sec:solver-verdicts}) is the
+largest. A larger ladder would tighten the CIs but, given the
+consistency across eight verdicts, is unlikely to shift the
+qualitative outcome.
 
 \textbf{Deferred systems.} Two pre-registered systems were
-gate-tested but deferred for compute reasons (amendment A11):
+gate-tested but deferred for compute (amendment A11):
 \begin{itemize}
   \item \textbf{Kuramoto (12-dim)} -- the per-component scalar
-        circuit approach scales linearly with state dimension;
-        a 12D system would cost $\approx 7$\,hr per cell,
-        prohibitive at the paper's compute budget. A single-cell
+        circuit scales linearly with state dimension; a 12D
+        system would cost $\approx 7$\,hr per cell. A single-cell
         smoke test confirmed the dispatch works.
   \item \textbf{KdV ($u_t + 6 u u_x + u_{xxx} = 0$)} -- the
-        triple-nested reverse-mode autodiff
-        \texttt{jacrev$^3$} through the QNode was gate-tested
+        \texttt{jacrev$^3$} triple-nested autodiff through the
+        QNode gate-tested
         (\texttt{results/p7\_8\_kdv\_gate/gate\_result.json})
-        and \emph{passes}: finite non-trivial $u_{xxx}$ values
-        at JIT compile time $\approx 4.6$\,s and per-point cost
-        $\approx 0.43\times$ the second-order baseline thanks
-        to XLA fusion. The integrated training cost remains
-        prohibitive at $\approx 12$\,s per gradient step.
+        \emph{passes}: finite $u_{xxx}$ at JIT compile time
+        $\approx 4.6$\,s and per-point cost $\approx 0.43\times$
+        the second-order baseline via XLA fusion. Integrated
+        training cost remains prohibitive at $\approx 12$\,s per
+        gradient step.
 \end{itemize}
 
-\textbf{Matched-capacity bound.} All forecaster comparisons are
-performed within a factor of two on parameter count
+\textbf{Matched-capacity bound.} Forecaster comparisons hold
+parameter count within a factor of two
 (Section~\ref{sec:methods-baselines}). The cPINN solver baseline
-violates this by $3.3\times$ in one direction (amendment A4); the
-violation is in the classical baseline's favor (more capacity)
-and is therefore conservative for the FALSIFIED outcome.
+violates this by $3.3\times$ (amendment A4) in the classical
+baseline's favor, and is therefore conservative for the
+FALSIFIED outcome.
 
 \textbf{Hyperparameter optimization.} P7.6 ran symmetric HPO on
 the solver task at three anchor cells per family (LV s2,
-\vdp{} s1, Lorenz s2) with three learning rates $\times$ two
-training-step budgets. The forecaster task uses default-Adam
-without HPO; an HPO-symmetric forecaster sensitivity would be a
-natural revision-stage extension. The HPO-best $n=9$ solver
-verdict (row 4 of Table~\ref{tab:master-verdicts}) is the
-methodologically strongest sensitivity in the paper.
+\vdp{} s1, Lorenz s2), three learning rates $\times$ two
+step budgets; its HPO-best $n=9$ verdict (row 4 of
+Table~\ref{tab:master-verdicts}) is the methodologically
+strongest sensitivity in the paper. The forecaster task uses
+default-Adam; an HPO-symmetric forecaster sensitivity is a
+natural revision-stage extension.
 
 \textbf{Simulator only.} All quantum-circuit evaluations use
-\texttt{default.qubit} in PennyLane; we run no hardware-execution
-experiments. The pre-registration~\cite{schuld2022right} disclaims
-hardware execution explicitly; PRX Quantum routinely publishes
-simulator-only quantum-ML benchmarks. A small-scale hardware run
-on, say, the data-reuploading family at $n_q = 4$ would be a
-natural revision-stage validation but does not address the
-falsified hypothesis.
+\texttt{default.qubit} in PennyLane, which the
+pre-registration~\cite{schuld2022right} explicitly disclaims
+hardware execution for. A small-scale hardware run (e.g.,
+data-reuploading at $n_q = 4$) would be a natural revision-stage
+validation but does not address the falsified hypothesis.
 
-\textbf{Single ansatz per family.} Each registered ansatz uses a
-single layered configuration $(n_q, L) = (4, 1)$ at the
-default budget. Per-family architectural variants (e.g., deeper
-reuploading at $L = 5$, alternative entanglement patterns) are
-deferred to the follow-up paper described next.
+\textbf{Single ansatz per family.} Each ansatz uses one layered
+configuration $(n_q, L) = (4, 1)$ at the default budget.
+Architectural variants (deeper reuploading at $L = 5$,
+alternative entanglement patterns) are deferred to the follow-up
+paper.
 
-\textbf{Multiple-comparison family.} The eleven layered
-verdicts of Table~\ref{tab:master-verdicts} constitute a single
-inferential family; the per-row $\alpha = 0.05$ CI machinery
-does not on its own control the family-wise error rate.
-Under the strict Holm--Bonferroni reading
-($\alpha_{\text{family}} = 0.05$, $m = 11$ comparisons), both
-PRIMARY headline verdicts (P7.8 solver and P7.10 forecaster)
-retain their FALSIFIED designation; the eight ancillary
-falsified verdicts hold their FALSIFIED designation
-independent of the correction (all crossed zero already). The
-correction is therefore conservative for the paper's
-conclusions but is disclosed for transparency
-(Section~\ref{sec:methods-verdict} and the footnote on
-Table~\ref{tab:master-verdicts}).
+\textbf{Multiple-comparison family.} The eleven verdicts of
+Table~\ref{tab:master-verdicts} form a single inferential family
+that the per-row $\alpha = 0.05$ CI machinery does not control.
+Under strict Holm--Bonferroni ($\alpha_{\text{family}} = 0.05$,
+$m = 11$), both PRIMARY headline verdicts retain FALSIFIED
+designation and the eight ancillary verdicts already crossed
+zero, so the correction is conservative; it is disclosed for
+transparency (Section~\ref{sec:methods-verdict} and the
+Table~\ref{tab:master-verdicts} footnote).
 
 \textbf{Latent-bug remediation.} The post-peer-review audit
-pass (Amendments A20--A22) surfaced three implementation issues
-that did not affect the committed headline numbers but did
-affect cleanliness of the inferential family: the
-\texttt{te\_qpinn\_fnn} readout convention divergence (A20), the
-\texttt{brickwall} connectivity reduction at $n_q = 3$ (A21),
-and a 2D PDE hard-IC trial-solution docstring omission
-(A22, latent only; the implementation was always correct). A20
-requires re-runs of the \texttt{te\_qpinn\_fnn} cells; A21 is a
-disclosure-only strengthening of A18; A22 is a docstring fix
-with no compute effect. The post-A20 re-runs are bundled into
-the Phase~C Anvil sweep (Appendix~A).
+(Amendments A20--A22) surfaced three issues that left the
+committed headline numbers intact: the \texttt{te\_qpinn\_fnn}
+readout-convention divergence (A20, requiring cell re-runs), the
+\texttt{brickwall} connectivity reduction at $n_q = 3$ (A21,
+disclosure-only strengthening of A18), and a 2D PDE hard-IC
+docstring omission (A22, latent; implementation always correct).
+The post-A20 re-runs are bundled into the Phase~C Anvil sweep
+(Appendix~A).
 
 \subsection{Future work: hardening quantum PINN training}
 \label{sec:discussion-future}
 
-The follow-up to this paper applies three concrete techniques
-from the recent quantum-ML literature, each of which the
-mechanism analysis (Section~\ref{sec:mechanism}) identifies as
-plausibly relevant to the regime-contrast inversion:
+The mechanism analysis (Section~\ref{sec:mechanism}) identifies
+three interventions from the quantum-ML literature as plausibly
+relevant to the regime-contrast inversion:
 
 \begin{enumerate}
   \item \textbf{Quantum Natural
-        Gradient}~\cite{stokes2020quantum}. Adam optimization
-        treats the variational quantum parameter manifold as
-        Euclidean. QNG uses the Quantum Fisher Information
-        matrix as the preconditioner, which empirically
-        accelerates convergence and improves training-loss
-        floors on variational quantum circuits. The H3
-        KL-to-Haar trend $\rho = +0.518$ in
-        Section~\ref{sec:mechanism-h3} is consistent with the
-        expressivity-helps reading; QNG is the optimizer-level
-        intervention that targets it.
+        Gradient}~\cite{stokes2020quantum}. Adam treats the
+        variational parameter manifold as Euclidean; QNG
+        preconditions with the Quantum Fisher Information matrix,
+        improving convergence and loss floors. The H3 KL-to-Haar
+        trend $\rho = +0.518$ (Section~\ref{sec:mechanism-h3})
+        is consistent with the expressivity-helps reading QNG
+        targets.
 
   \item \textbf{Causal training
-        weighting}~\cite{wang2022causality}. The PINN
-        physics-residual loss treats all collocation points
-        symmetrically, ignoring temporal ordering. Wang,
-        Sankaran, and Perdikaris show that weighting points by
-        an inverse-time-order schedule that grows weights only
-        after upstream residuals decay improves training on
-        stiff dynamics. The \vdp{} stiff failure mode
-        (Section~\ref{sec:forecaster-cells}) is directly the
-        scenario this technique targets.
+        weighting}~\cite{wang2022causality}. The PINN residual
+        loss weights all collocation points equally, ignoring
+        temporal ordering; an inverse-time-order schedule that
+        grows weights only after upstream residuals decay
+        improves training on stiff dynamics, directly the \vdp{}
+        failure mode (Section~\ref{sec:forecaster-cells}).
 
   \item \textbf{Higher data-reuploading
-        depth}~\cite{schuld2021effect}. The H3 analysis found
-        Fourier $K_{\max} = 3$ at $L = 1$ across all four
-        ansätze -- the theoretical ceiling at the current
-        configuration. The Schuld--Sweke--Meyer relation
-        $K_{\max} = L \cdot n$ predicts $K_{\max} = 15$ at
-        $L = 5$, a five-fold increase in accessible Fourier
-        bandwidth. If the smooth-bin inductive bias the LTC
-        decomposition isolated ($\Delta_\text{liquid} = +0.12$,
+        depth}~\cite{schuld2021effect}. H3 found Fourier
+        $K_{\max} = 3$ at $L = 1$ across all four ansätze --- the
+        ceiling at the current configuration. The
+        Schuld--Sweke--Meyer relation $K_{\max} = L \cdot n$
+        predicts $K_{\max} = 15$ at $L = 5$. If the smooth-bin
+        inductive bias the LTC decomposition isolated
+        ($\Delta_\text{liquid} = +0.12$,
         Section~\ref{sec:forecaster-decomp}) scales with
-        $K_{\max}$, deeper reuploading should recover the
-        $H_1$ direction.
+        $K_{\max}$, deeper reuploading should recover the $H_1$
+        direction.
 \end{enumerate}
 
-The follow-up paper applies all three interventions to the
-$n = 18$ ODE+PDE combined-solver matrix at the same compute
-budget as P7.6's symmetric HPO sweep, plus the previously
-deferred Kuramoto and KdV systems. The pre-registration for the
-follow-up is locked in
-\texttt{.planning/P7\_7\_HARDENING\_PREREG.md} (to be created
-on the follow-up branch); the design adheres to the same
-matched-capacity, paired-bootstrap, underfit-guard, and skyline
-machinery used in this paper.
-
-\paragraph{Three named follow-up papers.}
-The negative finding and the mechanistic substructure (substrate-
-dependent $\tau$ signature, KL-to-Haar expressivity trend) jointly
-seed three follow-up papers that this work's structure deliberately
-makes ready. They are listed in priority order of
-experimental readiness, not in order of expected scientific impact.
+The negative finding and its mechanistic substructure
+(substrate-dependent $\tau$ signature, KL-to-Haar trend) seed
+three follow-up papers, listed by experimental readiness:
 
 \begin{enumerate}
-  \item \textbf{The training-hardening paper.} The three interventions
-        enumerated above (QNG~\cite{stokes2020quantum}, causal
+  \item \textbf{The training-hardening paper.} The three
+        interventions above (QNG~\cite{stokes2020quantum}, causal
         weighting~\cite{wang2022causality},
         higher-$K_{\max}$~\cite{schuld2021effect}) are tested
-        jointly on the same hardness ladder, at the same compute
-        budget, with the same pre-registration + verdict machinery.
-        If any subset of the three recovers $H_1$ in the predicted
-        direction, the paper reports it as a positive
-        result; otherwise it strengthens the present FALSIFIED
-        verdict from one to four sensitivity points. Estimated
-        scope: $\sim 60$ cells, $\sim 18$~CPU-hours on Anvil.
+        jointly on the same hardness ladder --- plus the deferred
+        Kuramoto and KdV systems --- at P7.6's HPO compute budget,
+        with the same
+        pre-registration and verdict machinery (locked in
+        \texttt{.planning/P7\_7\_HARDENING\_PREREG.md}). If any
+        subset recovers $H_1$ in the predicted direction the
+        paper reports it; otherwise it strengthens the present
+        FALSIFIED verdict from one to four sensitivity points.
+        Scope: $\sim 60$ cells, $\sim 18$~CPU-hours on Anvil.
 
   \item \textbf{The $\tau$-substrate mechanism paper.} The
         substrate-dependent $\tau$ signature
         (Figure~\ref{fig:tau-substrate}; $\Delta_{\mathrm{liquid}|\,
         \mathrm{classical}} \approx +0.12$ vs.\
         $\Delta_{\mathrm{liquid}|\,\mathrm{quantum}} \approx -0.33$,
-        $|\textrm{gap}| = 0.45$) is the strongest mechanism
-        finding in this paper and is not explained by either
-        substrate alone. The follow-up isolates the LTC $\tau$
-        machinery at multiple substrate widths + reuploading depths,
-        and seeks a closed-form prediction in the spirit of
-        Hasani et al.~\cite{hasani2022closed} for the sign of
-        $\Delta_\tau$. A theoretical posit + a focused experimental
-        sweep ($\sim 36$ cells) constitute the paper.
+        $|\textrm{gap}| = 0.45$) is the strongest mechanism finding
+        here and is explained by neither substrate alone. The
+        follow-up isolates the LTC $\tau$ machinery across substrate
+        widths and reuploading depths, seeking a closed-form
+        prediction for the sign of $\Delta_\tau$ in the spirit of
+        Hasani et al.~\cite{hasani2022closed}. Scope: $\sim 36$
+        cells.
 
   \item \textbf{The domain-breadth paper (ChemE / BioE / PSE).}
-        The follow-up extends the ladder from 8 dynamical-system
-        archetypes to 12 process-engineering-specific
-        ODEs / PDEs spanning chemical-reactor (Van~de~Vusse,
-        Saponification, etc.), biochemical (Monod, Yeast / Andrews,
-        Contois), and process-systems
-        (Fisher--KPP, CDR low/high-Pe, fixed-bed, ADM1) regimes.
-        Estimated scope: $\sim 12$ systems $\times$ 4 quantum
-        families $\times$ 3 seeds $= 144$ cells, $\sim 36$~CPU-hours.
-        This paper tests whether the FALSIFIED H1 generalizes from
-        the canonical-dynamical-systems ladder to the
-        domain-specific ladder a practitioner actually cares about.
+        Extends the ladder from 8 dynamical-system archetypes to 12
+        process-engineering ODEs / PDEs spanning chemical-reactor
+        (Van~de~Vusse, Saponification), biochemical (Monod,
+        Yeast / Andrews, Contois), and process-systems
+        (Fisher--KPP, CDR low/high-Pe, fixed-bed, ADM1) regimes,
+        testing whether the FALSIFIED H1 generalizes to the
+        domain-specific ladder a practitioner cares about. Scope:
+        $\sim 12$ systems $\times$ 4 families $\times$ 3 seeds
+        $= 144$ cells, $\sim 36$~CPU-hours.
 \end{enumerate}
 
-All three follow-ups inherit this paper's reproducibility
-infrastructure: pre-registration template,
-matched-capacity / paired-bootstrap / underfit-skyline-guard
-verdict machinery, and the \texttt{verify\_paper\_integrity}
-mechanical gate.
+All three inherit this paper's reproducibility infrastructure:
+pre-registration template, matched-capacity / paired-bootstrap /
+underfit-skyline-guard verdict machinery, and the
+\texttt{verify\_paper\_integrity} mechanical gate.
 
 \subsection{Positioning relative to the field}
 \label{sec:discussion-position}
 
-Three findings sit alongside the broader quantum-ML benchmarking
-discussion.
-
 \textbf{(1) The FALSIFIED outcome is not a uniqueness claim.}
-This work shows that the specific regime-dependent advantage
-formulated by Schuld--Killoran~\cite{schuld2022right} does not
-materialize on the pre-registered hardness ladder at
-matched-capacity training. It does not claim that all quantum
-advantages on PINN-style tasks fail; nor does it claim that the
-Schuld--Fourier hypothesis is wrong in general -- the
-liquid-isolated decomposition ($\Delta = +0.12$) is the only
-verdict in the paper whose point estimate matches the original
-direction, which the follow-up paper's higher-$K_{\max}$
-intervention will directly probe.
+The specific regime-dependent advantage formulated by
+Schuld--Killoran~\cite{schuld2022right} does not materialize on
+this ladder at matched-capacity training. This neither shows that
+all quantum advantages on PINN-style tasks fail nor that the
+Schuld--Fourier hypothesis is wrong in general --- the
+liquid-isolated decomposition ($\Delta = +0.12$) is the one
+verdict whose point estimate matches the original direction, which
+the higher-$K_{\max}$ intervention will probe.
 
 \textbf{(2) The mechanism attribution is the scientific
-content.} A FALSIFIED outcome on a pre-registered hypothesis
-is publishable~\cite{bowles2024better}, but its scientific
-weight depends on what the falsification \emph{shows}.
-Sections~\ref{sec:forecaster-decomp},
-\ref{sec:mechanism}, and the P7.11 quantum-side decomposition
-(Section~\ref{sec:forecaster-decomp}) attribute the regime-
-contrast inversion to the quantum circuit, not to the liquid-$\tau$
-machinery and not to baseline-tuning artifacts. That attribution
-is itself a contribution to the field's understanding of when
-and how matched-capacity quantum-PINN training fails.
+content.} A FALSIFIED pre-registered hypothesis is
+publishable~\cite{bowles2024better}, but its weight depends on
+what the falsification \emph{shows}.
+Sections~\ref{sec:forecaster-decomp} and \ref{sec:mechanism}
+attribute the regime-contrast inversion to the quantum circuit ---
+not the liquid-$\tau$ machinery, not baseline-tuning artifacts ---
+a contribution to understanding when matched-capacity quantum-PINN
+training fails.
 
 \textbf{(3) The positive sub-findings are independent of the
-aggregate verdict.} The \texttt{te\_qpinn\_qnn} family achieves
-a $24\times$-tighter seed standard deviation and $2.5\times$ lower mean
-relative-$L^2$ than the matched classical PINN on
-\fhn{} (Section~\ref{sec:solver-fhn}); \texttt{rf\_qrc} achieves
-the strongest cell on Lorenz s0 and s2
-(Section~\ref{sec:forecaster-cells}). Both are observed at zero
-classical parameters in the quantum-cell stack. We report these
-as regime-specific structural advantages that the falsification
-does not contradict; they are the kind of finding the
-\texttt{te\_qpinn\_qnn}~\cite{berger2025teqpinn} and
-\texttt{rf\_qrc}~\cite{ahmed2024rfqrc} original works each
-target, here observed in an independent benchmark.
+aggregate verdict.} \texttt{te\_qpinn\_qnn} achieves a
+$24\times$-tighter seed standard deviation and $2.5\times$ lower
+mean relative-$L^2$ than the matched classical PINN on \fhn{}
+(Section~\ref{sec:solver-fhn}); \texttt{rf\_qrc} achieves the
+strongest cell on Lorenz s0 and s2
+(Section~\ref{sec:forecaster-cells}). Both occur at zero classical
+parameters in the quantum-cell stack --- regime-specific
+structural advantages the falsification does not contradict, of
+the kind the \texttt{te\_qpinn\_qnn}~\cite{berger2025teqpinn} and
+\texttt{rf\_qrc}~\cite{ahmed2024rfqrc} original works target, here
+seen in an independent benchmark.
 
 \textbf{(4) Comparison to classical operator-learning competitors.}
-The matched-classical baselines used in this work are MLP-PINNs;
-on operator-learning tasks the relevant classical state-of-the-art
-includes DeepONet~\cite{lu2021deeponet} and the Fourier Neural
-Operator~\cite{li2021fourier}. Our PINN-vs-PINN matched-capacity
-framing was chosen because the quantum-PINN literature is itself
-PINN-vs-PINN; benchmarking against operator-learning methods would
-collapse the PINN inductive-bias question (which depends on the
-trial-solution structure) into a representational-capacity
-question (which depends on data scale and architecture). The
-follow-up paper described above is the appropriate venue to
-include operator-learning baselines, paired with the corresponding
-generalization analysis~\cite{caro2022generalization}.
+Our matched-classical baselines are MLP-PINNs, mirroring the
+PINN-vs-PINN framing of the quantum-PINN literature itself.
+Benchmarking against operator-learning state-of-the-art ---
+DeepONet~\cite{lu2021deeponet} and the Fourier Neural
+Operator~\cite{li2021fourier} --- would collapse the PINN
+inductive-bias question (trial-solution structure) into a
+representational-capacity question (data scale and architecture);
+the follow-up paper is the appropriate venue for such baselines,
+paired with the corresponding generalization
+analysis~\cite{caro2022generalization}.
 
 \subsection{Reproducibility and audit}
 \label{sec:discussion-reproducibility}
 
-Every number reported in this paper is gated mechanically by
-\texttt{scripts/verify\_paper\_integrity.py}, which reads
-committed JSON files and matches them against the paper's text.
-A reviewer running the script after cloning the repository
-(\url{https://github.com/shawngibford/qlnn}, tags
-\texttt{v0.1-prepaper-rigor} through the submission tag)
-receives a pass/fail summary on every numerical claim, including
-the LTC decomposition's algebraic-identity check
-(Section~\ref{sec:forecaster-decomp}). Twenty-two pre-registration amendments (A1--A22) are documented
-openly in \texttt{PRE\_REG\_AMENDMENT.md} with full empirical
-findings per amendment, including the conditions under which
-each was added and what it would have looked like without that
-amendment. Amendments A15--A19 were filed during a 2026-05-28
-internal audit and propose budget-parity, ansatz-aliasing, and
-sub-experiment refinements; amendments A20--A22 were filed the
-same day after a self-administered five-reviewer peer-review
-pass surfaced a paired QPINN readout divergence, a deeper
+Every reported number is gated mechanically by
+\texttt{scripts/verify\_paper\_integrity.py}, which matches
+committed JSON files against the paper's text; a reviewer running
+it after cloning the repository
+(\url{https://github.com/shawngibford/qlnn}) receives a
+pass/fail summary on every numerical claim, including the LTC
+decomposition's algebraic-identity check
+(Section~\ref{sec:forecaster-decomp}). Twenty-two amendments
+(A1--A22) are documented in \texttt{PRE\_REG\_AMENDMENT.md} with
+per-amendment empirical findings: A15--A19 (2026-05-28 internal
+audit) propose budget-parity, ansatz-aliasing, and
+sub-experiment refinements; A20--A22, filed the same day after a
+five-reviewer pass, record a paired QPINN readout divergence, a
 brickwall connectivity diagnosis, and a latent docstring defect.
 The verdict refresh under the A15--A22 configuration is deferred
 to a supplementary compute campaign.
 
 The full reproduction pipeline
-(\texttt{scripts/reproduce\_paper.sh}) regenerates every cell in
-this paper from scratch on a single MacBook Pro M1; estimated
-wall-clock is approximately 8\,hours, parallelizable across
-sweep scripts. The 36 P7.11 non-liquid quantum cells reproduce
-in under 30 minutes on the same hardware.
+(\texttt{scripts/reproduce\_paper.sh}) regenerates every cell
+from scratch on a single MacBook Pro M1 in $\approx 8$\,hours,
+parallelizable across sweep scripts; the 36 P7.11 non-liquid
+quantum cells reproduce in under 30 minutes.

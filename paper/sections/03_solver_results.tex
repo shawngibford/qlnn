@@ -11,10 +11,9 @@
 
 The solver task is the pre-registered gating task for H1
 (Section~\ref{sec:methods-verdict}): each model fits a single
-trajectory by physics-residual minimization, and we record the
-relative-$L^2$ error of the trained model against a high-resolution
-reference field. This section reports the full $n=24$ per-cell
-matrix and the four solver-task sensitivity points.
+trajectory by physics-residual minimization, scored by relative-$L^2$
+error against a high-resolution reference. We report the full $n=24$
+per-cell matrix and the four solver-task sensitivity points.
 
 \subsection{Per-cell error matrix (all-to-all)}
 \label{sec:solver-cells}
@@ -22,33 +21,26 @@ matrix and the four solver-task sensitivity points.
 Table~\ref{tab:cell-matrix} reports, for each (system, seed)
 cell, the relative-$L^2$ error of \emph{every} quantum-PINN
 family in our roster (Section~\ref{sec:methods-roster}) alongside
-the matched classical PINN baseline -- the full all-to-all
-contrast matrix. The best-per-row quantum family is bolded; the
-$\Delta$ column compares the best-QLNN to the cPINN on that row.
-The architectural family names abbreviate to: ``cheb'' for
-\texttt{chebyshev\_dqc} (or \texttt{\_2d} on the PDE half),
-``fnn'' for \texttt{te\_qpinn\_fnn(\_2d)}, ``qnn'' for
-\texttt{te\_qpinn\_qnn(\_2d)}, and ``qcp'' for
-\texttt{qcpinn(\_2d)}.
+the matched classical PINN baseline. The best-per-row quantum family is
+bolded; the $\Delta$ column compares the best-QLNN to the cPINN on that
+row. Family names abbreviate to ``cheb'' for \texttt{chebyshev\_dqc}
+(\texttt{\_2d} on the PDE half), ``fnn'' for
+\texttt{te\_qpinn\_fnn(\_2d)}, ``qnn'' for
+\texttt{te\_qpinn\_qnn(\_2d)}, and ``qcp'' for \texttt{qcpinn(\_2d)};
+the families are summarized in Figure~\ref{fig:circuit-zoo} and
+visualized per-cell in Figure~\ref{fig:solver-multistate} and
+per-system in Figure~\ref{fig:trajectory-grid}.
 
-The four ansatz families competing on the matrix are summarized
-in Figure~\ref{fig:circuit-zoo}; their per-cell relative-$L^2$
-behavior is visualized at the all-to-all level in
-Figure~\ref{fig:solver-multistate} and per-system in
-Figure~\ref{fig:trajectory-grid}.
-No single quantum family dominates the matrix: \texttt{qcpinn}
+No single quantum family dominates: \texttt{qcpinn}
 wins on \lv{} and most PDE-smooth cells; \texttt{te\_qpinn\_qnn}
 dominates the broadband bin (Lorenz, \fhn{}, \ac{}); and
 \texttt{te\_qpinn\_fnn} wins a handful of edge cells
 (\vdp{} s0,s2, heat s2, burgers\_smooth s1, burgers\_shock s2).
-\texttt{chebyshev\_dqc} is never the per-row winner on the
-$n=24$ matrix in its 2D PDE form (its smooth-only
-logistic-saturation feature map sits at
-$\relltwo \approx 0.42$--$0.44$ on burgers\_shock and similar
-on AC). \texttt{qcpinn} is the largest classical-parameter
-ansatz in the roster (Section~\ref{sec:methods-roster}) and
-its dominance on \lv{} should be read with that capacity-overhead
-caveat in mind.
+\texttt{chebyshev\_dqc} is never a per-row winner in its 2D PDE form
+(its smooth-only feature map sits at $\relltwo \approx 0.42$--$0.44$ on
+burgers\_shock and similar on AC). Note that \texttt{qcpinn} is the
+largest classical-parameter ansatz in the roster, so its \lv{}
+dominance carries a capacity-overhead caveat.
 
 \begin{table*}[t]
 \centering
@@ -105,46 +97,35 @@ The all-to-all view exposes structural family preferences invisible
 in the single best-QLNN reduction. Three patterns stand out.
 
 \textbf{(1) Family specialization is real.} \texttt{qcpinn} owns the
-smooth, very-easy-to-fit cells (\lv{}, heat, burgers\_smooth s0)
-where its 706-classical-parameter overhead presumably helps; the
-pure-quantum \texttt{te\_qpinn\_qnn} (zero classical parameters)
-owns the broadband bin entirely. The two TE-QPINN variants
-sometimes trade leadership by seed on stiff cells (\vdp{},
+easy smooth cells (\lv{}, heat, burgers\_smooth s0) where its
+706-classical-parameter overhead presumably helps; the pure-quantum
+\texttt{te\_qpinn\_qnn} owns the broadband bin entirely. The two
+TE-QPINN variants trade leadership by seed on stiff cells (\vdp{},
 burgers\_shock).
 
 \textbf{(2) Lorenz is a shared-failure datapoint.} At $T=2$
 ($\approx 2$ Lyapunov times) every quantum family and the cPINN
-sit at the predict-zero baseline ($\relltwo \approx 0.98$--$1.00$).
-The $\Delta \approx +0.02$ contribution to the verdict is in the
-noise. We treat the Lorenz cells as discriminating evidence for
+sit at the predict-zero baseline ($\relltwo \approx 0.98$--$1.00$);
+the $\Delta \approx +0.02$ contribution is in the noise, discriminating
 neither H1 nor its inverse.
 
 \textbf{(3) chebyshev\_dqc and qcpinn fail on different broadband
-PDEs.} \texttt{chebyshev\_dqc\_2d} sits at $\relltwo \approx 0.42$--$0.44$
-on all three burgers\_shock seeds (smooth-only feature map cannot
-represent the near-shock gradient) and at $\relltwo \approx 0.52$--$0.62$
-on AC (cannot represent the sharp two-front structure).
+PDEs.} \texttt{chebyshev\_dqc\_2d} cannot represent the near-shock
+gradient on burgers\_shock ($\relltwo \approx 0.42$--$0.44$) nor the
+sharp two-front structure on AC ($\relltwo \approx 0.52$--$0.62$).
 \texttt{qcpinn\_2d} fails on AC ($\relltwo \approx 0.49$--$0.90$)
-even with its classical-parameter overhead, but it is the leader
-on burgers\_shock (s0, s1). These family-level failure modes are
-the kind of structural information the best-QLNN reduction
-discards.
+despite its overhead, yet leads on burgers\_shock (s0, s1).
 
-The smooth-bin mean $\dsmooth = +0.067$ and broad-bin mean
-$\dbroad = +0.152$. The broadband mean is dominated by the
-\fhn{} and \ac{} (s=0) cells; the Lorenz cells contribute
-$\Delta \approx +0.02$ each because both quantum and classical
-collapse to the predict-zero baseline at $T = 2$ Lyapunov times
-($\relltwo \approx 0.98$).
+The bin means are $\dsmooth = +0.067$ and $\dbroad = +0.152$, the
+latter dominated by the \fhn{} and \ac{} (s=0) cells.
 
 \subsection{Per-system difficulty profile}
 \label{sec:per-system-profile}
 
-The aggregate ``smooth-vs-broadband'' bin masks substantial
-within-regime variance. We summarize the dominant inductive challenge
-per system, why it is hard or easy, and which family handles it best.
-Figures~\ref{fig:system-heatmap} and~\ref{fig:delta-distribution}
-provide the per-cell support for this narrative.
+The aggregate bins mask substantial within-regime variance. We
+summarize the dominant inductive challenge per system and which family
+handles it best; Figures~\ref{fig:system-heatmap}
+and~\ref{fig:delta-distribution} give the per-cell support.
 
 \begin{description}
   \item[\lv{} (S, predator-prey).] Periodic limit cycle in 2D with
@@ -152,9 +133,8 @@ provide the per-cell support for this narrative.
         space~\cite{schuld2021effect} captures it almost exactly
         at $K_{\max} = 3$. All four quantum families and the cPINN
         attain $\relltwo \le 0.02$; \texttt{qcpinn} leads
-        ($\relltwo \approx 0.007$). The cell carries small positive
-        $\Delta$ contributions, mostly from cPINN underfit at lower
-        learning rates.
+        ($\relltwo \approx 0.007$). The small positive $\Delta$ comes
+        mostly from cPINN underfit at lower learning rates.
   \item[\vdp{} (S, limit cycle with relaxation).] Stiff oscillation
         with a slow drift + fast snap-back. The relaxation phase is
         a localized derivative discontinuity that the smooth
@@ -163,12 +143,11 @@ provide the per-cell support for this narrative.
         $\relltwo \approx 0.18$--$0.34$. \texttt{te\_qpinn\_qnn}
         is the most consistent on this regime, with the lowest
         seed standard deviation.
-  \item[Heat (S, diffusion).] Linear PDE with analytic
-        Fourier-mode decomposition; the Schuld--Fourier ansatz is a
-        natural fit. All families attain $\relltwo \le 0.005$;
-        \texttt{qcpinn} and \texttt{te\_qpinn\_qnn} are
-        essentially tied at the integrity-gate floor. This is the
-        easiest cell in the entire matrix.
+  \item[Heat (S, diffusion).] Linear PDE with analytic Fourier-mode
+        decomposition --- a natural fit for the Schuld--Fourier ansatz,
+        and the easiest cell in the matrix. All families attain
+        $\relltwo \le 0.005$; \texttt{qcpinn} and \texttt{te\_qpinn\_qnn}
+        tie at the integrity-gate floor.
   \item[Burgers smooth (S, parabolic with mild nonlinearity).]
         Smooth dissipation around a coherent traveling profile;
         $\nu = 0.07$ keeps gradients moderate. All quantum
@@ -200,31 +179,27 @@ provide the per-cell support for this narrative.
   \item[Lorenz (B, chaotic).] Strange-attractor dynamics on
         $T = 2$ ($\approx 2$ Lyapunov times). At this horizon the
         trial solution's hard-IC structure cannot diverge from
-        $u(0)$ enough to follow the chaotic trajectory; everything
+        $u(0)$ enough to follow the chaotic trajectory, so everything
         collapses to the predict-zero baseline
-        ($\relltwo \approx 0.98$). The Lorenz contribution to the
-        verdict is in the noise.
+        ($\relltwo \approx 0.98$); the contribution to the verdict is
+        in the noise.
 \end{description}
 
-The Fourier amplitude content of each system's reference dynamics
-relative to the program's accessible bandwidth $K_{\max} = 3$ is
-shown in Figure~\ref{fig:system-spectrum} for context. The
-takeaway: of the eight systems, exactly one (\fhn{}) shows a
-clear regime-specific quantum-PINN structural advantage, and exactly
-one (Burgers smooth) shows a clear regime-specific classical-PINN
-advantage. The remaining six are shared-failure or shared-success
-cells. This is precisely the per-cell distribution the verdict-level
-$\dsmooth - \dbroad$ statistic compresses into a single number — and
-the n=24 PRIMARY CI crosses zero because the per-cell distribution
-itself is not concentrated.
+Figure~\ref{fig:system-spectrum} shows each system's Fourier amplitude
+content relative to the accessible bandwidth $K_{\max} = 3$. Of the
+eight systems, exactly one (\fhn{}) shows a clear regime-specific
+quantum-PINN advantage and exactly one (Burgers smooth) a clear
+classical-PINN advantage; the remaining six are shared-failure or
+shared-success cells. The $n=24$ PRIMARY CI crosses zero precisely
+because this per-cell distribution is not concentrated.
 
 \subsection{Four layered solver-task sensitivity points}
 \label{sec:solver-verdicts}
 
 We applied the paired-bootstrap verdict
 (Section~\ref{sec:methods-verdict}) at four successively-stronger
-sample-size and tuning configurations on the solver task; all
-four return the same qualitative outcome (Table~\ref{tab:verdicts}).
+sample-size and tuning configurations; all four return the same
+qualitative outcome (Table~\ref{tab:verdicts}).
 
 \begin{table*}[t]
 \centering
@@ -255,14 +230,12 @@ HPO-best both sides, n=9 (P7.6) &
 fails the symmetric HPO test in the next row (Section~\ref{sec:methods-hpo}).
 \end{table*}
 
-The first row -- the default-Adam $n=9$ raw bootstrap that
-appears in the P7.5 commit -- is the only configuration whose
-CI excludes zero positively. We report it for transparency but
-treat it as superseded by every subsequent row: at the symmetric
-HPO-best $n=9$ (row~3), the CI widens to include zero; at the
-expanded $n=18$ (row~2) the sample-size effect alone is enough
-to push the lower CI bound to $-0.04$; at $n=24$ (row~4) the
-point estimate flips sign.
+The first row -- the default-Adam $n=9$ raw bootstrap from the P7.5
+commit -- is the only configuration whose CI excludes zero positively.
+We report it for transparency but treat it as superseded by every
+subsequent row: symmetric HPO-best (row~3) widens the CI to include
+zero; the expanded $n=18$ (row~2) pushes the lower bound to $-0.04$ on
+sample size alone; and $n=24$ (row~4) flips the point estimate's sign.
 
 \subsection{The sign flip and the \fhn{} positive sub-finding}
 \label{sec:solver-fhn}
@@ -278,28 +251,21 @@ single-cell quantum advantages in the matrix sit at
 
 The \fhn{} cells warrant special discussion. The
 \texttt{te\_qpinn\_qnn} ansatz attains
-$\relltwo = 0.327, 0.356, 0.329$ across the three seeds, a
-mean of $0.337$ and a sample standard deviation of $0.016$.
-The matched classical PINN attains $0.640, 0.641, 1.326$
-($\mathrm{mean} = 0.870$, $\mathrm{std} = 0.396$), with seed~2
-exhibiting a catastrophic training failure
-($\relltwo > 1$ indicates worse than predict-zero). The
-quantum-side seed standard deviation is roughly twenty-four times tighter,
-and the mean is roughly two-and-a-half times lower. Notably the
-\texttt{te\_qpinn\_qnn} architecture has zero classical
-parameters by construction (Section~\ref{sec:methods-roster}),
-so this is a clean structural quantum win rather than a
-classical-overhead artifact.
+$\relltwo = 0.327, 0.356, 0.329$ (mean $0.337$, std $0.016$),
+while the matched classical PINN attains $0.640, 0.641, 1.326$
+(mean $0.870$, std $0.396$), seed~2 failing catastrophically
+($\relltwo > 1$ is worse than predict-zero). The quantum side is
+roughly twenty-four times tighter in seed std and two-and-a-half times
+lower in mean. Because \texttt{te\_qpinn\_qnn} has zero classical
+parameters by construction (Section~\ref{sec:methods-roster}), this is
+a clean structural quantum win, not a classical-overhead artifact.
 
-We treat \fhn{} as a regime-specific positive
-sub-finding within an otherwise-falsified main verdict: the
-combination of a stiff fast--slow nullcline and a 2D state
-space appears to be a class of dynamics on which the
-\texttt{te\_qpinn\_qnn} hypothesis class is structurally
-well-matched. Whether this generalizes beyond \fhn{} is left as
-follow-up work (the pre-reg's Kuramoto system would test the
-same hypothesis class at higher state dimension, deferred per
-A11).
+We treat \fhn{} as a regime-specific positive sub-finding within an
+otherwise-falsified verdict: a stiff fast--slow nullcline in a 2D state
+space appears structurally well-matched to the \texttt{te\_qpinn\_qnn}
+hypothesis class. Whether this generalizes is left to follow-up work
+(the pre-reg's Kuramoto system would test it at higher state dimension,
+deferred per A11).
 
 \subsection{Family-of-models failure modes}
 \label{sec:solver-failures}
@@ -307,29 +273,21 @@ A11).
 Two family-level failure modes are visible in the matrix.
 
 \textbf{\texttt{chebyshev\_dqc\_2d} on burgers\_shock and AC.}
-Across all three burgers\_shock seeds the
-\texttt{chebyshev\_dqc\_2d} ansatz achieves $\relltwo \approx
-0.42$--$0.44$, substantially worse than the other three quantum
-families on the same cells and worse than the matched cPINN
-(which achieves $\approx 0.13$--$0.27$). The Chebyshev tower
-feature map's polynomial coordinate encoding is a poor match
-for the near-shock sharp gradient at $t^* \approx 1$. The
-same family is also outperformed by \texttt{te\_qpinn\_qnn\_2d}
-on AC. We document this as a confirmation of the
-chebyshev family's smooth-only specialization observed in our
-earlier solver-demo work.
+On all three burgers\_shock seeds \texttt{chebyshev\_dqc\_2d} achieves
+$\relltwo \approx 0.42$--$0.44$, well below the other quantum families
+and the matched cPINN ($\approx 0.13$--$0.27$): the Chebyshev tower's
+polynomial coordinate encoding poorly matches the near-shock gradient
+at $t^* \approx 1$. The same family is outperformed by
+\texttt{te\_qpinn\_qnn\_2d} on AC, confirming the chebyshev family's
+smooth-only specialization seen in our earlier solver-demo work.
 
-\textbf{All four families on Lorenz at $T=2$.} Every quantum
-family and the classical PINN collapse to the predict-zero
-baseline on Lorenz ($\relltwo \approx 0.98$ for all twelve
-Lorenz cells). The pre-registered Lorenz horizon is
-$T = 2 \approx 2$ Lyapunov times; this is the regime where
-the system has begun to diverge from its initial trajectory
-but the trial solution's hard-IC structure cannot yet diverge
-itself. The Lorenz contribution to the verdict is near-zero
-in all four sensitivity points; we treat the Lorenz cells as a
-shared-failure datapoint rather than as discriminating evidence
-for or against H1.
+\textbf{All four families on Lorenz at $T=2$.} Every quantum family and
+the cPINN collapse to the predict-zero baseline ($\relltwo \approx 0.98$
+across all twelve Lorenz cells): at $\approx 2$ Lyapunov times the
+system has begun to diverge but the trial solution's hard-IC structure
+cannot. The contribution to the verdict is near-zero at all four
+sensitivity points, so the Lorenz cells are a shared-failure datapoint
+rather than discriminating evidence.
 
 \begin{figure}[t]
 \centering
@@ -337,10 +295,9 @@ for or against H1.
 \caption{Solver-task per-cell relative-$L^2$ across the four
 quantum-PINN families on the four ODE systems (Lotka--Volterra,
 Van der Pol, Lorenz, FitzHugh--Nagumo) and the matched classical
-PINN baseline. Per-cell values are reported in
-Table~\ref{tab:cell-matrix}; this figure visualizes the same data
-to make the family specialization patterns
-(Section~\ref{sec:solver-failures}) visible at a glance.}
+PINN baseline. Per-cell values appear in
+Table~\ref{tab:cell-matrix}; this view makes the family-specialization
+patterns (Section~\ref{sec:solver-failures}) visible at a glance.}
 \label{fig:solver-multistate}
 \end{figure}
 
@@ -374,17 +331,15 @@ $K_{\max}$ at the program's default $L{=}1, n{=}3$
 chebyshev-DQC configuration sits at $x{=}3$ in every panel
 (grey vertical line and shaded band). Reference trajectories shown
 in the top row for context (first state component, seed 0). The
-fraction of spectral energy lying outside the accessible bandwidth
-is annotated per panel. The figure shows that all four systems
-concentrate the bulk of their spectral energy in the $k \le 3$
-band, which is consistent with the H3 cross-tabulation finding that
-$K_{\max}$ alone (held at the theoretical ceiling
-$K_{\max} = L \cdot n = 3$ uniformly across families) does not
-discriminate among families at this configuration. The
-broadband/multiscale character of FHN and Lorenz that drives the
-H1 verdict (Section~\ref{sec:verdict}) is a structural feature
-of the dynamics (chaoticity, stiffness, sharp transitions) that
-the bare Fourier spectrum does not fully expose.}
+fraction of spectral energy outside the accessible bandwidth is
+annotated per panel. All four systems concentrate their spectral energy
+in the $k \le 3$ band, consistent with the H3 finding that $K_{\max}$
+alone (held at the ceiling $K_{\max} = L \cdot n = 3$ across families)
+does not discriminate among families. The broadband/multiscale
+character of FHN and Lorenz that drives the H1 verdict
+(Section~\ref{sec:verdict}) is a structural feature of the dynamics
+(chaoticity, stiffness, sharp transitions) that the bare Fourier
+spectrum does not expose.}
 \label{fig:system-spectrum}
 \end{figure*}
 
@@ -407,16 +362,13 @@ Section~\ref{sec:verdict}.}
 \includegraphics[width=0.95\textwidth]{figures/fig_delta_distribution.pdf}
 \caption{Per-system $\Delta$ distribution underlying the $n{=}24$
 PRIMARY solver verdict. Box-and-whisker on individual seed scatter
-makes visible (a) that
-the verdict-level $\dsmooth - \dbroad = -0.084$ statistic
-compresses an underlying distribution with substantial within-system
-spread, (b) that exactly one system per regime carries a
-qualitatively decisive $\Delta$ (\fhn{} on the broadband side,
-\vdp{} on the smooth side), and (c) that the
-remaining six systems sit near zero with overlapping IQRs.
-The CI on the headline statistic crosses zero precisely because the
-per-cell distribution itself is not concentrated; the verdict is
-appropriately reported as FALSIFIED-direction-flipped rather than
-``inconclusive at the sample limit.''}
+shows (a) that the verdict-level $\dsmooth - \dbroad = -0.084$ statistic
+compresses a distribution with substantial within-system spread, (b)
+that exactly one system per regime carries a decisive $\Delta$ (\fhn{}
+broadband, \vdp{} smooth), and (c) that the remaining six sit near zero
+with overlapping IQRs. The CI crosses zero precisely because the
+per-cell distribution is not concentrated; the verdict is reported as
+FALSIFIED-direction-flipped rather than ``inconclusive at the sample
+limit.''}
 \label{fig:delta-distribution}
 \end{figure*}

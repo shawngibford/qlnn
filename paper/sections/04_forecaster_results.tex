@@ -14,16 +14,16 @@ The forecaster task is the corroborating verdict per pre-reg \S7:
 each model learns an autoregressive one-step predictor from a
 training trajectory and is evaluated on its multi-step rollout
 against a held-out test trajectory. The pre-registered $H_1$
-contrast is QLNN forecaster against the mandatory non-liquid
+contrast pits the QLNN forecaster against the non-liquid
 Neural-ODE baseline, but the QLNN forecaster has learnable
 per-qubit time constants $\tau$ (the
-\texttt{LiquidQuantumCell}) while the Neural-ODE baseline does
-not. Per amendment A12 (P7.10), we add the missing fourth-quadrant
-baseline -- a classical liquid-time-constant forecaster
+\texttt{LiquidQuantumCell}) that the baseline lacks. Per amendment
+A12 (P7.10), we add the missing fourth-quadrant baseline -- a
+classical liquid-time-constant forecaster
 (\texttt{ClassicalLTCForecaster},
-Hasani-form~\cite{hasani2021liquid} with no quantum circuit) -- so the forecaster $H_1$ verdict can be cleanly
-decomposed into the quantum and liquid-$\tau$ contributions
-that the original contrast confounds.
+Hasani-form~\cite{hasani2021liquid} with no quantum circuit) -- so
+the verdict decomposes cleanly into the quantum and liquid-$\tau$
+contributions that the original contrast confounds.
 
 \subsection{All-to-all per-cell error matrix}
 \label{sec:forecaster-cells}
@@ -32,11 +32,11 @@ Table~\ref{tab:forecaster-matrix} reports the per-cell relative-$L^2$
 rollout error for the full all-to-all contrast: five quantum
 forecaster families (the four registry ansätze plus the SOTA
 recurrence-free quantum reservoir
-\texttt{rf\_qrc}~\cite{ahmed2024rfqrc}) versus four classical
+\texttt{rf\_qrc}~\cite{ahmed2024rfqrc}) against four classical
 baselines (\texttt{plain\_neuralode}, \texttt{plain\_mlp}, the
-\texttt{skyline} that fits the known structural RHS by least
-squares, and the P7.10 \texttt{classical\_ltc}). All nine ODE
-cells (3 systems $\times$ 3 seeds) are shown explicitly.
+\texttt{skyline} fitting the known structural RHS by least
+squares, and the P7.10 \texttt{classical\_ltc}), across all nine
+ODE cells (3 systems $\times$ 3 seeds).
 
 \begin{table*}[t]
 \centering
@@ -93,49 +93,43 @@ Three patterns stand out in the all-to-all matrix.
 The known-RHS least-squares skyline attains $\relltwo = 0.020$
 across all three \lv{} seeds -- two orders of magnitude better
 than any learned model. This is the structural cap the skyline
-guard (Section~\ref{sec:methods-verdict}) is designed to surface:
-\lv{} is at-reach in the structural sense, and a learned model
-that loses to the skyline by an order of magnitude has a real
-gap to close. The same pattern holds on Lorenz
-($\relltwo \approx 0.71$) but is weaker on \vdp{}
+guard (Section~\ref{sec:methods-verdict}) exists to surface:
+\lv{} is at-reach, and any learned model that loses to the skyline
+by an order of magnitude has a real gap to close. The pattern
+holds on Lorenz ($\relltwo \approx 0.71$) but weakens on \vdp{}
 ($\relltwo \approx 0.96$, near the predict-zero floor).
 
-\textbf{(2) The classical baselines are mostly stronger than the
+\textbf{(2) Classical baselines mostly beat the
 quantum families on smooth ODEs.}
 On \lv{}, the strongest learned model is consistently
-\texttt{plain\_neuralode} ($\relltwo \approx 0.29$--$0.47$) or
-\texttt{classical\_ltc} ($\approx 0.21$--$0.66$), beating the
-best quantum family ($\approx 0.33$--$0.81$) by a clear margin on
-two of three seeds. On \vdp{}, all models including classical
-sit far above the predict-zero floor ($\relltwo > 1$ indicates
-worse than predict-zero), with several quantum cells exhibiting
-catastrophic blow-up (\texttt{data\_reuploading} on s1:
-$\relltwo = 8.35$; \texttt{brickwall} on s0: $\relltwo = 9.61$;
-\texttt{plain\_mlp} on s0: $\relltwo = 13.73$). \vdp{} at $\mu=5$
+\texttt{plain\_neuralode} or \texttt{classical\_ltc}, beating the
+best quantum family by a clear margin on two of three seeds. On
+\vdp{}, all models sit far above the predict-zero floor
+($\relltwo > 1$), several quantum cells blowing up catastrophically
+(\texttt{data\_reuploading} s1: $8.35$; \texttt{brickwall} s0:
+$9.61$; \texttt{plain\_mlp} s0: $13.73$). \vdp{} at $\mu=5$
 is near the learnability boundary for matched-capacity models on
 the pre-registered rollout horizon.
 
 \textbf{(3) The quantum families show their advantage on Lorenz.}
-\texttt{rf\_qrc} attains the best Lorenz s0
-($\relltwo = 0.607$) and Lorenz s2 ($\relltwo = 0.460$) cells,
-notably outperforming both the matched classical baselines and
-the other quantum families. \texttt{hardware\_efficient} wins
-Lorenz s1 ($\relltwo = 0.485$). This is the broadband-chaotic
-regime where the solver-task expansion (\fhn{}, \ac{}) also
-surfaced regime-specific quantum advantages -- consistent
-across both tasks, even though the global $H_1$ verdict
-on the forecaster task is FALSIFIED.
+\texttt{rf\_qrc} attains the best Lorenz s0 ($0.607$) and s2
+($0.460$) cells, outperforming both the matched classical
+baselines and the other quantum families;
+\texttt{hardware\_efficient} wins Lorenz s1 ($0.485$). This is the
+broadband-chaotic regime where the solver-task expansion (\fhn{},
+\ac{}) also surfaced regime-specific quantum advantages --
+consistent across both tasks, even though the global $H_1$ verdict
+here is FALSIFIED.
 
 \subsection{Combined verdict and LTC decomposition}
 \label{sec:forecaster-decomp}
 
-The pre-reg-mandated combined verdict is computed by selecting
-the best quantum family per cell as the QLNN representative and
-running the paired-bootstrap $H_1$ verdict against the
-\texttt{plain\_neuralode} baseline (Section~\ref{sec:methods-verdict}).
-Per amendment A12, we additionally compute two decomposition
-verdicts that share the cell records but swap which baseline
-sits in the contrast slot:
+The pre-reg-mandated combined verdict selects the best quantum
+family per cell as the QLNN representative and runs the
+paired-bootstrap $H_1$ verdict against \texttt{plain\_neuralode}
+(Section~\ref{sec:methods-verdict}). Per amendment A12, we add two
+decomposition verdicts that share the cell records but swap which
+baseline sits in the contrast slot:
 
 \begin{align*}
 \Delta_\mathrm{cmb} &= \mathrm{QLNN} - \text{Neural-ODE} \\
@@ -176,28 +170,25 @@ The decomposition tells a clear mechanism story.
 
 \textbf{The quantum circuit is the source of the regime-contrast
 underperformance, at high statistical confidence.} The
-quantum-isolated CI is $[-1.167, -0.178]$ -- it EXCLUDES zero in
-the negative direction. The quantum circuit's contribution to
-$\ddiff$ is significantly negative: under matched-capacity
-training, the regime contrast favors the broadband bin (i.e.,
-quantum forecasters underperform classical-LTC more on smooth
-ODEs than on broadband). The combined point estimate ($-0.501$)
-is less negative than the quantum-isolated estimate ($-0.616$)
-because the liquid-$\tau$ component partially offsets it.
+quantum-isolated CI $[-1.167, -0.178]$ EXCLUDES zero negatively:
+the quantum circuit's contribution to $\ddiff$ is significantly
+negative. Under matched-capacity training, quantum forecasters
+underperform classical-LTC more on smooth ODEs than on broadband.
+The combined point estimate ($-0.501$) is less negative than the
+quantum-isolated estimate ($-0.616$) because the liquid-$\tau$
+component partially offsets it.
 
 \textbf{The liquid-$\tau$ component on its own is directionally
 consistent with $H_1$.} The liquid-isolated $\Delta = +0.115$ is
-the only verdict in the entire paper -- across five layered
-solver-task points (Section~\ref{sec:solver}) and three
-forecaster-task points -- whose point estimate matches the
-original Schuld--Fourier
+the only verdict in the paper -- across five layered solver-task
+points (Section~\ref{sec:solver}) and three forecaster-task
+points -- whose point estimate matches the Schuld--Fourier
 prediction~\cite{schuld2021effect,schuld2022right} of a smooth-bin
-quantum advantage. The CI includes zero (the $n=9$ sample size
-is underpowered to detect a $+0.115$ effect at the 95\% level),
-but the directional information is informative: the liquid-$\tau$
-machinery has the inductive bias the original hypothesis posits,
-\emph{and} the quantum circuit's contribution destroys that bias
-in the combined verdict.
+quantum advantage. The CI includes zero ($n=9$ is underpowered to
+detect a $+0.115$ effect), but the direction is informative: the
+liquid-$\tau$ machinery has the inductive bias the hypothesis
+posits, \emph{and} the quantum circuit destroys that bias in the
+combined verdict.
 
 The pre-reg $P5$ verdict ($\Delta = -0.417$, CI $[-0.787, -0.046]$
 excluding zero negatively, computed over a 4-family quantum
@@ -205,15 +196,15 @@ roster) is a directionally identical but weaker version of the
 P7.10 combined verdict ($-0.501$, CI $[-0.804, -0.244]$,
 computed over the 5-family roster including \texttt{rf\_qrc}).
 The P7.10 reaggregation adds \texttt{rf\_qrc}'s broadband
-wins (Lorenz s0 and s2) to the per-cell best-QLNN pool, which
-\emph{strengthens} the regime-favoring-broad point estimate
-because the new wins are all broadband-bin cells. Both verdicts
-are FALSIFIED with CIs excluding zero negatively.
+wins (Lorenz s0, s2) to the per-cell best-QLNN pool, which
+\emph{strengthens} the regime-favoring-broad estimate because the
+new wins are all broadband-bin cells. Both verdicts are FALSIFIED
+with CIs excluding zero negatively.
 
 \subsection{Per-cell decomposition: where the underperformance lives}
 \label{sec:forecaster-percell-decomp}
 
-The $\Delta_q$ values per cell expose substantial
+The per-cell $\Delta_q$ values expose substantial
 seed-level bimodality on \lv{} (best-QLNN selection includes
 \texttt{rf\_qrc}):
 
@@ -230,48 +221,43 @@ seed-level bimodality on \lv{} (best-QLNN selection includes
 \end{itemize}
 
 Two of three \lv{} seeds favor classical-LTC; the third favors
-the best quantum family (\texttt{brickwall}, which attains
-$\relltwo = 0.327$ on s2 despite blowing up to $\relltwo > 9$ on
-\vdp{} s0). The matched-capacity quantum-PINN forecasters have
-a real, seed-dependent failure mode on smooth ODEs that the
-classical-LTC does not exhibit at the same compute budget.
+the best quantum family (\texttt{brickwall}, $\relltwo = 0.327$ on
+s2 despite blowing up to $\relltwo > 9$ on \vdp{} s0). The
+matched-capacity quantum-PINN forecasters have a real,
+seed-dependent failure mode on smooth ODEs that the classical-LTC
+does not, at the same compute budget.
 
-The decomposition's broadband side tells the opposite story.
-On Lorenz s2, $\Delta_q = +1.190$: \texttt{rf\_qrc}
-attains $\relltwo = 0.460$ while the classical-LTC collapses to
-$\relltwo = 1.650$ (worse than predict-zero) on the same cell.
-On Lorenz s0, $\Delta_q = +0.249$: \texttt{rf\_qrc}
-($0.607$) again beats classical-LTC ($0.855$). This is consistent with the solver-task FHN and AC
-sub-findings (Section~\ref{sec:solver-fhn}): the quantum
-families exhibit regime-specific structural advantages on
-broadband/multiscale dynamics that the classical baselines do
-not match.
+The broadband side tells the opposite story. On Lorenz s2,
+$\Delta_q = +1.190$: \texttt{rf\_qrc} attains $\relltwo = 0.460$
+while classical-LTC collapses to $1.650$ (worse than
+predict-zero); on Lorenz s0, $\Delta_q = +0.249$, with
+\texttt{rf\_qrc} ($0.607$) again beating classical-LTC ($0.855$).
+This matches the solver-task FHN and AC sub-findings
+(Section~\ref{sec:solver-fhn}): the quantum families exhibit
+regime-specific structural advantages on broadband/multiscale
+dynamics that the classical baselines do not match.
 
 \paragraph{Residual-distribution diagnostic on the Lorenz cell.}
-The per-cell magnitudes in Section~\ref{sec:forecaster-percell-decomp}
-quantify \emph{how badly} each stack fails on Lorenz; a
-distribution-level diagnostic separates whether the two stacks fail in
-the \emph{same way} or in distinguishable ways. Pooling the per-seed
-held-out residuals
-$r = u_{\text{pred}} - u_{\text{ref}}$ across the three seeds for the
-QLNN (\texttt{strongly\_entangling}) forecaster and the non-liquid
-plain Neural-ODE baseline (each yields $1800$ residuals from the
-$200\,\text{step}\times 3\,\text{state}\times 3\,\text{seed}$ rollout
-budget) and applying the Q-Q harness of
-Amendment~A14 (Supplement~\S 3.4) gives
-Shapiro--Wilk per-stack normality $W=0.978,\ p=5.5\times 10^{-16}$
-(Neural-ODE) and $W=0.916,\ p=2.0\times 10^{-30}$ (QLNN), and a
-two-sample Kolmogorov--Smirnov test of $D=0.183,\ p=7.7\times 10^{-27}$
-between the two distributions
-(Figure~\ref{fig:qq-forecaster-lorenz}). Neither residual
-distribution is Normal; more importantly, the two distributions are
-\emph{distinguishable at very high significance}. The QLNN's heavier
-upper tail (residuals to $\approx{+}60$ vs the Neural-ODE's
-$\approx{+}35$) means the two stacks share the same broadband
-failure regime but fail differently within it --- the
-distributional shape, not just the magnitude, carries the
-quantum-vs-non-liquid contrast. This complements (rather than
-modifies) the verdicts of the preceding per-cell decomposition.
+The per-cell magnitudes above quantify \emph{how badly} each stack
+fails on Lorenz; a distribution-level diagnostic asks whether the
+two stacks fail in the \emph{same way}. Pooling the held-out
+residuals $r = u_{\text{pred}} - u_{\text{ref}}$ across the three
+seeds for the QLNN (\texttt{strongly\_entangling}) forecaster and
+the non-liquid plain Neural-ODE baseline (each $1800$ residuals
+from the $200\,\text{step}\times 3\,\text{state}\times
+3\,\text{seed}$ budget) and applying the Q-Q harness of
+Amendment~A14 (Supplement~\S 3.4) gives Shapiro--Wilk normality
+$W=0.978,\ p=5.5\times 10^{-16}$ (Neural-ODE) and
+$W=0.916,\ p=2.0\times 10^{-30}$ (QLNN), and a two-sample
+Kolmogorov--Smirnov $D=0.183,\ p=7.7\times 10^{-27}$
+(Figure~\ref{fig:qq-forecaster-lorenz}). Neither distribution is
+Normal, and the two are \emph{distinguishable at very high
+significance}: the QLNN's heavier upper tail (residuals to
+$\approx{+}60$ vs the Neural-ODE's $\approx{+}35$) means the two
+stacks share the broadband failure regime but fail differently
+within it --- shape, not just magnitude, carries the
+quantum-vs-non-liquid contrast. This complements rather than
+modifies the per-cell verdicts.
 
 \begin{figure}[t]
 \centering
@@ -283,14 +269,13 @@ QLNN \texttt{strongly\_entangling} residuals vs standard Normal,
 $W{=}0.916$, $p{=}2.0{\times}10^{-30}$ --- pronounced
 S-shape with heavy right tail. \textit{Right:} two-sample Q-Q of
 the two empirical distributions, Kolmogorov--Smirnov $D{=}0.183$,
-$p{=}7.7{\times}10^{-27}$ --- distributions are distinguishable at
-very high significance, and the points depart systematically from
-$y{=}x$ in the upper tail (the QLNN's worst-case residuals are
-markedly larger). Built via the reusable
-\texttt{\_qq\_panel\_vs\_normal} and \texttt{\_two\_sample\_qq}
-helpers added in Amendment~A14; the harness is dataset-agnostic and
-applies unchanged to any other (model, system) cell with on-disk
-\texttt{field.npz} artifacts.}
+$p{=}7.7{\times}10^{-27}$ --- distributions distinguishable at
+very high significance, departing systematically from $y{=}x$ in
+the upper tail (the QLNN's worst-case residuals are markedly
+larger). Built via the reusable \texttt{\_qq\_panel\_vs\_normal}
+and \texttt{\_two\_sample\_qq} helpers (Amendment~A14); the harness
+is dataset-agnostic and applies unchanged to any (model, system)
+cell with on-disk \texttt{field.npz} artifacts.}
 \label{fig:qq-forecaster-lorenz}
 \end{figure}
 
@@ -298,11 +283,11 @@ applies unchanged to any other (model, system) cell with on-disk
 \label{sec:forecaster-2x2}
 
 Amendment A13 (P7.11) closes the fourth corner of the fairness
-matrix by adding a non-liquid quantum forecaster (the same quantum
-circuit with the $\tau$-leak removed; see
+matrix with a non-liquid quantum forecaster (the same quantum
+circuit, $\tau$-leak removed; see
 \texttt{src/qlnn\_/cells/non\_liquid\_quantum\_cell.py}). With all
-four corners filled, the $\tau$-isolation contribution can be computed
-along TWO independent paths:
+four corners filled, the $\tau$-isolation contribution can be
+computed along TWO independent paths:
 
 \begin{align*}
 \Delta_{\tau,\,\text{cls}}
@@ -346,13 +331,11 @@ Quantum via non-liquid    & $-0.167$ & $[-0.495, +0.204]$ & FALSIFIED \\
 \end{table}
 
 \paragraph{The $\tau$-isolation cross-check disagrees in sign.}
-$\Delta_{\tau,\,\text{cls}} = +0.115$ has positive
-point estimate (smooth-bin advantage, matching the
-Schuld--Fourier H1 prediction direction);
-$\Delta_{\tau,\,\text{q}} = -0.334$ has \emph{negative}
-point estimate. Both CIs cross zero individually, but the
-qualitative directions are opposite. The liquid-$\tau$ machinery
-is therefore not a context-independent component -- its
+$\Delta_{\tau,\,\text{cls}} = +0.115$ is positive (smooth-bin
+advantage, matching the Schuld--Fourier H1 direction);
+$\Delta_{\tau,\,\text{q}} = -0.334$ is \emph{negative}. Both CIs
+cross zero, but the directions are opposite. The liquid-$\tau$
+machinery is therefore not a context-independent component -- its
 regime-contrast contribution depends on the substrate it
 modulates.
 
@@ -371,44 +354,41 @@ Per-cell inspection clarifies the mechanism:
         near-neutral on smooth.
 \end{itemize}
 
-$\tau$-on-quantum disproportionately helps the broadband cells.
-When stratified by the smooth-minus-broad regime contrast, this
-yields the negative point estimate above. The combined
-$\ddiff = -0.501$ inversion is therefore the net of (a) a
-quantum-circuit underperformance
-($\Delta_{q,\,\text{ltc}} = -0.62$) and (b) a
-substrate-dependent $\tau$ contribution that goes opposite
-directions on classical vs quantum substrates.
+$\tau$-on-quantum disproportionately helps the broadband cells, so
+under the smooth-minus-broad contrast it yields the negative
+estimate above. The combined $\ddiff = -0.501$ inversion is thus
+the net of (a) a quantum-circuit underperformance
+($\Delta_{q,\,\text{ltc}} = -0.62$) and (b) a substrate-dependent
+$\tau$ contribution that goes opposite directions on classical
+vs quantum substrates.
 
 \subsection{Connection to the solver-task verdict}
 \label{sec:forecaster-vs-solver}
 
 The forecaster task's mechanism decomposition strengthens the
-overall paper narrative. The solver-task primary verdict
-(Section~\ref{sec:solver}, $n=24$,
-$\ddiff = -0.084$) has a point estimate that flipped sign with
-the broadband-bin expansion ($n=18 \to n=24$). The
-forecaster-task LTC decomposition shows that the same
-phenomenon -- a regime-dependent quantum advantage that is
-positive in the broadband bin and negative or absent in the
-smooth bin -- is mechanistically attributable to the quantum
-circuit. The Schuld--Fourier prediction (smooth-bin
-inductive bias) is recovered by the liquid-$\tau$ machinery on
-its own, then inverted by the quantum component. This is
-exactly the kind of regime-dependent attribution Bowles, Ahmed,
-and Schuld~\cite{bowles2024better} call for in QML benchmarking.
-The autoregressive-rollout per-cell errors underlying these
-verdicts are visualized in Figure~\ref{fig:forecaster-rollout}.
+overall narrative. The solver-task primary verdict
+(Section~\ref{sec:solver}, $n=24$, $\ddiff = -0.084$) flipped sign
+with the broadband-bin expansion ($n=18 \to n=24$). The
+forecaster-task LTC decomposition shows the same phenomenon -- a
+regime-dependent quantum advantage positive in the broadband bin
+and negative or absent in the smooth bin -- is mechanistically
+attributable to the quantum circuit: the Schuld--Fourier smooth-bin
+inductive bias is recovered by the liquid-$\tau$ machinery alone,
+then inverted by the quantum component. This is exactly the
+regime-dependent attribution Bowles, Ahmed, and
+Schuld~\cite{bowles2024better} call for in QML benchmarking. The
+per-cell rollout errors underlying these verdicts are visualized
+in Figure~\ref{fig:forecaster-rollout}.
 
 \begin{figure}[t]
 \centering
 \includegraphics[width=\columnwidth]{figures/fig_p4_forecaster_rollout.pdf}
 \caption{Forecaster-task autoregressive-rollout error on the three
-pre-registered ODE systems. The figure visualizes the per-cell
-values reported in Table~\ref{tab:forecaster-matrix} (five quantum
-families plus the four classical baselines). The Lorenz cells
-show the largest spread, consistent with the structural quantum
-advantage of \texttt{rf\_qrc} on chaotic dynamics
+pre-registered ODE systems, visualizing the per-cell values of
+Table~\ref{tab:forecaster-matrix} (five quantum families plus four
+classical baselines). The Lorenz cells show the largest spread,
+consistent with the structural quantum advantage of
+\texttt{rf\_qrc} on chaotic dynamics
 (Section~\ref{sec:forecaster-cells}).}
 \label{fig:forecaster-rollout}
 \end{figure}

@@ -11,14 +11,13 @@
 \label{sec:methods}
 
 Figure~\ref{fig:pipeline-diagram} summarizes the
-end-to-end benchmark pipeline at a glance: from the
+end-to-end benchmark pipeline: from the
 pre-registered hardness ladder
 (top row), through the Lagaris hard-IC trial solution and the
 quantum circuit family
 (middle row), to the physics-residual loss, Adam optimizer,
 trained-model evaluation, and paired-bootstrap verdict
-(bottom row). The remainder of this section
-documents each stage in detail.
+(bottom row). Each stage is documented below.
 
 \begin{figure*}[t]
 \centering
@@ -38,7 +37,7 @@ through the nested Diffrax + PennyLane QNode stack.}
 \subsection{Pre-registration and the falsifiable hypothesis}
 \label{sec:methods-prereg}
 
-The complete pre-registration document (\texttt{ODE\_PDE\_PRE\_REG.md},
+The pre-registration document (\texttt{ODE\_PDE\_PRE\_REG.md},
 committed 2026-05-19 before any benchmark results were generated)
 states the central hypothesis:
 
@@ -54,11 +53,10 @@ The theoretical motivation is the Schuld--Sweke--Meyer
 result~\cite{schuld2021effect} that a data-reuploading parameterized
 quantum circuit realizes a truncated Fourier series in the encoded
 variable, with accessible $K_\text{max}$ proportional to reuploading
-depth. A model whose hypothesis class is a low-order Fourier series
-should exhibit an inductive bias toward smooth periodic dynamics and
-a corresponding difficulty representing broadband or multiscale
-structure. H1 operationalizes this prediction as a comparison
-between two pre-registered regime bins.
+depth. A low-order-Fourier hypothesis class should bias toward smooth
+periodic dynamics and struggle with broadband or multiscale structure.
+H1 operationalizes this as a comparison between two pre-registered
+regime bins.
 
 The pre-registration locks three additional commitments before
 any result is generated: (i)~mandatory classical baselines
@@ -68,12 +66,11 @@ metrics that admit persistence-trivial wins (notably one-step MAE
 on autoregressive rollout); (iii)~explicit decision rules under
 which H1 is declared CONFIRMED, FALSIFIED, or INCONCLUSIVE.
 
-Twenty-two amendments to the pre-registration are documented
-openly in \texttt{PRE\_REG\_AMENDMENT.md} (A1--A22). They were
-necessary because the original pre-registration left some
-parameter choices implicit; each amendment locks a single
-decision and reports whether the outcome was stable under the
-alternative choice. The key amendments from the original analysis
+Twenty-two amendments are documented
+openly in \texttt{PRE\_REG\_AMENDMENT.md} (A1--A22), each locking a
+single parameter choice left implicit in the original
+pre-registration and reporting whether the outcome was stable under
+the alternative. The key amendments from the original analysis
 pass are: A1 (skyline threshold = 0.5; sensitivity at 0.75
 reported); A4 (MLP capacity 3.3$\times$ Neural-ODE, violating the
 original ``within factor of 2'' rule, disclosed and shown not to
@@ -99,15 +96,14 @@ diagnosis of the brickwall connectivity limitation also at
 $L = 2$, and (h) a latent documentation defect in the 2D PDE
 Lagaris hard-IC trial solution (implementation always correct,
 docstring corrected). The verdict refresh under the A15--A22
-configuration is deferred to a supplementary compute campaign;
-the verdicts reported in this manuscript reflect the
-configuration locked at the time of analysis.
+configuration is deferred to a supplementary compute campaign; the
+verdicts reported here reflect the configuration locked at analysis time.
 
 \subsection{Hardness ladder}
 \label{sec:methods-ladder}
 
-We test H1 on eight pre-registered dynamical systems organized
-into a regime-tagged hardness ladder.
+We test H1 on eight pre-registered dynamical systems in a
+regime-tagged hardness ladder.
 
 \textbf{Smooth/periodic bin} (six pre-reg cells, four taxa, two
 mathematical structures):
@@ -184,9 +180,8 @@ qubit registers.
         al.~\cite{farea2025qcpinn}): hybrid quantum--classical
         PINN with classical pre- and post-net. 15 PQC parameters
         and 706 classical parameters per scalar circuit (the
-        classical-parameter overhead is disclosed openly and
-        flagged at every cell in the per-cell tables in
-        Section~\ref{sec:solver}).
+        classical-parameter overhead is flagged at every cell in the
+        per-cell tables of Section~\ref{sec:solver}).
 \end{itemize}
 
 For all four families the 2D PDE port uses split qubit registers:
@@ -275,8 +270,7 @@ relative-$L^2$ error against the reference field. We construct one
 relative-$L^2$ across the four families on the quantum side and
 the matched classical-PINN result on the classical side. The H1
 verdict module (\texttt{h1\_verdict.py} in the
-\texttt{quantum\_liquid\_neuralode.evaluation} package) performs
-the following:
+\texttt{quantum\_liquid\_neuralode.evaluation} package) then:
 
 \begin{enumerate}
   \item \emph{Underfit guard}: drops cells where the classical
@@ -307,9 +301,8 @@ the following:
         Table~\ref{tab:master-verdicts}).
 \end{enumerate}
 
-The pre-registration commits the framework to mechanical
-application of these rules; no analyst chooses the verdict
-post-hoc.
+These rules are applied mechanically; no analyst chooses the
+verdict post-hoc.
 
 \subsection{Symmetric HPO sensitivity}
 \label{sec:methods-hpo}
@@ -329,15 +322,15 @@ sides'' sensitivity test.
 \subsection{Compute envelope}
 \label{sec:methods-compute}
 
-All committed results in this paper were produced on a single
-Apple Silicon (M1) laptop CPU. The headline committed corpus
-consists of approximately 320 individual training cells across
+All committed results were produced on a single
+Apple Silicon (M1) laptop CPU. The committed corpus
+comprises approximately 320 training cells across
 the solver and forecaster tasks, totalling
 $\sim 145$~CPU-hours of wall-clock. The largest individual cell
 (\texttt{chebyshev\_dqc} on KdV at the post-A15 uniform 2000-step
 budget) ran for $\sim 1.1$~hours; the smallest (classical PINN
 on Lotka--Volterra) for under one minute. The task is
-embarrassingly parallel by cell and was run sequentially on
+embarrassingly parallel by cell but was run sequentially on
 CPU; the post-audit re-runs required by amendments A15--A20
 (Supplement~\S 5) are deferred to an NSF~ACCESS
 \texttt{Anvil} GPU partition and are estimated at $\sim
