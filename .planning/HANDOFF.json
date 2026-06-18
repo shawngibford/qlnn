@@ -1,42 +1,111 @@
 {
   "version": "1.0",
-  "timestamp": "2026-06-16T13:48:55.109Z",
+  "timestamp": "2026-06-18T18:10:12Z",
   "phase": null,
-  "phase_name": "Paper de-overwriting + submission staging (non-GSD project)",
+  "phase_name": "Handoff/anvil doc refresh (non-GSD project)",
   "phase_dir": null,
   "plan": null,
-  "task": null,
+  "task": "Refresh handoff/anvil docs and pause work",
   "total_tasks": null,
   "status": "paused",
   "context": "default",
-  "note": "This repo does not use GSD .planning/phases scaffolding; it tracks state via CLAUDE.md, NEXT_STEPS.md, ADVISOR_BRIEF.md. Project phase per NEXT_STEPS.md is Phase A (blocked on ACCESS advisor letter).",
+  "note": "This repo does not use GSD .planning/phases scaffolding; active state is in ADVISOR_BRIEF.md, NEXT_STEPS.md, ACCESS_APPLICATION.md, FOLLOW_UP_PAPERS.md, CLAUDE.md, and .planning/.continue-here.md.",
   "completed_tasks": [
-    {"id": 1, "name": "Trim overwritten abstract (~330->~175 words) + introduction (~halved, methodology moved to Methods, contributions folded to prose)", "status": "done", "commit": "baa1a27"},
-    {"id": 2, "name": "De-overwrite body sections 2-8 via 7 parallel subagents (prose-only, all numbers/cites/labels/figures preserved)", "status": "done", "commit": "bfc925c"},
-    {"id": 3, "name": "Refresh stale page counts in CLAUDE.md (17/7 -> 25/8)", "status": "done", "commit": "380df89"},
-    {"id": 4, "name": "Draft + commit PRX Quantum cover letter (COVER_LETTER.md, stage-ready not submitted)", "status": "done", "commit": "bcbad5d"}
+    {
+      "id": 1,
+      "name": "Refresh advisor brief to current status: QLNN ODE/PDE benchmark, 25+8 pages, 405/0 cells, 22 amendments, H1 falsified, tau mechanism positive result",
+      "status": "done",
+      "commit": "d414be5"
+    },
+    {
+      "id": 2,
+      "name": "Refresh next-steps doc to make strengthened Anvil-first submission the default path",
+      "status": "done",
+      "commit": "d414be5"
+    },
+    {
+      "id": 3,
+      "name": "Refresh ACCESS/Anvil application materials with concise abstract, advisor letter draft, and post-award checklist",
+      "status": "done",
+      "commit": "d414be5"
+    },
+    {
+      "id": 4,
+      "name": "Compress all three follow-up paper plans into a brief combined memo",
+      "status": "done",
+      "commit": "d414be5"
+    },
+    {
+      "id": 5,
+      "name": "Sync stale README/CLAUDE page-count, amendment-count, and pytest-failure language",
+      "status": "done",
+      "commit": "d414be5"
+    }
   ],
   "remaining_tasks": [
-    {"id": 5, "name": "Coauthor reviews the trimmed abstract+intro+body for voice/density approval", "status": "not_started"},
-    {"id": 6, "name": "DECISION: minimum-path submission (as-is, A15-A22 re-runs documented-but-deferred) vs strengthened path (run re-runs on Anvil first)", "status": "not_started"},
-    {"id": 7, "name": "If strengthened path: Phase A ACCESS allocation -> Phase B Anvil setup -> Phase C re-run sweep -> Phase D verdict refresh (see NEXT_STEPS.md)", "status": "not_started"},
-    {"id": 8, "name": "Optional follow-up: restore rf_qrc/Lorenz secondary sub-finding to conclusions if coauthor prefers", "status": "not_started"}
+    {
+      "id": 6,
+      "name": "Send ADVISOR_BRIEF.md and ACCESS_APPLICATION.md to advisor; request institutional-letterhead ACCESS Explore support letter",
+      "status": "not_started"
+    },
+    {
+      "id": 7,
+      "name": "If advisor approves strengthened path: submit ACCESS Explore request, provision Anvil, run smoke cell, launch audit rerun matrix",
+      "status": "not_started"
+    },
+    {
+      "id": 8,
+      "name": "After reruns: refresh verdict numbers, update integrity gate, rebuild paper and supplement, stage PRX Quantum/arXiv package",
+      "status": "not_started"
+    },
+    {
+      "id": 9,
+      "name": "If advisor chooses minimum fallback: final format pass and submission staging without reruns",
+      "status": "not_started"
+    }
   ],
   "blockers": [
-    {"description": "Phase A ACCESS allocation requires a one-paragraph advisor letter on institutional letterhead; blocks the strengthened-path re-runs (Phase C). Minimum-path submission is NOT blocked by this.", "type": "human_action", "workaround": "Submit minimum path now with deferral documented; only the strengthened version needs Anvil."},
-    {"description": "Submission framing (the FALSIFIED headline) needs coauthor sign-off before submitting.", "type": "human_action", "workaround": "none"}
+    {
+      "description": "ACCESS Explore advisor letter on institutional letterhead blocks strengthened-path Anvil reruns.",
+      "type": "human_action",
+      "workaround": "Use minimum fallback submission path if advisor declines Anvil-first strengthened path."
+    },
+    {
+      "description": "Advisor/coauthor sign-off on the FALSIFIED framing blocks PRX Quantum submission.",
+      "type": "human_action",
+      "workaround": "none"
+    }
   ],
   "human_actions_pending": [
-    {"action": "Advisor letter on institutional letterhead for ACCESS Explore proposal", "context": "Only required for the strengthened path (Anvil re-runs). See NEXT_STEPS.md Phase A + ACCESS_APPLICATION.md.", "blocking": false},
-    {"action": "Coauthor review of trimmed prose + agreement on minimum-vs-strengthened submission path", "context": "Coauthor's overwriting complaint drove this session's work; she should confirm the new density before submission.", "blocking": false}
+    {
+      "action": "Advisor support letter for ACCESS Explore proposal",
+      "context": "Use ACCESS_APPLICATION.md advisor letter draft.",
+      "blocking": true
+    },
+    {
+      "action": "Advisor/coauthor approval of strengthened-path default and falsification framing",
+      "context": "Use ADVISOR_BRIEF.md and NEXT_STEPS.md.",
+      "blocking": true
+    }
   ],
   "decisions": [
-    {"decision": "Relocated methodology from intro to Methods rather than deleting it", "rationale": "Verified Methods (sec:methods-prereg, sec:verdict, sec:hpo, sec:methods-ladder) already carries the BAS commitments, the methodological-lineage detail, and the deferred Kuramoto/KdV extensions; intro was duplicating it.", "phase": null},
-    {"decision": "Folded the four intro contributions from a numbered list into prose", "rationale": "User choice during this session.", "phase": null},
-    {"decision": "Conclusions (sec 8) dropped the rf_qrc/Lorenz secondary sub-finding", "rationale": "Abstract+intro headline only one positive sub-finding (te_qpinn_qnn/FHN); a second in the conclusion read inconsistent. rf_qrc remains in the body. Reversible (task id 8).", "phase": null},
-    {"decision": "Body sweep ran as 7 parallel subagents with hard invariants (no number/cite/label/figure changes); orchestrator built + integrity-checked centrally", "rationale": "Each section is a distinct file (no edit conflicts); central build avoids LaTeX aux-file races.", "phase": null}
+    {
+      "decision": "Strengthened Anvil-first path is the default.",
+      "rationale": "Current paper is defensible, but Anvil reruns close audit-surfaced reviewer weak points before submission.",
+      "phase": null
+    },
+    {
+      "decision": "Keep all three follow-up projects.",
+      "rationale": "User clarified all three should remain: training hardening, tau mechanism, and domain breadth.",
+      "phase": null
+    },
+    {
+      "decision": "Brief handoff pack rather than exhaustive doc rewrite.",
+      "rationale": "User asked for brevity; docs were compressed to advisor/actionable status.",
+      "phase": null
+    }
   ],
   "uncommitted_files": [],
-  "next_action": "Confirm with coauthor that the trimmed abstract/intro/body density is right; then make the minimum-vs-strengthened submission-path decision. No code/paper edits are pending — the tree is clean and pushed (HEAD bcbad5d).",
-  "context_notes": "Session was paper-cleanup only, not compute. 4 commits, all pushed to origin/master. All gates green throughout: main build exit-0 (25pp), supplement exit-0 (8pp), no undefined refs, verify_paper_integrity.py exit-0 (no numbers altered anywhere). Results on disk: 405 metrics.json, 0 error.json. Paper is publishable on the minimum path NOW. DO NOT run the M3/audit re-runs on the laptop (CLAUDE.md 'What NOT to do') -- they belong on Anvil GPU. DO NOT push to GitHub 'main' (placeholder) -- push to 'master'."
+  "next_action": "Send ADVISOR_BRIEF.md + ACCESS_APPLICATION.md to advisor and request the ACCESS Explore support letter. Do not run reruns locally.",
+  "context_notes": "Before pause handoff update: repo clean at d414be5. Verification: pdfinfo main=25 pages, supplement=8 pages; stale grep clean; verify_paper_integrity.py passed with ALL PAPER NUMBERS VERIFIED; results count 405 metrics.json and 0 error.json."
 }
