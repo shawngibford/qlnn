@@ -1,7 +1,7 @@
 # Quantum Liquid Neural Network — ODE/PDE solver & forecaster
 
 [![integrity](https://img.shields.io/badge/verify__paper__integrity-passing-brightgreen)](scripts/verify_paper_integrity.py)
-[![paper](https://img.shields.io/badge/paper-main%2027pp%20%2B%20supp%208pp-blue)](paper/main.pdf)
+[![paper](https://img.shields.io/badge/paper-main%2025pp%20%2B%20supp%208pp-blue)](paper/main.pdf)
 [![tests](https://img.shields.io/badge/pytest-510%20passing-brightgreen)](tests/)
 [![figures](https://img.shields.io/badge/figures-25%20(21%20main%20%2B%204%20supp)-blue)](paper/figures/)
 [![bibliography](https://img.shields.io/badge/references-37%20verified-blue)](paper/references.bib)
@@ -33,7 +33,7 @@ In order:
    here to *PRX Quantum* submission, with explicit gates between
    phases. The single blocker is Phase A (ACCESS allocation —
    advisor letter required).
-3. **[`paper/main.pdf`](paper/main.pdf)** — the rendered 27-page paper
+3. **[`paper/main.pdf`](paper/main.pdf)** — the rendered 25-page paper
    draft (§1 Intro through §8 Conclusions). 21 figures, 37 verified
    bibliography entries, 72 in-prose citations. Source:
    `paper/main.tex` + `paper/sections/0*.tex`; rebuild with
@@ -142,7 +142,7 @@ pre-registered question and method are the contribution.
 ## Citation & contact
 
 Research code (no production claims). The current rendered paper is
-**[`paper/main.pdf`](paper/main.pdf)** (27pp, integrity-gated, on
+**[`paper/main.pdf`](paper/main.pdf)** (25pp, integrity-gated, on
 master). Cite via the in-prose contributions enumeration in §1 until
 the arXiv preprint / *PRX Quantum* submission tag lands. For author
 contact see the top-level commit history.

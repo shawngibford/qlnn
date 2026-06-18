@@ -1,348 +1,80 @@
-# Advisor brief — quantum-vs-classical benchmark on differential equations
-
-*Single-page summary. The full draft is at `paper/main.pdf` (17 pp) +
-`paper/supplement.pdf` (7 pp).*
-
-## What we set out to test
-
-A specific, pre-registered claim from the quantum-machine-learning
-literature: that a quantum-enhanced neural network should beat its
-classical counterpart on smooth, well-behaved differential equations
-(and tie on chaotic ones). We built a head-to-head benchmark on two
-tasks — *solving* differential equations and *forecasting* their
-trajectories — across a structured ladder of problems running from
-smooth to chaotic.
-
-## Headline finding
-
-**The predicted quantum advantage did not appear.** Under matched
-parameter counts, multiple random seeds, and proper statistical
-comparison, the quantum model is either *worse* than its classical
-counterpart (on forecasting) or *statistically indistinguishable* from
-it (on solving). This is exactly the kind of rigorous null the field
-has been asking for — most prior "quantum advantage in ML" claims have
-not held up under matched conditions. Ours is the first systematic
-test on differential-equation tasks.
-
-## Three sub-findings
-
-1. **Forecasting task: the classical model wins clearly.** Across the
-   systems and seeds we tested, the classical baseline reliably beats
-   the quantum one. The statistical confidence interval excludes "tie".
-
-2. **Solving task: no clear winner.** Across roughly two dozen
-   system/seed combinations, we cannot distinguish the two models. The
-   direction of the point estimate has even flipped as we added more
-   problems to the ladder — a clear sign there is no robust effect.
-
-3. **An unexpected mechanism finding.** A specific architectural piece
-   borrowed from *liquid neural networks* — a learned per-neuron time
-   constant — behaves in opposite directions depending on what kind of
-   network it is attached to. On the classical hidden state it helps;
-   on the quantum hidden state it actively hurts. We cannot yet
-   explain this. It is genuinely new and probably deserves its own
-   paper.
-
-## What we have done
-
-- Pre-registered the hypothesis, success/failure criteria, and
-  baselines in writing *before* running the comparison (now
-  **nineteen** amendments documented openly as the work evolved).
-- Built and ran the full benchmark: four quantum model families
-  against four classical baselines on a structured problem ladder.
-- Wired the entire paper to a mechanical integrity gate — every
-  number in the draft is checked against a JSON record on disk on
-  every build.
-- Drafted the full paper (17 pages main + 7 pages supplement).
-- **This week's audit pass** produced five pre-registration amendments
-  (A15-A19) that close every fairness concern an external reviewer
-  could raise: uniform training budget across all quantum AND
-  classical models, the strongly-entangling circuit-aliasing fix,
-  the qcpinn quantum-capacity sub-experiment, the brickwall
-  structural-deficit disclosure, and cross-task budget parity.
-- **A self-administered peer-review pass** (five reviewer-agents,
-  modeled as a hostile *PRX Quantum* panel) identified fifteen
-  distinct concerns a real reviewer would raise. **Nine were closed
-  in-session today** as a closure plan ([`REMEDIATION_PLAN.md`](REMEDIATION_PLAN.md))
-  with three more amendments (A20–A22 covering a paired QPINN
-  readout divergence, a brickwall connectivity diagnosis, and a
-  latent 2D PDE docstring fix), a Tier 1 paper-text polish pass
-  (numerical inconsistency between abstract and body fixed,
-  bibliography expanded from 10 to 15 entries, amendment count
-  synchronized), and two Tier 5 reproducibility guards (a JAX dtype
-  startup assertion and a PDE field SHA-256 manifest gate). The
-  remaining six concerns split into the audit re-runs already on
-  the Anvil queue, two advisor-decision items (venue + scope), and
-  one deferred reproducibility-deepening pass. See
-  [`PEER_REVIEW_SYNTHESIS.md`](PEER_REVIEW_SYNTHESIS.md) for what
-  the reviewers said and [`REMEDIATION_PLAN.md`](REMEDIATION_PLAN.md)
-  for how each item closes.
-
-## Do we have a minimum viable paper right now? Yes.
-
-Honest read: **the current 17-page draft + 7-page supplement is
-already submittable.** The verdict is clear, the pre-registration is
-locked, every number is mechanically gated, and the 14 + 5 + 3 = 22
-amendments document every methodological choice openly. If we had to
-ship today, the paper would defend.
-
-What the audit-driven re-runs add is *strength*, not *validity*:
-
-- The training-step parity fix (A15) closes a reviewer-surface concern
-  before a reviewer can raise it — the current numbers used a
-  defensible-but-undisclosed "equal compute per step" model; the
-  refresh uses the more conservative "equal iterations" model.
-- The strongly-entangling un-aliasing (A16) replaces a circuit that
-  was *unitarily identical* to data-reuploading at our config with a
-  genuinely distinct circuit. Doesn't change the verdict; removes an
-  embarrassment.
-- The qcpinn quantum-attribution sub-experiment (A17) tests whether
-  "qcpinn wins Lotka-Volterra" is the quantum circuit or the 706-
-  parameter MLP attached to it. Strengthens the attribution story.
-- The kuramoto + KdV completion (M3) takes the system ladder from 8
-  of 9 to all 9.
-
-So the choice is: **submit now and respond to reviewers, or invest
-the ~53 CPU-hours / one Anvil weekend and submit the strengthened
-version.** My recommendation is the latter, but the former is real
-and would not embarrass anyone.
+# Advisor brief — QLNN ODE/PDE benchmark
 
-## What we want to finish before submitting
+*Current draft: `paper/main.pdf` (25 pp) + `paper/supplement.pdf`
+(8 pp). Integrity gate: `scripts/verify_paper_integrity.py` passes.*
 
-- The audit-driven re-runs (about 225 cells, roughly 53 CPU-hours on
-  a laptop — or a small fraction of an HPC GPU allocation that runs
-  embarrassingly parallel in roughly cell-time) plus the last two
-  systems on the problem ladder, bringing coverage from 8 of 9
-  systems to all 9.
-- A one-hour paper-update pass: refresh the headline numbers, the
-  master verdict table, and the integrity gate.
-- Submit to *PRX Quantum*.
+## Status
 
-## The pipeline beyond this submission — three follow-up papers
+This is a pre-registered benchmark of Quantum Liquid Neural Networks
+(QLNNs) against matched classical baselines on ODE/PDE solver and
+forecaster tasks. It is no longer the earlier bioreactor-OD project.
 
-Full design in [`FOLLOW_UP_PAPERS.md`](FOLLOW_UP_PAPERS.md). Each sits
-*after* the current submission lands; the current paper ships first.
+Current state:
 
-### Follow-up #1 — Training-hardening paper
-
-> *Hardening quantum PINN training: QNG + causal weighting +
-> deeper data-reuploading on the QLNN benchmark.*
-
-Three literature-best interventions identified by the H3 mechanism
-analysis as plausibly relevant:
-
-1. **Quantum Natural Gradient** (Stokes 2020) — replace optax Adam
-   with PennyLane's QNG. Drop-in.
-2. **Causal training** (Wang et al. arXiv:2203.07404) — weight
-   collocation points by inverse time-order. Targets the van der Pol
-   stiff failure.
-3. **Deeper data-reuploading L=5** (Schuld 2021) — widens the
-   Fourier K_max ceiling.
-
-Either outcome publishable. If the verdict flips at literature-best:
-"default optimization underestimated quantum potential." If it stays
-FALSIFIED: the strongest possible Bowles-Schuld 2024 null.
-
-**Effort:** ~3-4 days dev + ~2 hr Anvil GPU.
-
-### Follow-up #2 — Substrate-dependent τ mechanism paper
-
-> *Substrate-dependent behavior of learned time constants: a
-> mechanism investigation.*
-
-The current paper's headline mechanism finding — the τ-cross-check
-disagreement (Δ_τ on classical MLP is +0.115; Δ_τ on quantum cell is
-−0.334; signs disagree, algebraic identities hold per-cell exactly)
-— has **no explanation in the literature**. Why does a learned per-
-neuron time constant help on a classical hidden state but hurt on a
-quantum hidden state?
-
-A focused mechanism investigation: τ-distribution analysis, frequency-
-domain decomposition, a third substrate (random-feature reservoir)
-to isolate trainability from representation, and an analytical
-derivation of the τ-leak sign asymmetry for both substrates.
-
-**Effort:** ~1 day dev + hours of focused experiments. Sits on the
-existing cells from the current paper.
-
-### Follow-up #3 — Domain-breadth paper *(NEW, scoped this week)*
-
-> *Quantum-enhanced solvers and forecasters for chemical, biochemical,
-> and process-systems engineering: a pre-registered benchmark.*
-
-The current benchmark is mathematical-physics (Lorenz, Burgers, KdV)
-and generic dynamical (Lotka-Volterra, van der Pol, kuramoto, FHN).
-These were the right systems for testing the H1 hypothesis but they
-leave a gap: **the ChemE / BioE / PSE communities that would actually
-deploy a quantum-enhanced differential-equation solver have not seen
-a head-to-head benchmark on systems they care about.**
-
-The follow-up re-runs the benchmark on four web-verified canonical
-systems:
-
-| Domain | System | Equation | Reference | Regime |
-|---|---|---|---|---|
-| ChemE | **Van de Vusse CSTR** | `dC_A/dt = (q/V)(C_A,in − C_A) − k₁·C_A − k₃·C_A²`, `dC_B/dt = −(q/V)·C_B + k₁·C_A − k₂·C_B` | Van de Vusse 1964; Pannocchia 2003 | SMOOTH (stiff transitions near a fold) |
-| BioE | **Monod chemostat** | `dS/dt = D·(S_in − S) − (1/Y)·μ(S)·X`, `dX/dt = (μ(S) − D)·X` with `μ(S) = μ_max·S/(K_s + S)` | Monod 1950; Novick-Szilard 1950 | SMOOTH (washout boundary at D → μ_max) |
-| PSE | **CDR low-Pe** | `∂u/∂t + v·∂u/∂x = D·∂²u/∂x² − k·u`, Pe = vL/D = 1 | Agud Albesa et al. 2023 | SMOOTH (diffusion-dominated) |
-| PSE | **CDR high-Pe** | same equation, Pe = 100 | same | BROADBAND (sharp reaction front) |
-
-Two systems per regime keeps the H1 bin balance. The CDR equation
-yields two systems from one residual function by varying Péclet.
-
-**Effort:** ~5 hr code scaffolding + ~35 CPU-hours compute. Fits in
-the same ACCESS Explore allocation.
-
-### Plus — long-term: hardware execution
-
-Pre-reg disclaimed simulator-only. PRX Quantum routinely publishes
-simulator-only QML benchmarks. A small-scale hardware run (e.g.
-4-qubit ionQ Aria; IBM Eagle 127q with transpilation) is a natural
-revision-stage extension if reviewers request it. Out of scope for
-the current submission and for the three follow-ups above unless
-budget + device-access materializes.
-
----
-
-## Why we should move the remaining compute to Purdue's Anvil
-
-The story above is honest about the paper's current state. What it
-does not yet show is that **a deeper audit of our own work, completed
-this week, surfaced four issues that materially expand the compute
-budget needed to ship the paper at the rigor we have been holding it
-to.** I want to make the case for requesting an ACCESS allocation on
-Purdue's Anvil supercomputer to run the remainder on GPU rather than
-on my laptop CPU.
-
-### What the audit found
-
-A read-only review pass by four specialist agents over the codebase
-this week identified:
-
-1. **Training-budget asymmetry on the solver task.** Four quantum
-   families had been given different numbers of training iterations
-   (1200, 1500, 2000, 1500) justified informally as "equal compute
-   per step". This is not equal-iterations fairness and was never
-   pre-registered. The family with the largest budget (te_qpinn_qnn)
-   is also the family that wins three of four solver systems. The
-   fix is to equalize at 2000 steps and re-run the solver cells.
-2. **A circuit-aliasing bug.** Our "strongly entangling" circuit and
-   our "data reuploading" circuit were producing bit-identical
-   numerical outputs on every forecasting cell — at 16-digit
-   precision. Root-caused to a PennyLane template fallback at our
-   small qubit count. The fix is one line of code but it requires
-   re-running every cell that involves either circuit.
-3. **A classical-parameter confound on a key quantum family.** The
-   qcpinn family wins on one system at relL² 0.006, but does it with
-   706 classical neural-network parameters alongside 15 quantum ones.
-   The "win" is mostly the MLP, not the quantum circuit. Fix: add
-   three step-wise variants that progressively shift mass from
-   classical to quantum (24% / 45% / 87% quantum), so the attribution
-   becomes testable.
-4. **One ansatz is structurally broken at our config.** The
-   "brickwall" forecaster ansatz leaves one of three qubits entirely
-   disconnected at our depth budget. Loss decreases during training
-   but the circuit cannot represent three-dimensional dynamics.
-   Removing it from the empirical sweep is the only honest call.
-
-All four findings are documented in formal pre-registration amendments
-(A15–A18) with full code changes committed and pushed to GitHub. The
-paper's headline verdict will not change qualitatively, but the
-numbers backing it will be refreshed with a fair comparison.
-
-### What this implies for compute
-
-Combining the re-runs the audit forces with the originally-planned M3
-sweep, the compute footprint (recomputed 2026-05-28 from the on-disk
-KdV + kuramoto smoke measurements) is:
-
-| Workload | Cells | Est. CPU-hours | Source |
-|---|---:|---:|---|
-| M3: kuramoto + KdV at the new uniform 2000-step budget | 30 | ~24 | smoke-measured |
-| A15 re-run: original 4 ODE systems × 4 QLNN families + classical PINN, all at uniform 2000 steps | ~60 | ~9 | smoke-measured (cPINN at ~3 sec/cell; QLNN scaled by state dim from kuramoto smoke) |
-| A17 ODE-side: 3 qcpinn variants × 5 ODE systems × 3 seeds | 45 | ~15 | smoke-measured for kuramoto (0.39 / 0.90 / 1.62 hr per variant); scaled to 2D systems |
-| A16 + A19: forecaster re-runs at 2000-step budget (post-A18 brickwall removal; includes strongly-entangling fix) | ~90 | ~5 | extrapolated (forecaster cells were seconds at 200 steps → minutes at 2000) |
-| **Committed-scope subtotal** | **~225** | **~53** | |
-| *Optional A17 extension: 3 qcpinn variants × 4 PDE systems × 3 seeds* | *36* | *~40* | *extrapolated (would require a small PDE-side code patch)* |
-| **Grand total if the PDE extension lands** | **~261** | **~93** | |
-
-The committed-scope estimate is **roughly 2-3 days of CPU compute on
-my laptop** (Apple Silicon, JAX `default.qubit`). Extending the
-qcpinn quantum-attribution sub-experiment to the PDE side adds another
-~40 hours to **~4 days total**. The actual wall-clock would be longer
-because the laptop needs to do everything else I do on it.
-
-### Why Anvil specifically
-
-Purdue's Anvil supercomputer (NSF-funded ACCESS resource at the
-Rosen Center for Advanced Computing) is sized exactly for this kind
-of workload:
-
-- **GPU partition**: 16 nodes, each with four NVIDIA A100 Tensor
-  Core GPUs (40 GB each), delivering 1.5 PF of single-precision
-  performance. A 2025 NSF NAIRR upgrade added 21 more nodes with
-  four NVIDIA H100 SXM GPUs each (80 GB), bringing the total to 84
-  H100s.
-- **CPU partition** ("Sub-cluster A"): 1,000 nodes, each with 128
-  cores (two AMD Milan CPUs at 2.45 GHz) and 256 GB of memory.
-- **Embarrassingly parallel fit**: our experiment is independent per
-  (system, family, seed) cell, so we can launch every cell as a
-  separate SLURM job and finish the entire 200-cell matrix in roughly
-  the time of one cell — call it overnight rather than a week.
-- **GPU speedup expected**: PennyLane ships a `lightning.gpu` device
-  backed by NVIDIA's cuQuantum SDK, with proven JAX interoperability.
-  Independent benchmarks have demonstrated PennyLane at scale on
-  Frontier (the world's largest supercomputer until 2024). The same
-  software path that runs on my laptop runs on Anvil GPUs with a
-  module load and a device-string change.
-
-### How we apply
-
-Anvil is allocated through ACCESS, a National Science Foundation
-program. Graduate students are explicitly eligible for the **Explore
-tier** with an advisor letter on institutional letterhead. The
-process:
-
-1. Create an ACCESS account at the allocations portal using my
-   Purdue / institutional email.
-2. Submit an Explore project: title, ≤3-page CV, one-page abstract
-   describing the workload, and your letter of support.
-3. Outcome typically within **one business day**. Credit-to-resource
-   exchange takes up to one week.
-4. The Explore tier ceiling is 400,000 ACCESS credits, which
-   translates to ~6,000 GPU-hours or ~334,000 CPU-core-hours on
-   Anvil. Our entire 200-cell matrix at the worst-case CPU estimate
-   uses ~145 × 128 ≈ 18,500 core-hours — a fraction of one Explore
-   allocation. With GPU acceleration it is a sliver.
-
-If we get a no on the first pass we can re-request with a tighter
-abstract. If we get a yes we can be running on Anvil this week.
-
-### What I would need from you
-
-A short letter on institutional letterhead, ~one paragraph, stating
-that the proposed Anvil workload is being conducted by me as part of
-my dissertation, that you support the request, and that it is
-separate from your other funded grants. ACCESS publishes a template;
-I can send you a draft to sign.
-
-### The ask in one sentence
-
-**Authorize me to request an ACCESS Explore allocation on Anvil so
-the audit re-runs and the kuramoto + KdV sweep can finish on GPU
-in roughly cell-time rather than two to five straight days of laptop
-CPU — and so the same allocation can backstop the qcpinn PDE-side
-extension if we decide it strengthens the paper.**
-
----
-
-## Sources
-
-- [Anvil overview — Purdue RCAC](https://www.rcac.purdue.edu/compute/anvil)
-- [Anvil specs — RCAC Knowledge Base](https://www.rcac.purdue.edu/knowledge/anvil/overview)
-- [Anvil GPU resource — ACCESS](https://allocations.access-ci.org/resources/anvil.purdue.access-ci.org)
-- [Anvil AI now available to ACCESS researchers (H100 upgrade)](https://www.rcac.purdue.edu/news/7268)
-- [ACCESS allocations: getting your first project](https://allocations.access-ci.org/get-your-first-project)
-- [How to get onto Anvil through ACCESS (graduate-student path)](https://www.rcac.purdue.edu/knowledge/anvil/access/anvil_through_access?all=true)
-- [PennyLane Lightning + NVIDIA cuQuantum on GPU](https://pennylane.ai/blog/2022/07/lightning-fast-simulations-with-pennylane-and-the-nvidia-cuquantum-sdk/)
-- [Hybrid quantum programming with PennyLane Lightning on HPC platforms (arXiv:2403.02512)](https://arxiv.org/html/2403.02512v1)
+- Results on disk: **405 completed cells, 0 error cells**.
+- Pre-registration amendments: **22** documented amendments.
+- Every paper number is mechanically checked against committed JSON
+  results.
+- The minimum paper is close to advisor handoff now.
+- The strengthened paper needs Anvil/ACCESS re-runs first.
+
+## Result
+
+**The pre-registered quantum-advantage hypothesis is falsified under
+matched controls.** The QLNN does not show a robust regime-dependent
+advantage over classical baselines on the current ODE/PDE benchmark.
+
+This is still publishable: it is a controlled, pre-registered,
+reproducibility-gated null result in a field where many advantage claims
+do not survive matched-budget comparison.
+
+## Strongest positive finding
+
+The mechanism result is better than the original headline:
+
+**Learned liquid time constants are substrate-dependent.** They help on
+a classical hidden state but hurt on a quantum-cell hidden state. The
+2x2 decomposition identities hold, so this is not a bookkeeping error.
+It is the cleanest follow-up-paper seed.
+
+## Recommendation
+
+Default path: **strengthened submission**.
+
+1. Get advisor support for an ACCESS Explore request.
+2. Run the audit-driven re-run matrix on Purdue Anvil.
+3. Refresh the verdict numbers and paper text.
+4. Submit to *PRX Quantum*.
+
+Minimum fallback: submit the current integrity-gated paper after advisor
+and coauthor sign-off, with audit re-runs documented as deferred.
+
+## Stop condition for this project
+
+Stop adding scope when:
+
+- Anvil re-runs finish with **0 errors**.
+- Integrity gate is refreshed and green.
+- Main paper and supplement build clean.
+- Advisor signs off on the falsification framing.
+- PRX Quantum/arXiv package is staged.
+
+New ideas after that go to follow-up papers, not this manuscript.
+
+## Follow-up papers
+
+1. **Training hardening.** QNG + causal training + deeper
+   data-reuploading. Tests whether the null survives literature-best
+   optimization.
+2. **τ mechanism.** Explain why liquid time constants help classical
+   substrates and hurt quantum substrates.
+3. **Domain breadth.** New ChemE/BioE/PSE benchmark on process-relevant
+   ODE/PDE systems, with a separate pre-registration.
+
+## Advisor ask
+
+Approve an ACCESS Explore request for Anvil so the remaining audit
+re-runs happen on HPC rather than on a laptop. The needed letter is one
+short institutional-letterhead statement that the work is part of the
+student's dissertation and separate from the advisor's other funded
+grants.

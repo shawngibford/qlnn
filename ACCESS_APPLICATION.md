@@ -1,140 +1,89 @@
-# ACCESS Explore allocation — application materials
+# ACCESS Explore / Anvil materials
 
-*Two ready-to-edit drafts. Replace bracketed placeholders with
-your details before submitting.*
+Use this for the advisor conversation and ACCESS Explore application.
 
----
+## Ask
 
-## 1. Project abstract (for the ACCESS allocations portal)
+Authorize an ACCESS Explore request for Purdue Anvil so the remaining
+audit-driven QLNN benchmark re-runs can run as an embarrassingly
+parallel HPC job instead of on a laptop.
 
-Paste into the "Project abstract" field of the ACCESS Explore
-proposal. Target length: 200-300 words. The portal allows up to
-~3,000 characters.
+## Project abstract
 
-> ### A pre-registered benchmark of quantum-enhanced neural networks for differential-equation modeling
+> This project supports a pre-registered benchmark of Quantum Liquid
+> Neural Networks against matched classical baselines on ordinary and
+> partial differential equation solver/forecaster tasks. The current
+> manuscript is complete in draft form (`paper/main.pdf`, 25 pages, plus
+> an 8-page supplement), with 405 successful result cells, zero recorded
+> training errors, 22 documented pre-registration amendments, and a
+> mechanical integrity gate that verifies every cited number against
+> committed JSON results. The pre-registered quantum-advantage
+> hypothesis is currently falsified under matched controls; the remaining
+> compute strengthens the submission by completing audit-driven fairness
+> re-runs before PRX Quantum submission.
 >
-> This project is a controlled, pre-registered head-to-head benchmark
-> of **Quantum Liquid Neural Networks (QLNNs)** against matched
-> classical baselines on a structured hardness ladder of ordinary
-> and partial differential equations. The work tests a falsifiable
-> hypothesis from the quantum-machine-learning literature (a
-> Schuld-Fourier regime-dependent inductive bias) and follows the
-> rigorous methodological framework established by Bowles & Schuld
-> 2024 for QML benchmarking. The current paper draft (17 pages main
-> + 7 pages supplement) is integrity-gated by a mechanical
-> reproducibility script that verifies every cited number against a
-> committed JSON record; 22 pre-registration amendments transparently
-> document every methodological choice.
+> The Anvil workload is approximately 225 independent training cells
+> covering kuramoto/KdV completion, uniform-budget solver re-runs,
+> qcpinn quantum-attribution variants, and forecaster re-runs after
+> ansatz/budget fixes. The jobs are independent by `(system, model,
+> seed)` cell and are therefore natural SLURM-array tasks. Estimated
+> serial footprint is ~53 CPU-hours for committed scope, plus an optional
+> ~40 CPU-hours for a PDE-side qcpinn attribution extension. Software
+> stack: Python 3.11, JAX, Equinox, Diffrax, PennyLane, and GPU-capable
+> PennyLane Lightning/cuQuantum where available.
 >
-> The compute request supports a 200-cell embarrassingly-parallel
-> sweep across (a) the kuramoto + KdV completion of the 9-system
-> pre-registered ladder, (b) audit-driven re-runs at uniform training
-> budgets across all quantum and classical model classes (per-reg
-> amendments A15–A19), (c) a quantum-attribution sub-experiment
-> across three step-wise qcpinn variants, and (d) a per-cell
-> initial-condition robustness check on the heat equation. Total
-> footprint ≈ 200 CPU-hours serial; parallelized by cell on a multi-
-> GPU partition, expected wall-clock is ~10 hours. Software stack:
-> JAX + Equinox + Diffrax + PennyLane (`lightning.gpu` with NVIDIA
-> cuQuantum SDK).
->
-> All code, results, and pre-registration documentation are
-> publicly available at `https://github.com/shawngibford/qlnn`.
-> Target publication: *PRX Quantum* (Q4 2026).
+> Target output: a strengthened, integrity-gated *PRX Quantum*
+> submission and public reproducibility package.
 
-**Notes for you to edit:**
-
-- Replace the GitHub link if your username or repo name differs.
-- If your advisor prefers a different target journal, swap "PRX
-  Quantum" for whatever venue they suggest.
-- Trim the parenthetical software-stack line if you want to free up
-  characters for other detail.
-
----
-
-## 2. Advisor letter (institutional letterhead format)
-
-Paste into a Word/Google Docs document on your university's
-letterhead. Your advisor signs and you upload it as the
-"Letter of Support" attachment in the ACCESS Explore application.
+## Advisor letter draft
 
 > **[University Letterhead]**
 >
 > [Date]
 >
 > ACCESS Allocation Review Committee
-> National Science Foundation
 >
-> Re: ACCESS Explore allocation in support of [Student Name]'s
-> doctoral research
+> Re: ACCESS Explore allocation in support of [Student Name]'s doctoral
+> research
 >
 > Dear Reviewers,
 >
-> I write in support of the ACCESS Explore allocation request
-> submitted by [Student Name], a doctoral candidate in my research
-> group at [University / Department]. The proposed project — a
-> pre-registered benchmark of quantum-enhanced neural networks
-> against matched classical baselines on a hardness ladder of
-> differential equations — constitutes a substantive component of
-> [Student Name]'s dissertation work and is being conducted
-> primarily by them.
+> I support the ACCESS Explore allocation request submitted by [Student
+> Name]. The proposed project, a pre-registered benchmark of quantum
+> neural differential-equation models against matched classical baselines,
+> is part of [Student Name]'s dissertation research.
 >
-> The compute request supports the completion of approximately
-> 200 independent training cells (each one a 1,000–2,000-step
-> optimization on a small PDE/ODE problem), which together form
-> the empirical basis for the paper currently in preparation. The
-> workload is embarrassingly parallel by cell and well-suited to
-> Anvil's GPU partition; estimated total resource use is well
-> within the Explore tier ceiling.
+> The requested compute will complete an audit-driven re-run matrix of
+> independent ODE/PDE training cells needed to strengthen a manuscript
+> currently in preparation for *PRX Quantum*. The workload is
+> embarrassingly parallel and well suited to Purdue Anvil's GPU resources.
 >
-> This proposed work is **separate from my other funded research
-> grants** and does not duplicate compute resources available through
-> those grants. The research program is transparent and openly
-> published at <https://github.com/shawngibford/qlnn>, including
-> the full pre-registration, methodological amendments, and
-> reproducibility infrastructure.
->
-> I support this application and confirm [Student Name]'s
-> qualifications to execute the proposed work.
+> This work is separate from my other funded grants and does not duplicate
+> compute resources available through those grants. I support the request
+> and confirm [Student Name]'s qualifications to execute the work.
 >
 > Sincerely,
 >
-> [Advisor Name]
-> [Title, Department]
-> [University]
+> [Advisor Name]  
+> [Title, Department]  
+> [University]  
 > [Contact email]
 
-**Notes for your advisor (or for you to edit before sending):**
+## Checklist
 
-- The "separate from my other funded grants" line is required by
-  ACCESS for Explore-tier eligibility. Your advisor confirms it.
-- "Approximately 200 independent training cells" matches the Phase
-  C scope in `NEXT_STEPS.md`. Adjust if your scope changes before
-  submission.
-- The "no duplication" line addresses the standard Explore-tier
-  question about overlap with existing allocations.
+- ACCESS account with institutional email.
+- CV, <= 3 pages.
+- Project abstract above, edited to final voice.
+- Advisor letter on letterhead, signed.
+- Resource target: Anvil GPU or Anvil AI.
+- Requested credits: Explore-tier maximum unless advisor prefers a
+  smaller ask.
 
----
+## After award
 
-## Submission checklist
-
-Before clicking "Submit" in the ACCESS allocations portal, verify
-you have:
-
-- [ ] ACCESS account created with institutional email
-- [ ] Up-to-date CV (≤ 3 pages PDF)
-- [ ] Project abstract (above, edited to voice)
-- [ ] Advisor letter (above, on letterhead, signed by advisor)
-- [ ] Target resource selected: **Anvil GPU** (or **Anvil AI** if
-      you want H100 access — your call based on availability)
-- [ ] Credit estimate filled in: **400,000 credits** (the Explore
-      tier maximum; you don't need to justify the full amount, the
-      committee scales the actual award)
-
-Expected outcome timeline (per ACCESS documentation):
-- **Decision**: 1 business day after submission
-- **Credit-to-resource exchange**: up to 1 week after award
-
-The award is for the duration of the doctoral project (Explore
-allocations without a grant-citation default to 12 months and are
-renewable).
+1. Clone repo to `/scratch/$USER/qlnn`.
+2. Install Python 3.11 environment.
+3. Run one smoke cell.
+4. Launch the SLURM array only after smoke passes.
+5. Copy results back and run the paper integrity gate before any paper
+   number changes.

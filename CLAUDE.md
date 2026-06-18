@@ -12,8 +12,8 @@ Quantum target). Read in this order:
 2. [`NEXT_STEPS.md`](NEXT_STEPS.md) — five-phase timeline (ACCESS
    allocation → Anvil setup → audit re-runs → paper refresh → submit).
 3. [`paper/main.pdf`](paper/) — the 25-page draft + 8-page supplement.
-4. [`PRE_REG_AMENDMENT.md`](PRE_REG_AMENDMENT.md) — the 19
-   pre-registration amendments (A1-A19) documenting every methodological
+4. [`PRE_REG_AMENDMENT.md`](PRE_REG_AMENDMENT.md) — the 22
+   pre-registration amendments (A1-A22) documenting every methodological
    choice and deviation.
 5. [`ODE_PDE_PRE_REG.md`](ODE_PDE_PRE_REG.md) — the original
    pre-registration (foundational; do not modify without a corresponding
@@ -22,8 +22,8 @@ Quantum target). Read in this order:
 ## Current state (master HEAD, post-2026-05-28 audit session)
 
 - **Paper draft complete and integrity-gated:** main 25pp + supplement 8pp.
-  Headline `fig:h1-verdict` lives in §5. (Grew from 17pp via the Tier-1/2/3
-  figure expansion; abstract + all body sections de-overwritten 2026-06-15.)
+  Headline `fig:h1-verdict` lives in §5. Abstract and all body sections were
+  de-overwritten 2026-06-15.
 - **Two PRIMARY verdicts, both FALSIFIED**:
   - Solver-task H1 (n=24): Δ_diff ≈ −0.084 (CI includes 0; sign
     flipped from +0.032 at n=18 when broadband bin expanded).
@@ -96,9 +96,8 @@ bash paper/build_supplement.sh
 ```
 
 All four must exit-0 / build clean for the repo to be in a publishable
-state. The pytest suite currently has 6 pre-existing failures
-(documented; orthogonal to the audit work — to be cleaned up during
-Phase D of NEXT_STEPS.md).
+state. If tests drift, do not alter locked paper numbers to compensate;
+fix the test/code issue or document the failure before submission.
 
 ### Smoke checks
 ```bash
