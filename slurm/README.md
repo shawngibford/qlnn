@@ -20,7 +20,34 @@ Every workload writes to a NEW `results/p6_*` directory — the
 committed result trees backing `verify_paper_integrity.py` are never
 touched on Anvil.
 
-## Run order
+## ⚡ The one-command path (recommended)
+
+On an Anvil login node — this is ALL you have to type:
+
+```bash
+git clone https://github.com/shawngibford/qlnn.git
+cd qlnn/slurm
+./go.sh <ACCESS_ACCOUNT>        # e.g.  ./go.sh cis250123
+```
+
+Then log off. `go.sh` bootstraps the environment, runs the paper
+integrity gate, and queues the ENTIRE pipeline with SLURM
+dependencies: smoke (5 cells, debug queue) → automated smoke-gate
+verification → five production arrays (222 cells) → aggregation +
+copy-back tarball. If any smoke cell fails, everything downstream
+cancels automatically — no allocation is burned on a broken
+environment. Total unattended runtime ≈ 4–5 hr.
+
+```bash
+# Check in whenever you like:
+squeue --me
+find $QLNN_ROOT/results/p6_* -name metrics.json | wc -l   # → 222 when done
+
+# When done, send the tarball home:
+scp $QLNN_ROOT/qlnn_phase_c_results_*.tar.gz you@home:
+```
+
+## Manual step-by-step path (fallback / debugging)
 
 ```bash
 # 0. One-time, on an Anvil login node:
