@@ -339,6 +339,13 @@ def main() -> int:
     ap.add_argument("--max-cells", type=int, default=None, metavar="N",
                     help="Stage only the first N cells (for smoke / "
                           "staging). Default: all cells.")
+    ap.add_argument("--cell-index", type=int, default=None, metavar="I",
+                    help="Run exactly ONE cell, the I-th entry of the "
+                          "deterministic _build_cells() ordering. Used "
+                          "by the Anvil SLURM array (slurm/"
+                          "01_kuramoto_kdv.sbatch) to map "
+                          "SLURM_ARRAY_TASK_ID → cell. Mutually "
+                          "composable with --dry-run for plan preview.")
     ap.add_argument("--confirm", action="store_true",
                     help="REQUIRED to start training. Without this flag "
                           "the script prints the plan and exits 1 with "
@@ -348,6 +355,12 @@ def main() -> int:
     args = ap.parse_args()
 
     cells = _build_cells()
+    if args.cell_index is not None:
+        if not (0 <= args.cell_index < len(cells)):
+            print(f"FATAL: --cell-index {args.cell_index} out of range "
+                  f"[0, {len(cells) - 1}]", flush=True)
+            return 2
+        cells = cells[args.cell_index : args.cell_index + 1]
     if args.max_cells is not None:
         cells = cells[: args.max_cells]
 

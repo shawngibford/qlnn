@@ -160,6 +160,12 @@ def main() -> None:
                     help="Pre-reg §7 skyline-out-of-reach threshold")
     ap.add_argument("--out", type=Path, default=OUT)
     ap.add_argument("--verdict-out", type=Path, default=VERDICT_DIR)
+    ap.add_argument("--no-verdict", action="store_true",
+                    help="Skip the post-sweep H1 verdict aggregation. "
+                         "Used by the Anvil SLURM array (slurm/"
+                         "05_a19_baselines.sbatch) where each task "
+                         "trains ONE cell; the verdict runs once in "
+                         "Phase D instead of per-task.")
     args = ap.parse_args()
 
     cfg = P4SweepConfig(
@@ -236,6 +242,11 @@ def main() -> None:
         "Combined with `results/p4_forecaster_rollout/` (QLNN data),\n"
         "the H1 verdict module computes Δ_smooth − Δ_broad CI per\n"
         "pre-reg §7. Output: `results/p5_h1_verdict/h1_analysis.json`.\n")
+
+    if args.no_verdict:
+        print("\nP5 baseline sweep done — --no-verdict set, skipping "
+              "H1 aggregation (runs once in Phase D).", flush=True)
+        return
 
     print(f"\nP5 baseline sweep done — computing H1 verdict ...", flush=True)
 
