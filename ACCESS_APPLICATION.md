@@ -1,5 +1,10 @@
 # ACCESS Explore / Anvil materials
 
+> **STATUS: ✅ AWARDED (2026-07-06).** The allocation was granted and
+> Anvil access is live. This document is retained as the historical
+> application record. The operational path is now `slurm/README.md`
+> (job-array infrastructure) + `NEXT_STEPS.md` Phase B/C.
+
 Use this for the advisor conversation and ACCESS Explore application.
 
 ## Ask

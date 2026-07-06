@@ -57,8 +57,12 @@ Quantum target). Read in this order:
   for the committed scope (M3 + A15/A17 ODE + A16/A19 forecaster):
   ~216 cells / ~55 CPU-hours. Embarrassingly parallel. Optional
   PDE-side A17 extension adds ~36 cells / ~60 CPU-hours.
-- **Blocked on:** Phase A of NEXT_STEPS.md — ACCESS allocation for
-  Purdue Anvil HPC. Requires advisor letter on institutional letterhead.
+- **✅ UNBLOCKED (2026-07-06):** ACCESS allocation AWARDED — Anvil
+  access granted. Phase A of NEXT_STEPS.md is closed. SLURM job-array
+  infrastructure is committed under `slurm/` (see `slurm/README.md`).
+  Next: fill `QLNN_ACCOUNT` in `slurm/config.env`, run
+  `slurm/env_setup.sh` on an Anvil login node, pass the smoke gate,
+  then `slurm/submit_all.sh` (222 cells, ~2-3 hr wall-clock).
 - **Integrity gate exit-0** throughout the session. Locked numbers
   will refresh once the audit-driven re-runs land (Phase D of
   NEXT_STEPS.md).
@@ -106,10 +110,16 @@ PYTHONPATH=src .venv/bin/python scripts/smoke_kuramoto_p6.py       # 4 kuramoto 
 PYTHONPATH=src .venv/bin/python scripts/smoke_post_audit.py        # qcpinn variants + cPINN
 ```
 
-### M3 + audit re-run launch (when ACCESS allocation lands)
+### M3 + audit re-run launch (ACCESS AWARDED — run on Anvil, not laptop)
 ```bash
-PYTHONPATH=src .venv/bin/python scripts/run_p7_8_h1_kuramoto_kdv.py --dry-run    # plan
-PYTHONPATH=src .venv/bin/python scripts/run_p7_8_h1_kuramoto_kdv.py --confirm    # full sweep
+# On an Anvil login node (see slurm/README.md for the full sequence):
+bash slurm/env_setup.sh                              # bootstrap + integrity gate
+# edit slurm/config.env → set QLNN_ACCOUNT
+sbatch -A $QLNN_ACCOUNT -p debug slurm/00_smoke.sbatch   # 5-cell smoke gate
+cd $QLNN_ROOT/slurm && touch SMOKE_PASSED && ./submit_all.sh  # 222 cells
+
+# Local plan preview (safe, no compute):
+PYTHONPATH=src .venv/bin/python scripts/run_p7_8_h1_kuramoto_kdv.py --dry-run
 ```
 
 The runner is resumable (skips cells whose `metrics.json` already

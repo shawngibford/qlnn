@@ -14,37 +14,41 @@ Read `ADVISOR_BRIEF.md` first. This document is the operational path.
 
 ## Default path: strengthened submission
 
-### Phase A — ACCESS allocation
+### Phase A — ACCESS allocation ✅ DONE (awarded 2026-07-06)
 
-**Action.** Submit an ACCESS Explore proposal for Purdue Anvil.
+**AWARDED.** ACCESS allocation granted with Anvil access. Phase A is
+closed. Remaining residue: put the awarded account string into
+`slurm/config.env` (`QLNN_ACCOUNT`) before submitting jobs.
 
-Required:
+### Phase B — Anvil setup ⏩ NOW UNBLOCKED
 
-- CV, <= 3 pages.
-- Project abstract from `ACCESS_APPLICATION.md`.
-- Advisor letter on institutional letterhead confirming support,
-  dissertation relevance, and separation from advisor-funded grants.
-
-**Gate.** ACCESS allocation granted and exchanged for Anvil GPU/AI time.
-
-### Phase B — Anvil setup
-
-**Action.** Clone the repo under Anvil scratch, create a Python 3.11
-environment, install the project, and run one smoke cell.
-
-Target:
+**Action.** The full SLURM job-array infrastructure is committed under
+`slurm/` (see `slurm/README.md`). On an Anvil login node:
 
 ```bash
-PYTHONPATH=src python scripts/run_p7_8_h1_kuramoto_kdv.py --dry-run
-PYTHONPATH=src python scripts/run_p7_8_h1_kuramoto_kdv.py --max-cells 1 --confirm
+bash slurm/env_setup.sh        # clone → venv → integrity gate must pass
+vim slurm/config.env           # set QLNN_ACCOUNT to the awarded account
+cd $QLNN_ROOT/slurm
+sbatch -A $QLNN_ACCOUNT -p debug 00_smoke.sbatch   # 5 representative cells
+# inspect logs/smoke_*.out — all five must end "OK", then:
+touch SMOKE_PASSED
 ```
 
-**Gate.** Smoke writes one valid `metrics.json` and no `error.json`.
+**Gate.** Smoke writes valid `metrics.json` files and no `error.json`;
+`SMOKE_PASSED` marker created.
 
 ### Phase C — Audit re-run matrix
 
-**Action.** Run the remaining audit-driven cells as a SLURM array, one
-cell per task.
+**Action.** After the smoke gate passes, submit the five job arrays +
+dependent aggregation with one command:
+
+```bash
+cd $QLNN_ROOT/slurm && ./submit_all.sh
+```
+
+All five arrays run concurrently (222 cells, ~115 core-hr, ~2-3 hr
+wall-clock). Per-workload scripts and index decodes are documented in
+`slurm/README.md`.
 
 Committed scope:
 
