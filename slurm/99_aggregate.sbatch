@@ -10,6 +10,8 @@
 #   3. tars results/p6_* for scp copy-back.
 # =====================================================================
 #SBATCH --job-name=qlnn-aggregate
+#SBATCH -A chm260071
+#SBATCH -p shared
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1

@@ -13,6 +13,8 @@
 # Output: results/p6_a15_uniform/{family}_{system}/seed_N/
 # =====================================================================
 #SBATCH --job-name=qlnn-a15
+#SBATCH -A chm260071
+#SBATCH -p shared
 #SBATCH --array=0-47%64
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -23,6 +25,9 @@
 set -euo pipefail
 source "${SLURM_SUBMIT_DIR}/config.env"
 eval "${QLNN_TASK_ENV}"
+module load anaconda
+# conda activate references unset vars internally — suspend nounset
+set +u; conda activate "${QLNN_CONDA_ENV}"; set -u
 cd "${QLNN_ROOT}"
 export PYTHONPATH=src
 
@@ -41,6 +46,6 @@ if [ -f "${OUT_CELL}/metrics.json" ]; then
 fi
 
 echo "[a15 ${i}] ${FAM} × ${SYS} × seed ${SEED} @ 2000 steps"
-"${QLNN_VENV}/bin/python" scripts/run_multi_state_demo.py \
+python -u scripts/run_multi_state_demo.py \
     --families "${FAM}" --systems "${SYS}" --seeds "${SEED}" \
     --steps 2000 --out results/p6_a15_uniform

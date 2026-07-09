@@ -13,6 +13,8 @@
 # Output: results/p6_kuramoto_kdv/{system}_{ansatz}/seed_N/
 # =====================================================================
 #SBATCH --job-name=qlnn-m3
+#SBATCH -A chm260071
+#SBATCH -p shared
 #SBATCH --array=0-29%64
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -23,8 +25,11 @@
 set -euo pipefail
 source "${SLURM_SUBMIT_DIR}/config.env"
 eval "${QLNN_TASK_ENV}"
+module load anaconda
+# conda activate references unset vars internally — suspend nounset
+set +u; conda activate "${QLNN_CONDA_ENV}"; set -u
 cd "${QLNN_ROOT}"
 export PYTHONPATH=src
 
-"${QLNN_VENV}/bin/python" scripts/run_p7_8_h1_kuramoto_kdv.py \
+python -u scripts/run_p7_8_h1_kuramoto_kdv.py \
     --confirm --cell-index "${SLURM_ARRAY_TASK_ID}"

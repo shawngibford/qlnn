@@ -5,20 +5,23 @@
 #   Usage (on an Anvil login node, from anywhere):
 #       git clone https://github.com/shawngibford/qlnn.git
 #       cd qlnn/slurm
-#       ./go.sh <ACCESS_ACCOUNT>        # e.g. ./go.sh cis250123
+#       ./go.sh                    # account chm260071 is pre-configured
+#
+#   (Optional: ./go.sh <other_account> to override.)
 #
 # That's it — log off. The script:
-#   1. bootstraps the environment (venv + integrity gate),
-#   2. queues the 5-cell smoke on the debug partition,
+#   1. bootstraps the environment (anaconda module + conda env "qlnn"
+#      + pip install + paper integrity gate),
+#   2. queues the 5-cell smoke,
 #   3. queues an automated smoke-verification gate (afterok:smoke),
 #   4. queues all five production arrays gated on the smoke gate,
 #   5. queues the final aggregation/tarball job gated on the arrays.
 #
-# SLURM enforces the ordering. If ANY smoke cell fails, the gate job
-# fails and every downstream job is cancelled automatically
-# (--kill-on-invalid-dep=yes) — nothing burns allocation on a broken
-# environment. Total unattended runtime: ~4-5 hr (smoke ~1 hr in
-# debug queue + arrays ~2-3 hr).
+# Everything runs on the "shared" partition (same as the coauthor's
+# working QPINN jobs). SLURM enforces the ordering. If ANY smoke cell
+# fails, the gate job fails and every downstream job is cancelled
+# automatically (--kill-on-invalid-dep=yes) — nothing burns allocation
+# on a broken environment. Total unattended runtime: ~4-5 hr.
 #
 # Monitor any time with:   squeue --me
 # Results land in:         $QLNN_ROOT/qlnn_phase_c_results_<date>.tar.gz
@@ -47,7 +50,7 @@ if squeue --me --noheader -o "%j" 2>/dev/null | grep -q "^qlnn-"; then
 fi
 
 # --- 1. Environment bootstrap (login node, ~5-10 min first time) ------
-echo "==> [1/5] Environment bootstrap + paper integrity gate ..."
+echo "==> [1/5] Environment bootstrap (conda env '${QLNN_CONDA_ENV}') + integrity gate ..."
 bash env_setup.sh
 
 mkdir -p logs
@@ -55,7 +58,7 @@ rm -f SMOKE_PASSED   # fresh gate every pipeline run
 
 SB="sbatch --parsable -A ${QLNN_ACCOUNT}"
 
-# --- 2. Smoke (debug partition) ----------------------------------------
+# --- 2. Smoke -----------------------------------------------------------
 echo "==> [2/5] Queueing 5-cell smoke on '${QLNN_DEBUG_PARTITION}' ..."
 J_SMOKE=$(${SB} -p "${QLNN_DEBUG_PARTITION}" 00_smoke.sbatch)
 echo "    smoke job: ${J_SMOKE}"

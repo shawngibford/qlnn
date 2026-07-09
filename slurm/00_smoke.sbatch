@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 # =====================================================================
 # Smoke pass — ONE representative cell from each Phase C workload.
-# Submit from the slurm/ directory on the DEBUG partition:
+# Submit from the slurm/ directory:
 #   cd $QLNN_ROOT/slurm
-#   sbatch -A $QLNN_ACCOUNT -p $QLNN_DEBUG_PARTITION 00_smoke.sbatch
+#   sbatch 00_smoke.sbatch     (account/partition embedded in headers)
 #
 # Gate per ACCESS_APPLICATION.md: "launch the SLURM array only after
 # smoke passes." After all 5 tasks succeed, inspect outputs, then:
 #   touch SMOKE_PASSED   (marker consumed by submit_all.sh)
 # =====================================================================
 #SBATCH --job-name=qlnn-smoke
+#SBATCH -A chm260071
+#SBATCH -p shared
 #SBATCH --array=0-4
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -20,8 +22,11 @@
 set -euo pipefail
 source "${SLURM_SUBMIT_DIR}/config.env"
 eval "${QLNN_TASK_ENV}"
+module load anaconda
+# conda activate references unset vars internally — suspend nounset
+set +u; conda activate "${QLNN_CONDA_ENV}"; set -u
 cd "${QLNN_ROOT}"
-PY="${QLNN_VENV}/bin/python"
+PY="python -u"
 export PYTHONPATH=src
 
 case "${SLURM_ARRAY_TASK_ID}" in

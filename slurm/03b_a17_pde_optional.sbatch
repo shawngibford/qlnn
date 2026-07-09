@@ -16,6 +16,8 @@
 #   variant = i % 3, pde = (i / 3) % 4, seed = i / 12
 # =====================================================================
 #SBATCH --job-name=qlnn-a17pde
+#SBATCH -A chm260071
+#SBATCH -p shared
 #SBATCH --array=0-35%64
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -26,6 +28,9 @@
 set -euo pipefail
 source "${SLURM_SUBMIT_DIR}/config.env"
 eval "${QLNN_TASK_ENV}"
+module load anaconda
+# conda activate references unset vars internally — suspend nounset
+set +u; conda activate "${QLNN_CONDA_ENV}"; set -u
 cd "${QLNN_ROOT}"
 export PYTHONPATH=src
 
@@ -38,7 +43,7 @@ PDE="${PDES[$(( (i / 3) % 4 ))]}"
 SEED=$(( i / 12 ))
 
 # Fail fast if the 2D variant family isn't registered yet.
-"${QLNN_VENV}/bin/python" - "$VAR" <<'EOF'
+python -u - "$VAR" <<'EOF'
 import sys
 from qlnn_.training.p3_9_pde_matrix import QUANTUM_FAMILIES
 fam = sys.argv[1]
@@ -55,6 +60,6 @@ if [ -f "${OUT_CELL}/metrics.json" ]; then
 fi
 
 echo "[a17pde ${i}] ${VAR} × ${PDE} × seed ${SEED}"
-"${QLNN_VENV}/bin/python" scripts/run_p3_9_pde_matrix.py \
+python -u scripts/run_p3_9_pde_matrix.py \
     --families "${VAR}" --pdes "${PDE}" --seeds "${SEED}" \
     --out results/p6_a17_pde_variants

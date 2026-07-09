@@ -27,12 +27,12 @@ On an Anvil login node — this is ALL you have to type:
 ```bash
 git clone https://github.com/shawngibford/qlnn.git
 cd qlnn/slurm
-./go.sh <ACCESS_ACCOUNT>        # e.g.  ./go.sh cis250123
+./go.sh                          # account chm260071 pre-configured
 ```
 
 Then log off. `go.sh` bootstraps the environment, runs the paper
 integrity gate, and queues the ENTIRE pipeline with SLURM
-dependencies: smoke (5 cells, debug queue) → automated smoke-gate
+dependencies: smoke (5 cells) → automated smoke-gate
 verification → five production arrays (222 cells) → aggregation +
 copy-back tarball. If any smoke cell fails, everything downstream
 cancels automatically — no allocation is burned on a broken
@@ -51,12 +51,12 @@ scp $QLNN_ROOT/qlnn_phase_c_results_*.tar.gz you@home:
 
 ```bash
 # 0. One-time, on an Anvil login node:
-bash slurm/env_setup.sh          # clone → venv → integrity gate must pass
+bash slurm/env_setup.sh          # clone → conda env "qlnn" → integrity gate
 
-# 1. Smoke (debug partition; 5 representative cells):
+# 1. Smoke (5 representative cells):
 cd $QLNN_ROOT/slurm
-# first: edit config.env — set QLNN_ACCOUNT to your ACCESS allocation
-sbatch -A $QLNN_ACCOUNT -p $QLNN_DEBUG_PARTITION 00_smoke.sbatch
+# account chm260071 + partition are embedded in every .sbatch header
+sbatch 00_smoke.sbatch
 # inspect logs/smoke_*.out; all five must end with "OK"
 touch SMOKE_PASSED
 
@@ -82,9 +82,15 @@ find $QLNN_ROOT/results/p6_* -name metrics.json | wc -l   # → 222
   qubits — tiny state vectors; JAX/XLA is effectively single-threaded
   per cell. `config.env` pins `OMP_NUM_THREADS=2` and forces a single
   XLA host device so tasks don't oversubscribe shared nodes.
-- **`#SBATCH` directives can't expand variables**, so account and
-  partition are passed at submit time (`sbatch -A ... -p ...`), which
-  `submit_all.sh` does automatically from `config.env`.
+- **Environment = `module load anaconda` + `conda activate qlnn`**
+  inside every task — the same pattern as the coauthor's working
+  QPINN jobs. `env_setup.sh` creates the conda env (python 3.11 +
+  `pip install -e ".[dev]"`) if it doesn't exist.
+- **Account (`chm260071`) and partition (`shared`) are embedded in
+  every `.sbatch` header** — plain `sbatch foo.sbatch` works with no
+  flags, matching the coauthor's known-good QPINN script style.
+  `go.sh`/`submit_all.sh` still pass `-A` at submit time (harmless
+  duplicate; enables account override).
 - **All five arrays run concurrently** (~222 tasks × 2 cores ≈ 444
   cores ≈ 3.5 nodes). The `%64` throttle per array is queue etiquette,
   not a requirement — raise it if the queue is empty.

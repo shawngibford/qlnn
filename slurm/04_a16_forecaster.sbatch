@@ -16,6 +16,8 @@
 # Output: results/p6_a16_forecaster/{system}_{family}/seed_N/
 # =====================================================================
 #SBATCH --job-name=qlnn-a16
+#SBATCH -A chm260071
+#SBATCH -p shared
 #SBATCH --array=0-62%64
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -26,6 +28,9 @@
 set -euo pipefail
 source "${SLURM_SUBMIT_DIR}/config.env"
 eval "${QLNN_TASK_ENV}"
+module load anaconda
+# conda activate references unset vars internally — suspend nounset
+set +u; conda activate "${QLNN_CONDA_ENV}"; set -u
 cd "${QLNN_ROOT}"
 export PYTHONPATH=src
 
@@ -46,6 +51,6 @@ if [ -f "${OUT_CELL}/metrics.json" ]; then
 fi
 
 echo "[a16 ${i}] ${FAM} × ${SYS} × seed ${SEED} @ 2000 train steps"
-"${QLNN_VENV}/bin/python" scripts/run_p4_forecaster_rollout.py \
+python -u scripts/run_p4_forecaster_rollout.py \
     --families "${FAM}" --systems "${SYS}" --seeds "${SEED}" \
     --train-steps 2000 --out results/p6_a16_forecaster

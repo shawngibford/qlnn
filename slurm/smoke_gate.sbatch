@@ -14,6 +14,8 @@
 # (--kill-on-invalid-dep=yes).
 # =====================================================================
 #SBATCH --job-name=qlnn-smoke-gate
+#SBATCH -A chm260071
+#SBATCH -p shared
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1

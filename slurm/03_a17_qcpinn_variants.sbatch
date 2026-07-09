@@ -14,6 +14,8 @@
 # Output: results/p6_a17_qcpinn_variants/{variant}_{system}/seed_N/
 # =====================================================================
 #SBATCH --job-name=qlnn-a17
+#SBATCH -A chm260071
+#SBATCH -p shared
 #SBATCH --array=0-44%64
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
@@ -24,6 +26,9 @@
 set -euo pipefail
 source "${SLURM_SUBMIT_DIR}/config.env"
 eval "${QLNN_TASK_ENV}"
+module load anaconda
+# conda activate references unset vars internally — suspend nounset
+set +u; conda activate "${QLNN_CONDA_ENV}"; set -u
 cd "${QLNN_ROOT}"
 export PYTHONPATH=src
 
@@ -42,6 +47,6 @@ if [ -f "${OUT_CELL}/metrics.json" ]; then
 fi
 
 echo "[a17 ${i}] ${VAR} × ${SYS} × seed ${SEED} @ 2000 steps"
-"${QLNN_VENV}/bin/python" scripts/run_multi_state_demo.py \
+python -u scripts/run_multi_state_demo.py \
     --families "${VAR}" --systems "${SYS}" --seeds "${SEED}" \
     --steps 2000 --out results/p6_a17_qcpinn_variants
