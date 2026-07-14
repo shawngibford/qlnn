@@ -19,7 +19,7 @@
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
-#SBATCH --mem-per-cpu=4G
+#SBATCH --mem=32G
 #SBATCH --time=03:00:00
 #SBATCH --output=logs/m3_%a.out
 set -euo pipefail

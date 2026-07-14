@@ -4,6 +4,10 @@ Runs the ~222-cell audit re-run matrix (`NEXT_STEPS.md` Phase C /
 `REMEDIATION_PLAN.md` Tier 3) on Purdue Anvil CPU in **~2–3 hr
 wall-clock** (~115 core-hr billed), vs ~55 hr serial on a laptop.
 
+Memory note: M3 and A17 ODE-side cells require larger JAX/XLA compile
+headroom on Anvil. Those arrays now request 32 GB/task; the other
+production arrays remain at 8 GB/task.
+
 ## Workloads
 
 | Script | Workload | Cells | Walltime/task | Est. core-hr |
@@ -78,10 +82,12 @@ find $QLNN_ROOT/results/p6_* -name metrics.json | wc -l   # → 222
   (`scontrol requeue <jobid>_<idx>`), because every script either
   skips-if-`metrics.json`-exists (bash guard) or is natively
   resumable (job 01's runner).
-- **2 cores + 8 GB per task.** The quantum circuits here are 3–8
-  qubits — tiny state vectors; JAX/XLA is effectively single-threaded
-  per cell. `config.env` pins `OMP_NUM_THREADS=2` and forces a single
-  XLA host device so tasks don't oversubscribe shared nodes.
+- **2 cores per task.** Most cells request 8 GB/task; M3 and A17
+  request 32 GB/task after OOM failures on Anvil. The quantum circuits
+  here are 3–8 qubits — tiny state vectors; memory pressure is from
+  JAX/XLA compilation and Diffrax traces, not state-vector size.
+  `config.env` pins `OMP_NUM_THREADS=2` and forces a single XLA host
+  device so tasks don't oversubscribe shared nodes.
 - **Environment = `module load anaconda` + `conda activate qlnn`**
   inside every task — the same pattern as the coauthor's working
   QPINN jobs. `env_setup.sh` creates the conda env (python 3.11 +
