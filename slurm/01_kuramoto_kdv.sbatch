@@ -9,7 +9,8 @@
 # The runner is resumable (skips existing metrics.json) and
 # error-isolated (writes error.json and exits nonzero on crash), so
 # requeueing failed tasks is safe.
-# Walltime: KdV QLNN cells ~1.1 hr + JIT + margin.
+# Walltime: 12 h. Anvil-measured XLA compile is 1-1.5 h per module on
+# these graphs (job 19203640) + training; laptop estimates do NOT apply.
 # Output: results/p6_kuramoto_kdv/{system}_{ansatz}/seed_N/
 # =====================================================================
 #SBATCH --job-name=qlnn-m3
@@ -18,13 +19,16 @@
 #SBATCH --array=0-29%64
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
-#SBATCH --time=03:00:00
+#SBATCH --time=12:00:00
 #SBATCH --output=logs/m3_%a.out
 set -euo pipefail
 source "${SLURM_SUBMIT_DIR}/config.env"
 eval "${QLNN_TASK_ENV}"
+# M3 graphs are huge (12-D kuramoto vmap / KdV jacrev³) — let XLA use
+# all 8 requested cores for compile + train.
+export OMP_NUM_THREADS=8 MKL_NUM_THREADS=8
 module load anaconda
 # conda activate references unset vars internally — suspend nounset
 set +u; conda activate "${QLNN_CONDA_ENV}"; set -u

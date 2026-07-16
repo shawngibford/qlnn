@@ -15,13 +15,14 @@
 #SBATCH --array=0-4
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=8
 #SBATCH --mem=32G
-#SBATCH --time=01:30:00
+#SBATCH --time=06:00:00
 #SBATCH --output=logs/smoke_%a.out
 set -euo pipefail
 source "${SLURM_SUBMIT_DIR}/config.env"
 eval "${QLNN_TASK_ENV}"
+export OMP_NUM_THREADS=8 MKL_NUM_THREADS=8
 module load anaconda
 # conda activate references unset vars internally — suspend nounset
 set +u; conda activate "${QLNN_CONDA_ENV}"; set -u

@@ -20,7 +20,7 @@
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=2
 #SBATCH --mem-per-cpu=4G
-#SBATCH --time=01:30:00
+#SBATCH --time=03:00:00
 #SBATCH --output=logs/a15_%a.out
 set -euo pipefail
 source "${SLURM_SUBMIT_DIR}/config.env"

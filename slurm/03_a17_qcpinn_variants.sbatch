@@ -19,13 +19,15 @@
 #SBATCH --array=0-44%64
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=2
+#SBATCH --cpus-per-task=4
 #SBATCH --mem=32G
-#SBATCH --time=01:30:00
+#SBATCH --time=08:00:00
 #SBATCH --output=logs/a17_%a.out
 set -euo pipefail
 source "${SLURM_SUBMIT_DIR}/config.env"
 eval "${QLNN_TASK_ENV}"
+# kuramoto rows (12-D) carry big graphs — use the 4 requested cores.
+export OMP_NUM_THREADS=4 MKL_NUM_THREADS=4
 module load anaconda
 # conda activate references unset vars internally — suspend nounset
 set +u; conda activate "${QLNN_CONDA_ENV}"; set -u
