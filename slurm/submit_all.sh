@@ -40,4 +40,4 @@ J9=$(${SB} --dependency="afterok:${J1}:${J2}:${J3}:${J4}:${J5}" 99_aggregate.sba
 echo "Aggregation job ${J9} queued (runs after all five arrays succeed)."
 echo ""
 echo "Monitor:   squeue --me"
-echo "Progress:  find ${QLNN_ROOT}/results/p6_* -name metrics.json | wc -l   # expect 222"
+echo "Progress:  find ${QLNN_ROOT}/results/anvil/p6_* -name metrics.json | wc -l   # expect 222"

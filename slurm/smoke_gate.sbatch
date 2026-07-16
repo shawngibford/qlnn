@@ -43,11 +43,11 @@ done
 
 # 2. Each workload's smoke cell wrote a metrics.json.
 declare -a SMOKE_OUTPUTS=(
-  "results/p6_kuramoto_kdv/kuramoto_chebyshev_dqc/seed_0/metrics.json"
-  "results/p6_a15_uniform/chebyshev_dqc_lotka_volterra/seed_0/metrics.json"
-  "results/p6_a17_qcpinn_variants/qcpinn_balanced_lotka_volterra/seed_0/metrics.json"
-  "results/p6_a16_forecaster/lotka_volterra_data_reuploading/seed_0/metrics.json"
-  "results/p6_a19_baselines/lotka_volterra_plain_neuralode/seed_0/metrics.json"
+  "results/anvil/p6_kuramoto_kdv/kuramoto_chebyshev_dqc/seed_0/metrics.json"
+  "results/anvil/p6_a15_uniform/chebyshev_dqc_lotka_volterra/seed_0/metrics.json"
+  "results/anvil/p6_a17_qcpinn_variants/qcpinn_balanced_lotka_volterra/seed_0/metrics.json"
+  "results/anvil/p6_a16_forecaster/lotka_volterra_data_reuploading/seed_0/metrics.json"
+  "results/anvil/p6_a19_baselines/lotka_volterra_plain_neuralode/seed_0/metrics.json"
 )
 for f in "${SMOKE_OUTPUTS[@]}"; do
     if [ -f "${f}" ]; then
@@ -59,7 +59,7 @@ for f in "${SMOKE_OUTPUTS[@]}"; do
 done
 
 # 3. Zero error.json anywhere in the smoke output trees.
-N_ERR=$(find results/p6_* -name error.json 2>/dev/null | wc -l)
+N_ERR=$(find results/anvil/p6_* -name error.json 2>/dev/null | wc -l)
 echo "  error.json count: ${N_ERR}"
 [ "${N_ERR}" -eq 0 ] || FAIL=1
 

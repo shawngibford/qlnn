@@ -53,7 +53,7 @@ if fam not in QUANTUM_FAMILIES:
              f" optional extension). Registered: {list(QUANTUM_FAMILIES)}")
 EOF
 
-OUT_CELL="results/p6_a17_pde_variants/${PDE}_${VAR}/seed_${SEED}"
+OUT_CELL="results/anvil/p6_a17_pde_variants/${PDE}_${VAR}/seed_${SEED}"
 if [ -f "${OUT_CELL}/metrics.json" ]; then
     echo "[a17pde ${i}] SKIP — exists"
     exit 0
@@ -62,4 +62,4 @@ fi
 echo "[a17pde ${i}] ${VAR} × ${PDE} × seed ${SEED}"
 python -u scripts/run_p3_9_pde_matrix.py \
     --families "${VAR}" --pdes "${PDE}" --seeds "${SEED}" \
-    --out results/p6_a17_pde_variants
+    --out results/anvil/p6_a17_pde_variants

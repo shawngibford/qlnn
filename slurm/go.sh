@@ -97,7 +97,7 @@ cat <<EOF
 
  Watch progress:   squeue --me
  Smoke logs:       ${PWD}/logs/smoke_*.out
- Cell count:       find ${QLNN_ROOT}/results/p6_* -name metrics.json | wc -l   # → 222 when done
+ Cell count:       find ${QLNN_ROOT}/results/anvil/p6_* -name metrics.json | wc -l   # → 222 when done
                    (smoke cells are index-0 array cells; skip-if-done
                     means they are never recomputed)
  Final artifact:   ${QLNN_ROOT}/qlnn_phase_c_results_<date>.tar.gz

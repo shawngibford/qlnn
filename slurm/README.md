@@ -32,7 +32,7 @@ finishes, skip-if-done tasks exit in seconds, and the compilation
 cache means only the FIRST cell of each circuit family pays the big
 compile.
 
-Every workload writes to a NEW `results/p6_*` directory — the
+Every workload writes to a NEW `results/anvil/p6_*` directory — the
 committed result trees backing `verify_paper_integrity.py` are never
 touched on Anvil.
 
@@ -57,7 +57,7 @@ environment. Total unattended runtime ≈ 4–5 hr.
 ```bash
 # Check in whenever you like:
 squeue --me
-find $QLNN_ROOT/results/p6_* -name metrics.json | wc -l   # → 222 when done
+find $QLNN_ROOT/results/anvil/p6_* -name metrics.json | wc -l   # → 222 when done
 
 # When done, send the tarball home:
 scp $QLNN_ROOT/qlnn_phase_c_results_*.tar.gz you@home:
@@ -81,7 +81,7 @@ touch SMOKE_PASSED
 
 # 3. Monitor:
 squeue --me
-find $QLNN_ROOT/results/p6_* -name metrics.json | wc -l   # → 222
+find $QLNN_ROOT/results/anvil/p6_* -name metrics.json | wc -l   # → 222
 
 # 4. After 99_aggregate completes: scp the tarball home, untar, and
 #    run Phase D locally (verdict refresh + integrity + paper rebuild).
@@ -166,3 +166,14 @@ in seconds.
 `Explicitly requested dtype complex128 ... truncated to complex64` —
 expected; `jax_enable_x64` is intentionally OFF for this project
 (Diffrax dtype-promotion constraint, see CLAUDE.md).
+
+## Provenance: the `results/anvil/` boundary
+
+ALL output from these SLURM scripts lands under `results/anvil/` —
+never directly in `results/`. This is deliberate: any cell under
+`results/anvil/` is guaranteed to have been produced on Anvil by
+these job arrays, and anything elsewhere in `results/` is a
+laptop/local artifact. When the copy-back tarball is untarred at
+home it recreates the same `results/anvil/...` tree, so provenance
+survives the round-trip. Phase D aggregators should read Anvil cells
+from `results/anvil/p6_*` explicitly.

@@ -12,7 +12,7 @@
 #
 # Index decode: i = seed*12 + system*4 + family
 #   family = i % 4, system = (i / 4) % 3, seed = i / 12
-# Output: results/p6_a19_baselines/{system}_{family}/seed_N/
+# Output: results/anvil/p6_a19_baselines/{system}_{family}/seed_N/
 # =====================================================================
 #SBATCH --job-name=qlnn-a19
 #SBATCH -A chm260071
@@ -41,7 +41,7 @@ FAM="${FAMILIES[$(( i % 4 ))]}"
 SYS="${SYSTEMS[$(( (i / 4) % 3 ))]}"
 SEED=$(( i / 12 ))
 
-OUT_CELL="results/p6_a19_baselines/${SYS}_${FAM}/seed_${SEED}"
+OUT_CELL="results/anvil/p6_a19_baselines/${SYS}_${FAM}/seed_${SEED}"
 if [ -f "${OUT_CELL}/metrics.json" ]; then
     echo "[a19 ${i}] SKIP — ${OUT_CELL}/metrics.json exists"
     exit 0
@@ -50,4 +50,4 @@ fi
 echo "[a19 ${i}] ${FAM} × ${SYS} × seed ${SEED} @ 2000 train steps"
 python -u scripts/run_p5_matched_baselines.py \
     --families "${FAM}" --systems "${SYS}" --seeds "${SEED}" \
-    --train-steps 2000 --no-verdict --out results/p6_a19_baselines
+    --train-steps 2000 --no-verdict --out results/anvil/p6_a19_baselines

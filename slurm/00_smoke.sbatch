@@ -32,27 +32,28 @@ export PYTHONPATH=src
 
 case "${SLURM_ARRAY_TASK_ID}" in
   0)  # M3: kuramoto chebyshev_dqc seed 0 (matches the 2026-05-28 laptop smoke)
-      ${PY} scripts/run_p7_8_h1_kuramoto_kdv.py --confirm --cell-index 0
+      ${PY} scripts/run_p7_8_h1_kuramoto_kdv.py --confirm --cell-index 0 \
+          --out results/anvil/p6_kuramoto_kdv
       ;;
   1)  # A15: one uniform-2000-step ODE cell
       ${PY} scripts/run_multi_state_demo.py \
           --families chebyshev_dqc --systems lotka_volterra --seeds 0 \
-          --steps 2000 --out results/p6_a15_uniform
+          --steps 2000 --out results/anvil/p6_a15_uniform
       ;;
   2)  # A17: one qcpinn-variant cell
       ${PY} scripts/run_multi_state_demo.py \
           --families qcpinn_balanced --systems lotka_volterra --seeds 0 \
-          --steps 2000 --out results/p6_a17_qcpinn_variants
+          --steps 2000 --out results/anvil/p6_a17_qcpinn_variants
       ;;
   3)  # A16: one forecaster cell at the A19 2000-step budget
       ${PY} scripts/run_p4_forecaster_rollout.py \
           --families data_reuploading --systems lotka_volterra --seeds 0 \
-          --train-steps 2000 --out results/p6_a16_forecaster
+          --train-steps 2000 --out results/anvil/p6_a16_forecaster
       ;;
   4)  # A19: one baseline cell at the 2000-step budget
       ${PY} scripts/run_p5_matched_baselines.py \
           --families plain_neuralode --systems lotka_volterra --seeds 0 \
-          --train-steps 2000 --no-verdict --out results/p6_a19_baselines
+          --train-steps 2000 --no-verdict --out results/anvil/p6_a19_baselines
       ;;
 esac
 echo "[smoke ${SLURM_ARRAY_TASK_ID}] OK"

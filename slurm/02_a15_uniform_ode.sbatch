@@ -10,7 +10,7 @@
 #
 # Index decode: i = seed*16 + system*4 + family
 #   family = i % 4, system = (i / 4) % 4, seed = i / 16
-# Output: results/p6_a15_uniform/{family}_{system}/seed_N/
+# Output: results/anvil/p6_a15_uniform/{family}_{system}/seed_N/
 # =====================================================================
 #SBATCH --job-name=qlnn-a15
 #SBATCH -A chm260071
@@ -39,7 +39,7 @@ FAM="${FAMILIES[$(( i % 4 ))]}"
 SYS="${SYSTEMS[$(( (i / 4) % 4 ))]}"
 SEED=$(( i / 16 ))
 
-OUT_CELL="results/p6_a15_uniform/${FAM}_${SYS}/seed_${SEED}"
+OUT_CELL="results/anvil/p6_a15_uniform/${FAM}_${SYS}/seed_${SEED}"
 if [ -f "${OUT_CELL}/metrics.json" ]; then
     echo "[a15 ${i}] SKIP — ${OUT_CELL}/metrics.json exists"
     exit 0
@@ -48,4 +48,4 @@ fi
 echo "[a15 ${i}] ${FAM} × ${SYS} × seed ${SEED} @ 2000 steps"
 python -u scripts/run_multi_state_demo.py \
     --families "${FAM}" --systems "${SYS}" --seeds "${SEED}" \
-    --steps 2000 --out results/p6_a15_uniform
+    --steps 2000 --out results/anvil/p6_a15_uniform

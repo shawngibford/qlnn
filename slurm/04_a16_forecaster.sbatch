@@ -13,7 +13,7 @@
 #
 # Index decode: i = seed*21 + system*7 + family
 #   family = i % 7, system = (i / 7) % 3, seed = i / 21
-# Output: results/p6_a16_forecaster/{system}_{family}/seed_N/
+# Output: results/anvil/p6_a16_forecaster/{system}_{family}/seed_N/
 # =====================================================================
 #SBATCH --job-name=qlnn-a16
 #SBATCH -A chm260071
@@ -44,7 +44,7 @@ FAM="${FAMILIES[$(( i % 7 ))]}"
 SYS="${SYSTEMS[$(( (i / 7) % 3 ))]}"
 SEED=$(( i / 21 ))
 
-OUT_CELL="results/p6_a16_forecaster/${SYS}_${FAM}/seed_${SEED}"
+OUT_CELL="results/anvil/p6_a16_forecaster/${SYS}_${FAM}/seed_${SEED}"
 if [ -f "${OUT_CELL}/metrics.json" ]; then
     echo "[a16 ${i}] SKIP — ${OUT_CELL}/metrics.json exists"
     exit 0
@@ -53,4 +53,4 @@ fi
 echo "[a16 ${i}] ${FAM} × ${SYS} × seed ${SEED} @ 2000 train steps"
 python -u scripts/run_p4_forecaster_rollout.py \
     --families "${FAM}" --systems "${SYS}" --seeds "${SEED}" \
-    --train-steps 2000 --out results/p6_a16_forecaster
+    --train-steps 2000 --out results/anvil/p6_a16_forecaster

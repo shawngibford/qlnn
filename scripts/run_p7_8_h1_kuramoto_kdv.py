@@ -113,7 +113,7 @@ class Cell:
     out_dir: Path    # results/p6_kuramoto_kdv/<system>_<ansatz>/seed_N/
 
 
-def _build_cells() -> list[Cell]:
+def _build_cells(out_root: Path = OUT_ROOT) -> list[Cell]:
     cells: list[Cell] = []
 
     # ODE side: kuramoto QLNN
@@ -122,14 +122,14 @@ def _build_cells() -> list[Cell]:
             cells.append(Cell(
                 task="ode_solver", system="kuramoto", ansatz=fam, seed=seed,
                 est_hours=HOURS_PER_KURAMOTO_CELL,
-                out_dir=OUT_ROOT / f"kuramoto_{fam}" / f"seed_{seed}"))
+                out_dir=out_root / f"kuramoto_{fam}" / f"seed_{seed}"))
 
     # ODE side: kuramoto classical PINN baseline
     for seed in SEEDS:
         cells.append(Cell(
             task="ode_solver", system="kuramoto", ansatz="classical_pinn",
             seed=seed, est_hours=SEC_PER_CLASSICAL_PINN_CELL / 3600.0,
-            out_dir=OUT_ROOT / "kuramoto_classical_pinn" / f"seed_{seed}"))
+            out_dir=out_root / "kuramoto_classical_pinn" / f"seed_{seed}"))
 
     # PDE side: kdv QLNN
     for fam in PDE_QLNN_FAMILIES:
@@ -137,14 +137,14 @@ def _build_cells() -> list[Cell]:
             cells.append(Cell(
                 task="pde_solver", system="kdv", ansatz=fam, seed=seed,
                 est_hours=HOURS_PER_KDV_CELL,
-                out_dir=OUT_ROOT / f"kdv_{fam}" / f"seed_{seed}"))
+                out_dir=out_root / f"kdv_{fam}" / f"seed_{seed}"))
 
     # PDE side: kdv classical PINN baseline
     for seed in SEEDS:
         cells.append(Cell(
             task="pde_solver", system="kdv", ansatz="classical_pinn",
             seed=seed, est_hours=SEC_PER_CLASSICAL_PINN_CELL / 3600.0,
-            out_dir=OUT_ROOT / "kdv_classical_pinn" / f"seed_{seed}"))
+            out_dir=out_root / "kdv_classical_pinn" / f"seed_{seed}"))
 
     return cells
 
@@ -157,8 +157,12 @@ def _print_plan(cells: list[Cell]) -> None:
     total_h = sum(c.est_hours for c in cells)
     print(f"  total est. wall-clock : {total_h:.1f} hr"
           f"  ({total_h / 24.0:.2f} days)", flush=True)
-    print(f"  output root           : "
-          f"{OUT_ROOT.relative_to(REPO_ROOT)}/", flush=True)
+    root = cells[0].out_dir.parent.parent if cells else OUT_ROOT
+    try:
+        root_disp = root.relative_to(REPO_ROOT)
+    except ValueError:
+        root_disp = root
+    print(f"  output root           : {root_disp}/", flush=True)
     print(flush=True)
     print(f"  {'idx':>3}  {'task':<11}  {'system':<10}  {'ansatz':<20}  "
           f"{'seed':>4}  {'est_hr':>7}", flush=True)
@@ -324,7 +328,7 @@ def _execute(cells: list[Cell]) -> None:
           f"{n_crashed} crashed  out of {n}  in {total_hr:.2f} hr",
           flush=True)
     if n_crashed:
-        print("⚠️  inspect results/p6_kuramoto_kdv/*/seed_*/error.json "
+        print("⚠️  inspect <out-root>/*/seed_*/error.json "
               "for crash tracebacks", flush=True)
 
 
@@ -339,6 +343,12 @@ def main() -> int:
     ap.add_argument("--max-cells", type=int, default=None, metavar="N",
                     help="Stage only the first N cells (for smoke / "
                           "staging). Default: all cells.")
+    ap.add_argument("--out", type=Path, default=OUT_ROOT, metavar="DIR",
+                    help="Output root for all cells (default: "
+                          "results/p6_kuramoto_kdv). The Anvil SLURM "
+                          "array passes results/anvil/p6_kuramoto_kdv "
+                          "so HPC-produced cells are segregated from "
+                          "any laptop runs.")
     ap.add_argument("--cell-index", type=int, default=None, metavar="I",
                     help="Run exactly ONE cell, the I-th entry of the "
                           "deterministic _build_cells() ordering. Used "
@@ -354,7 +364,7 @@ def main() -> int:
                           "never burns 16 hr of compute.")
     args = ap.parse_args()
 
-    cells = _build_cells()
+    cells = _build_cells(out_root=args.out)
     if args.cell_index is not None:
         if not (0 <= args.cell_index < len(cells)):
             print(f"FATAL: --cell-index {args.cell_index} out of range "

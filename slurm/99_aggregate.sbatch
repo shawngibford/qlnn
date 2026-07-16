@@ -7,7 +7,7 @@
 # that is Phase D / M5, done locally with human review. This job only:
 #   1. counts metrics.json vs expected per workload,
 #   2. lists every error.json,
-#   3. tars results/p6_* for scp copy-back.
+#   3. tars results/anvil/p6_* for scp copy-back.
 # =====================================================================
 #SBATCH --job-name=qlnn-aggregate
 #SBATCH -A chm260071
@@ -23,11 +23,11 @@ source "${SLURM_SUBMIT_DIR}/config.env"
 cd "${QLNN_ROOT}"
 
 declare -A EXPECTED=(
-  [results/p6_kuramoto_kdv]=30
-  [results/p6_a15_uniform]=48
-  [results/p6_a17_qcpinn_variants]=45
-  [results/p6_a16_forecaster]=63
-  [results/p6_a19_baselines]=36
+  [results/anvil/p6_kuramoto_kdv]=30
+  [results/anvil/p6_a15_uniform]=48
+  [results/anvil/p6_a17_qcpinn_variants]=45
+  [results/anvil/p6_a16_forecaster]=63
+  [results/anvil/p6_a19_baselines]=36
 )
 
 echo "===================================================================="
@@ -47,14 +47,14 @@ printf "  TOTAL %d / %d cells\n" "${TOTAL_GOT}" "${TOTAL_WANT}"
 
 echo ""
 echo "=== error.json inventory (must be empty after investigation) ==="
-find results/p6_* -name error.json 2>/dev/null | tee logs/error_json_list.txt || true
+find results/anvil/p6_* -name error.json 2>/dev/null | tee logs/error_json_list.txt || true
 N_ERR=$(wc -l < logs/error_json_list.txt || echo 0)
 echo "  ${N_ERR} error.json file(s)"
 
 echo ""
 echo "=== Tarball for copy-back ==="
 TARBALL="qlnn_phase_c_results_$(date -u +%Y%m%d).tar.gz"
-tar czf "${TARBALL}" results/p6_*
+tar czf "${TARBALL}" results/anvil/p6_*
 echo "  wrote ${QLNN_ROOT}/${TARBALL} ($(du -h "${TARBALL}" | cut -f1))"
 
 echo ""

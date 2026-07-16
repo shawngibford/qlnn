@@ -11,7 +11,7 @@
 # requeueing failed tasks is safe.
 # Walltime: 12 h. Anvil-measured XLA compile is 1-1.5 h per module on
 # these graphs (job 19203640) + training; laptop estimates do NOT apply.
-# Output: results/p6_kuramoto_kdv/{system}_{ansatz}/seed_N/
+# Output: results/anvil/p6_kuramoto_kdv/{system}_{ansatz}/seed_N/
 # =====================================================================
 #SBATCH --job-name=qlnn-m3
 #SBATCH -A chm260071
@@ -36,4 +36,5 @@ cd "${QLNN_ROOT}"
 export PYTHONPATH=src
 
 python -u scripts/run_p7_8_h1_kuramoto_kdv.py \
-    --confirm --cell-index "${SLURM_ARRAY_TASK_ID}"
+    --confirm --cell-index "${SLURM_ARRAY_TASK_ID}" \
+    --out results/anvil/p6_kuramoto_kdv
