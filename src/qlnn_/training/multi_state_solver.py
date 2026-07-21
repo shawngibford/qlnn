@@ -24,6 +24,7 @@ NOT used inside the P3 acceptance gate; see the smoke test in
 
 from __future__ import annotations
 
+import os
 from dataclasses import dataclass
 from typing import Any, Callable
 
@@ -222,18 +223,53 @@ def _make_vector_residual_loss(
     *,
     t0: float, t1: float, u0: jnp.ndarray,
 ):
-    """Vector-residual loss with per-component Lagaris hard-IC."""
+    """Vector-residual loss with per-component Lagaris hard-IC.
+
+    Component evaluation strategy (P7.8 Anvil fix, 2026-07-16): the
+    per-component circuits produced by `_build_per_component` are the
+    SAME function (weights are call-time arguments; only their init
+    values differ per component), so by default the d components are
+    evaluated with a single `jax.vmap` over the STACKED c0..c{d-1}
+    pytrees. This puts the circuit body in the traced graph ONCE
+    instead of d times. For kuramoto (d=12) the unrolled loop produced
+    ~97K-154K-equation modules whose XLA CPU compilation exceeded
+    32 GB RSS and 1.5 hr (Anvil jobs 19203640, 19300125); the vmapped
+    form is back in the 2-D-system size class (compiles in minutes,
+    <8 GB). The math is identical — vmap batches the same ops.
+
+    Escape hatch: set env `QLNN_UNROLLED_COMPONENTS=1` to restore the
+    historical unrolled loop (used for A/B numerical-equivalence
+    verification; both paths agree to float tolerance).
+    """
 
     dim = len(circuits)
+    circuit0 = circuits[0]
+    _unrolled = os.environ.get("QLNN_UNROLLED_COMPONENTS", "") == "1"
 
-    def u_of_t(t, p):
-        x = _affine_to_chebyshev(t, t0, t1)
-        comps = []
-        for k in range(dim):
-            pk = p[f"c{k}"]
-            n = pk["s"] * circuits[k](x, pk["w"]) + pk["b"]
-            comps.append(u0[k] + (t - t0) * n)
-        return jnp.stack(comps)
+    if _unrolled:
+        def u_of_t(t, p):
+            x = _affine_to_chebyshev(t, t0, t1)
+            comps = []
+            for k in range(dim):
+                pk = p[f"c{k}"]
+                n = pk["s"] * circuits[k](x, pk["w"]) + pk["b"]
+                comps.append(u0[k] + (t - t0) * n)
+            return jnp.stack(comps)
+    else:
+        def u_of_t(t, p):
+            x = _affine_to_chebyshev(t, t0, t1)
+            # Stack the identical-structure per-component pytrees along a
+            # new leading axis and evaluate all d components with ONE
+            # batched circuit application.
+            stacked = jax.tree_util.tree_map(
+                lambda *leaves: jnp.stack(leaves),
+                *[p[f"c{k}"] for k in range(dim)])
+
+            def one(pk):
+                return pk["s"] * circuit0(x, pk["w"]) + pk["b"]
+
+            n = jax.vmap(one)(stacked)                     # (d,)
+            return u0 + (t - t0) * n
 
     du_dt = jax.jacrev(u_of_t, argnums=0)
 

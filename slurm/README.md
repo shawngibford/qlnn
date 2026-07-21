@@ -131,24 +131,32 @@ find $QLNN_ROOT/results/anvil/p6_* -name metrics.json | wc -l   # → 222
 - Submit 03b automatically (2D variant ports aren't wired yet; the
   script fail-fasts with a clear message if invoked prematurely).
 
-## Troubleshooting (from the 2026-07-14 runs)
+## Troubleshooting (updated after the 2026-07-16 runs)
 
-**Symptom: `CANCELLED ... DUE TO TIME LIMIT` on M3 cells, log shows
-`[Compiling module jit_loss for CPU] Very slow compile` and an
-operation taking >1 h.**
-Cause: JAX's new CPU thunk runtime compile regression on the huge
-M3 graphs. Fixed by `--xla_cpu_use_thunk_runtime=false` in
-`config.env` (`QLNN_TASK_ENV`) + the 12 h walltime. If a cell STILL
-times out at 12 h, check the log for repeated compile alarms — a
-stale `.jax_cache` can be cleared with
-`rm -rf $QLNN_ROOT/.jax_cache` (first run after clearing re-pays
-one compile per family).
+**Symptom: `CANCELLED ... DUE TO TIME LIMIT` or
+`oom_kill event ... Killed` on M3/kuramoto cells; log shows
+`[Compiling module jit_loss for CPU] Very slow compile` (>1 h).**
+ROOT CAUSE (measured): `_make_vector_residual_loss` used to unroll a
+Python loop over the 12 kuramoto component circuits — the traced
+value-and-grad graph reached 154K equations (te_qpinn_qnn), and XLA
+CPU compilation of modules that size exceeded 32 GB RSS and 1.5 h.
+FIXED AT THE SOURCE (2026-07-16): the loop is now a `jax.vmap` over
+the stacked per-component weights — the circuit body appears in the
+graph once, shrinking kuramoto graphs 11× (154K → 14K eqns), i.e.
+back to the size class that compiles in minutes under 8 GB. The fix
+is numerically bit-identical (loss Δ = 0.0; grad max-rel ≤ 6e-9).
+NOTE: an earlier attempted fix (`--xla_cpu_use_thunk_runtime=false`)
+turned out to be a NO-OP — Anvil's JAX prints "'no longer supported'"
+and ignores it. It has been removed from `config.env`.
+M3 also keeps 64 GB + 12 h as headroom because the KdV jacrev³ cells
+share the array and remain genuinely large.
+Escape hatch: `QLNN_UNROLLED_COMPONENTS=1` restores the old loop
+(A/B verification only — do not use on kuramoto cells).
 
-**Symptom: `oom_kill event ... Killed` a few minutes after START.**
-Cause: XLA compile working set exceeds the task's memory. M3 and A17
-now request `--mem=32G`. If an A15/A16/A19 cell ever OOMs, raise that
-script's `--mem-per-cpu` to 8G (16 GB/task) — do not raise all of
-them preemptively; billing scales with the request on shared nodes.
+**Symptom: OOM on an A15/A16/A19 cell.**
+Raise that script's `--mem-per-cpu` to 8G (16 GB/task) — do not raise
+all of them preemptively; billing scales with the request on shared
+nodes.
 
 **Re-running only the failed cells** (all tasks are skip-if-done):
 ```bash
