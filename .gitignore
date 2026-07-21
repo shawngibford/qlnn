@@ -72,7 +72,6 @@ results/*
 !results/p7_5_h3_loo/
 !results/p7_6_qlnn_hpo/
 !results/p7_6_pde_solver_h1/
-refs/
 !results/p7_8_kdv_gate/
 !results/p7_8_solver_h1_n24/
 !results/p7_10_forecaster_decomposition/
